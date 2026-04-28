@@ -1,0 +1,43 @@
+import { defineSchema, defineTable } from "convex/server";
+import { v } from "convex/values";
+import { authTables } from "@convex-dev/auth/server";
+
+export default defineSchema({
+    ...authTables,
+
+    users: defineTable({
+        tokenIdentifier: v.string(),
+        email: v.string(),
+        name: v.string(),
+    }).index("by_token", ["tokenIdentifier"]),
+
+    transactions: defineTable({
+        userId: v.id("users"),
+        type: v.union(v.literal("income"), v.literal("expense")),
+        amount: v.number(),
+        category: v.string(),
+        date: v.string(),
+        note: v.optional(v.string()),
+    })
+        .index("by_user", ["userId"])
+        .index("by_user_and_date", ["userId", "date"]),
+
+    goals: defineTable({
+        userId: v.id("users"),
+        name: v.string(),
+        icon: v.string(),
+        targetAmount: v.number(),
+        savedAmount: v.number(),
+        deadline: v.string(),
+        isCompleted: v.boolean(),
+    }).index("by_user", ["userId"]),
+
+    budgets: defineTable({
+        userId: v.id("users"),
+        category: v.string(),
+        monthlyLimit: v.number(),
+        month: v.string(),
+    })
+        .index("by_user", ["userId"])
+        .index("by_user_and_month", ["userId", "month"]),
+});

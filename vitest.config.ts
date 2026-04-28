@@ -10,5 +10,7 @@ export default defineConfig({
         environment: "happy-dom",
         setupFiles: ["./src/test/setup.ts"],
         globals: true,
+        // Exclude e2e/ so Playwright specs don't get picked up by Vitest
+        exclude: ["e2e/**", "node_modules/**"],
     },
 });

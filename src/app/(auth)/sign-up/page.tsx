@@ -1,6 +1,6 @@
-import { LoginForm } from "@/components/auth/login-form";
+import { SignUpForm } from "@/components/auth/sign-up-form";
 
-export default function LoginPage() {
+export default function SignUpPage() {
   return (
     <div className="flex h-screen w-full font-body-base antialiased bg-background text-on-background">
       {/* Left Panel: Branding / Hero */}
@@ -38,7 +38,7 @@ export default function LoginPage() {
 
       {/* Right Panel: Auth Form */}
       <div className="w-full md:w-1/2 lg:w-7/12 flex items-center justify-center p-8 sm:p-12 bg-surface-container-lowest">
-        <LoginForm />
+        <SignUpForm />
       </div>
     </div>
   );

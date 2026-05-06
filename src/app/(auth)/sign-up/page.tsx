@@ -14,7 +14,7 @@ export default function SignUpPage() {
 
         {/* Top Content */}
         <div className="relative z-10 flex items-center gap-2 text-on-primary">
-          <span className="material-symbols-outlined text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>spa</span>
+          <span className="material-symbols-outlined text-4xl" style={{ fontVariationSettings: "'FILL' 1" }} aria-hidden="true">spa</span>
           <span className="font-h2 text-h2 tracking-tight">Ipon</span>
         </div>
 
@@ -31,7 +31,7 @@ export default function SignUpPage() {
         {/* Bottom Content */}
         <div className="relative z-10">
           <div className="flex items-center gap-2 text-primary-fixed-dim">
-            <span className="material-symbols-outlined text-xl">shield</span>
+            <span className="material-symbols-outlined text-xl" aria-hidden="true">shield</span>
             <span className="font-body-sm text-body-sm">Bank-grade security & encryption</span>
           </div>
         </div>

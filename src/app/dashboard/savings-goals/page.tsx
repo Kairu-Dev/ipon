@@ -21,7 +21,7 @@ export default function SavingsGoalsPage() {
           className="bg-primary text-on-primary font-label-md text-label-md px-6 py-3 rounded-full hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-sm"
         >
           New Goal 
-          <span className="material-symbols-outlined text-sm">add</span>
+          <span className="material-symbols-outlined text-sm" aria-hidden="true">add</span>
         </button>
       </div>
 
@@ -40,7 +40,7 @@ export default function SavingsGoalsPage() {
           </div>
           <h3 className="font-h3 text-h3 text-on-surface mb-1">Emergency Fund</h3>
           <p className="font-body-sm text-body-sm text-on-surface-variant mb-4 flex items-center gap-1">
-            <span className="material-symbols-outlined text-[16px]">event</span>
+            <span className="material-symbols-outlined text-[16px]" aria-hidden="true">event</span>
             Dec 2024
           </p>
           <div className="mt-auto">
@@ -70,7 +70,7 @@ export default function SavingsGoalsPage() {
           </div>
           <h3 className="font-h3 text-h3 text-on-surface mb-1">Japan Trip</h3>
           <p className="font-body-sm text-body-sm text-on-surface-variant mb-4 flex items-center gap-1">
-            <span className="material-symbols-outlined text-[16px]">event</span>
+            <span className="material-symbols-outlined text-[16px]" aria-hidden="true">event</span>
             Oct 2024
           </p>
           <div className="mt-auto">
@@ -93,14 +93,14 @@ export default function SavingsGoalsPage() {
           className="bg-surface border border-primary/30 rounded-xl p-[24px] shadow-sm relative flex flex-col group hover:shadow-md transition-shadow cursor-pointer"
         >
           <div className="absolute top-6 right-6 bg-primary text-on-primary px-3 py-1 rounded-full font-label-xs text-label-xs flex items-center gap-1 shadow-sm">
-            Completed <span className="material-symbols-outlined text-[14px]">check</span>
+            Completed <span className="material-symbols-outlined text-[14px]" aria-hidden="true">check</span>
           </div>
           <div className="w-12 h-12 bg-primary/10 text-primary rounded-full flex items-center justify-center text-2xl mb-4">
             💻
           </div>
           <h3 className="font-h3 text-h3 text-on-surface mb-1">New Laptop</h3>
           <p className="font-body-sm text-body-sm text-on-surface-variant mb-4 flex items-center gap-1">
-            <span className="material-symbols-outlined text-[16px]">event</span>
+            <span className="material-symbols-outlined text-[16px]" aria-hidden="true">event</span>
             Achieved Mar 2024
           </p>
           <div className="mt-auto">
@@ -130,7 +130,7 @@ export default function SavingsGoalsPage() {
           </div>
           <h3 className="font-h3 text-h3 text-on-surface mb-1">Car Downpayment</h3>
           <p className="font-body-sm text-body-sm text-on-surface-variant mb-4 flex items-center gap-1">
-            <span className="material-symbols-outlined text-[16px]">event</span>
+            <span className="material-symbols-outlined text-[16px]" aria-hidden="true">event</span>
             Jan 2026
           </p>
           <div className="mt-auto">

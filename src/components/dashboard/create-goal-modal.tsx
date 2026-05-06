@@ -28,23 +28,23 @@ export function CreateGoalModal() {
             <div>
               <label className="font-label-md text-label-md text-on-surface block mb-3">Choose an Icon</label>
               <div className="flex gap-3 justify-between">
-                <button className="w-12 h-12 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center border-2 border-primary focus:outline-none ring-2 ring-primary/20 transition-all" type="button">
-                  <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>flight</span>
+                <button className="w-12 h-12 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center border-2 border-primary focus:outline-none ring-2 ring-primary/20 transition-all" type="button" aria-label="Travel">
+                  <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }} aria-hidden="true">flight</span>
                 </button>
-                <button className="w-12 h-12 rounded-full bg-surface-variant text-on-surface-variant flex items-center justify-center border-2 border-transparent hover:border-slate-300 focus:outline-none transition-all" type="button">
-                  <span className="material-symbols-outlined">laptop_mac</span>
+                <button className="w-12 h-12 rounded-full bg-surface-variant text-on-surface-variant flex items-center justify-center border-2 border-transparent hover:border-slate-300 focus:outline-none transition-all" type="button" aria-label="Technology">
+                  <span className="material-symbols-outlined" aria-hidden="true">laptop_mac</span>
                 </button>
-                <button className="w-12 h-12 rounded-full bg-surface-variant text-on-surface-variant flex items-center justify-center border-2 border-transparent hover:border-slate-300 focus:outline-none transition-all" type="button">
-                  <span className="material-symbols-outlined">home</span>
+                <button className="w-12 h-12 rounded-full bg-surface-variant text-on-surface-variant flex items-center justify-center border-2 border-transparent hover:border-slate-300 focus:outline-none transition-all" type="button" aria-label="Home">
+                  <span className="material-symbols-outlined" aria-hidden="true">home</span>
                 </button>
-                <button className="w-12 h-12 rounded-full bg-surface-variant text-on-surface-variant flex items-center justify-center border-2 border-transparent hover:border-slate-300 focus:outline-none transition-all" type="button">
-                  <span className="material-symbols-outlined">favorite</span>
+                <button className="w-12 h-12 rounded-full bg-surface-variant text-on-surface-variant flex items-center justify-center border-2 border-transparent hover:border-slate-300 focus:outline-none transition-all" type="button" aria-label="Health">
+                  <span className="material-symbols-outlined" aria-hidden="true">favorite</span>
                 </button>
-                <button className="w-12 h-12 rounded-full bg-surface-variant text-on-surface-variant flex items-center justify-center border-2 border-transparent hover:border-slate-300 focus:outline-none transition-all" type="button">
-                  <span className="material-symbols-outlined">star</span>
+                <button className="w-12 h-12 rounded-full bg-surface-variant text-on-surface-variant flex items-center justify-center border-2 border-transparent hover:border-slate-300 focus:outline-none transition-all" type="button" aria-label="General">
+                  <span className="material-symbols-outlined" aria-hidden="true">star</span>
                 </button>
-                <button className="w-12 h-12 rounded-full bg-surface-variant text-on-surface-variant flex items-center justify-center border-2 border-transparent hover:border-slate-300 focus:outline-none transition-all" type="button">
-                  <span className="material-symbols-outlined">featured_seasonal_and_gifts</span>
+                <button className="w-12 h-12 rounded-full bg-surface-variant text-on-surface-variant flex items-center justify-center border-2 border-transparent hover:border-slate-300 focus:outline-none transition-all" type="button" aria-label="Gifts">
+                  <span className="material-symbols-outlined" aria-hidden="true">featured_seasonal_and_gifts</span>
                 </button>
               </div>
             </div>
@@ -80,7 +80,7 @@ export function CreateGoalModal() {
             <div>
               <label className="font-label-md text-label-md text-on-surface block mb-2" htmlFor="deadline-date">Target Deadline</label>
               <div className="relative">
-                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">calendar_today</span>
+                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" aria-hidden="true">calendar_today</span>
                 <input className="w-full pl-12 pr-4 py-3 bg-surface-bright border border-slate-200 rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 text-body-base font-body-base text-on-surface transition-all appearance-none" id="deadline-date" type="date" />
               </div>
             </div>

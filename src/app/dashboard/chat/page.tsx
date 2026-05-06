@@ -6,15 +6,15 @@ export default function ChatPage() {
         {/* Suggestion Chips */}
         <div className="p-4 flex gap-2 overflow-x-auto whitespace-nowrap border-b border-slate-100 bg-surface-container-lowest z-10 shrink-0 scrollbar-hide">
           <button className="suggestion-chip">
-            <span className="material-symbols-outlined text-base text-primary">shopping_cart</span>
+            <span className="material-symbols-outlined text-base text-primary" aria-hidden="true">shopping_cart</span>
             Can I afford a ₱3,000 purchase?
           </button>
           <button className="suggestion-chip">
-            <span className="material-symbols-outlined text-base text-primary">summarize</span>
+            <span className="material-symbols-outlined text-base text-primary" aria-hidden="true">summarize</span>
             Summarize my week
           </button>
           <button className="suggestion-chip">
-            <span className="material-symbols-outlined text-base text-primary">trending_down</span>
+            <span className="material-symbols-outlined text-base text-primary" aria-hidden="true">trending_down</span>
             How to lower food spending?
           </button>
         </div>
@@ -24,7 +24,7 @@ export default function ChatPage() {
           {/* AI Bubble */}
           <div className="flex gap-3 max-w-[85%] self-start">
             <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center shrink-0 mt-1">
-              <span className="material-symbols-outlined text-on-primary-container text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>colors_spark</span>
+              <span className="material-symbols-outlined text-on-primary-container text-sm" style={{ fontVariationSettings: "'FILL' 1" }} aria-hidden="true">colors_spark</span>
             </div>
             <div className="chat-bubble-ai-text">
               <p>Hi! I&apos;m your Ipon AI assistant. I&apos;ve analyzed your recent spending. You&apos;re doing great on groceries, but dining out is slightly above your usual budget this week. How can I help you today?</p>
@@ -45,7 +45,7 @@ export default function ChatPage() {
           {/* AI Bubble */}
           <div className="flex gap-3 max-w-[85%] self-start">
             <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center shrink-0 mt-1">
-              <span className="material-symbols-outlined text-on-primary-container text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>colors_spark</span>
+              <span className="material-symbols-outlined text-on-primary-container text-sm" style={{ fontVariationSettings: "'FILL' 1" }} aria-hidden="true">colors_spark</span>
             </div>
             <div className="chat-bubble-ai">
               <p>Looking at your current budget for this month:</p>
@@ -57,7 +57,7 @@ export default function ChatPage() {
               
               <div className="mt-3 p-3 bg-surface-container-highest rounded-lg border border-surface-variant flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                  <span className="material-symbols-outlined">check_circle</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">check_circle</span>
                 </div>
                 <div>
                   <p className="font-label-md text-label-md text-on-surface">Safe to Spend</p>
@@ -71,12 +71,12 @@ export default function ChatPage() {
         {/* Input Bar */}
         <div className="absolute bottom-0 left-0 right-0 p-4 bg-surface-container-lowest border-t border-slate-100">
           <div className="max-w-3xl mx-auto relative flex items-center">
-            <button className="absolute left-3 text-on-surface-variant hover:text-primary transition-colors p-2">
-              <span className="material-symbols-outlined">add_circle</span>
+            <button className="absolute left-3 text-on-surface-variant hover:text-primary transition-colors p-2" type="button" aria-label="Add conversation">
+              <span className="material-symbols-outlined" aria-hidden="true">add_circle</span>
             </button>
-            <input className="input-bar" placeholder="Ask about your finances..." type="text"/>
-            <button className="absolute right-3 bg-primary text-on-primary w-8 h-8 rounded-full flex items-center justify-center hover:bg-primary-container transition-colors">
-              <span className="material-symbols-outlined text-sm">arrow_upward</span>
+            <input className="input-bar" placeholder="Ask about your finances..." type="text" aria-label="Ask about your finances"/>
+            <button className="absolute right-3 bg-primary text-on-primary w-8 h-8 rounded-full flex items-center justify-center hover:bg-primary-container transition-colors" type="button" aria-label="Send message">
+              <span className="material-symbols-outlined text-sm" aria-hidden="true">arrow_upward</span>
             </button>
           </div>
         </div>
@@ -122,14 +122,14 @@ export default function ChatPage() {
           <div>
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-h3 text-h3 text-on-surface">Recent</h3>
-              <a className="text-primary font-label-md text-label-md hover:underline" href="#">View all</a>
+              <button className="text-primary font-label-md text-label-md hover:underline" type="button">View all</button>
             </div>
             <div className="bg-surface-container-lowest rounded-xl border border-slate-200 shadow-sm overflow-hidden divide-y divide-slate-100">
               {/* Transaction Item */}
               <div className="transaction-item">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container">
-                    <span className="material-symbols-outlined text-sm">restaurant</span>
+                    <span className="material-symbols-outlined text-sm" aria-hidden="true">restaurant</span>
                   </div>
                   <div>
                     <p className="font-label-md text-label-md text-on-surface">Mendokoro Ramenba</p>
@@ -143,7 +143,7 @@ export default function ChatPage() {
               <div className="transaction-item">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container">
-                    <span className="material-symbols-outlined text-sm">local_taxi</span>
+                    <span className="material-symbols-outlined text-sm" aria-hidden="true">local_taxi</span>
                   </div>
                   <div>
                     <p className="font-label-md text-label-md text-on-surface">GrabCar</p>
@@ -157,7 +157,7 @@ export default function ChatPage() {
               <div className="transaction-item">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                    <span className="material-symbols-outlined text-sm">account_balance</span>
+                    <span className="material-symbols-outlined text-sm" aria-hidden="true">account_balance</span>
                   </div>
                   <div>
                     <p className="font-label-md text-label-md text-on-surface">Salary Deposit</p>
@@ -171,7 +171,7 @@ export default function ChatPage() {
               <div className="transaction-item">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container">
-                    <span className="material-symbols-outlined text-sm">shopping_bag</span>
+                    <span className="material-symbols-outlined text-sm" aria-hidden="true">shopping_bag</span>
                   </div>
                   <div>
                     <p className="font-label-md text-label-md text-on-surface">Uniqlo</p>

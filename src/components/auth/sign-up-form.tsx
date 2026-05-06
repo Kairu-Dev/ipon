@@ -18,7 +18,7 @@ export function SignUpForm() {
     <div className="w-full max-w-md flex flex-col gap-12">
       {/* Mobile Header (Hidden on Desktop) */}
       <div className="md:hidden flex items-center gap-2 text-primary mb-8">
-        <span className="material-symbols-outlined text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>spa</span>
+        <span className="material-symbols-outlined text-3xl" style={{ fontVariationSettings: "'FILL' 1" }} aria-hidden="true">spa</span>
         <span className="font-h2 text-h2 tracking-tight">Ipon</span>
       </div>
 
@@ -46,7 +46,7 @@ export function SignUpForm() {
           <label className="font-label-md text-label-md text-on-surface" htmlFor="name">Full Name</label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-outline">
-              <span className="material-symbols-outlined text-xl">person</span>
+              <span className="material-symbols-outlined text-xl" aria-hidden="true">person</span>
             </div>
             <input className="w-full pl-10 pr-4 py-2.5 bg-surface-container-lowest border border-outline-variant rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-body-base text-body-base text-on-surface placeholder:text-outline-variant" id="name" placeholder="John Doe" type="text" required />
           </div>
@@ -57,7 +57,7 @@ export function SignUpForm() {
           <label className="font-label-md text-label-md text-on-surface" htmlFor="email">Email Address</label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-outline">
-              <span className="material-symbols-outlined text-xl">mail</span>
+              <span className="material-symbols-outlined text-xl" aria-hidden="true">mail</span>
             </div>
             <input className="w-full pl-10 pr-4 py-2.5 bg-surface-container-lowest border border-outline-variant rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-body-base text-body-base text-on-surface placeholder:text-outline-variant" id="email" placeholder="name@example.com" type="email" required />
           </div>
@@ -68,11 +68,11 @@ export function SignUpForm() {
           <label className="font-label-md text-label-md text-on-surface" htmlFor="password">Password</label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-outline">
-              <span className="material-symbols-outlined text-xl">lock</span>
+              <span className="material-symbols-outlined text-xl" aria-hidden="true">lock</span>
             </div>
             <input className="w-full pl-10 pr-10 py-2.5 bg-surface-container-lowest border border-outline-variant rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-body-base text-body-base text-on-surface placeholder:text-outline-variant" id="password" placeholder="••••••••" type="password" required />
             <button className="absolute inset-y-0 right-0 pr-3 flex items-center text-outline hover:text-on-surface transition-colors" type="button">
-              <span className="material-symbols-outlined text-xl">visibility_off</span>
+              <span className="material-symbols-outlined text-xl" aria-hidden="true">visibility_off</span>
             </button>
           </div>
         </div>
@@ -94,7 +94,7 @@ export function SignUpForm() {
         {/* Submit Button */}
         <button className="w-full mt-2 py-3 bg-primary hover:bg-primary-container text-on-primary rounded font-label-md text-label-md transition-colors shadow-sm flex items-center justify-center gap-2" type="submit">
           Create Account
-          <span className="material-symbols-outlined text-lg">arrow_forward</span>
+          <span className="material-symbols-outlined text-lg" aria-hidden="true">arrow_forward</span>
         </button>
       </form>
     </div>

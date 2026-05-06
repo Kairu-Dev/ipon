@@ -27,7 +27,7 @@ export function ContributeGoalPanel() {
           <div className="bg-surface-container-low rounded-xl p-5 border border-outline-variant/50">
             <div className="flex items-center gap-4 mb-4">
               <div className="w-14 h-14 rounded-full bg-white border border-outline-variant flex items-center justify-center text-primary shadow-sm">
-                <span className="material-symbols-outlined text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>laptop_mac</span>
+                <span className="material-symbols-outlined text-3xl" style={{ fontVariationSettings: "'FILL' 1" }} aria-hidden="true">laptop_mac</span>
               </div>
               <div>
                 <h3 className="font-h3 text-h3 text-on-surface">New MacBook Pro</h3>
@@ -80,18 +80,18 @@ export function ContributeGoalPanel() {
 
           {/* Source Account */}
           <div className="space-y-3 pt-4 border-t border-outline-variant/30">
-            <label className="block font-label-md text-label-md text-on-surface">From Account</label>
-            <button className="w-full flex items-center justify-between p-4 bg-white border border-outline-variant rounded-xl hover:bg-surface-container transition-colors">
+            <p className="block font-label-md text-label-md text-on-surface">From Account</p>
+            <button className="w-full flex items-center justify-between p-4 bg-white border border-outline-variant rounded-xl hover:bg-surface-container transition-colors" aria-label="From Account: Main Savings, Available ₱12,450.00">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center text-primary">
-                  <span className="material-symbols-outlined text-sm">account_balance</span>
+                  <span className="material-symbols-outlined text-sm" aria-hidden="true">account_balance</span>
                 </div>
                 <div className="text-left">
                   <p className="font-label-md text-label-md text-on-surface">Main Savings</p>
                   <p className="font-label-xs text-label-xs text-on-surface-variant">Available: ₱12,450.00</p>
                 </div>
               </div>
-              <span className="material-symbols-outlined text-on-surface-variant">expand_more</span>
+              <span className="material-symbols-outlined text-on-surface-variant" aria-hidden="true">expand_more</span>
             </button>
           </div>
 
@@ -103,7 +103,7 @@ export function ContributeGoalPanel() {
             onClick={() => setContributeGoalPanelOpen(false)}
             className="w-full bg-primary text-on-primary font-label-md text-label-md py-4 rounded-xl shadow-sm hover:bg-primary-container focus:ring-4 focus:ring-primary/20 transition-all active:scale-[0.98] flex justify-center items-center gap-2"
           >
-            <span className="material-symbols-outlined text-lg">add_circle</span>
+            <span className="material-symbols-outlined text-lg" aria-hidden="true">add_circle</span>
             Add Contribution
           </button>
         </div>

@@ -18,7 +18,7 @@ export default function TransactionsPage() {
           onClick={() => setAddTransactionModalOpen(true)}
           className="bg-primary text-on-primary font-label-md text-label-md px-6 py-3 rounded-lg flex items-center gap-2 hover:bg-primary-container transition-colors shadow-sm active:scale-95"
         >
-          <span className="material-symbols-outlined text-[18px]">add</span>
+          <span className="material-symbols-outlined text-[18px]" aria-hidden="true">add</span>
           Log Transaction
         </button>
       </div>
@@ -31,14 +31,14 @@ export default function TransactionsPage() {
           <button className="px-4 py-2 rounded-lg text-on-surface-variant font-label-md text-label-md transition-colors hover:bg-surface-container">Expense</button>
         </div>
         <div className="relative">
-          <select className="appearance-none bg-surface border border-outline-variant text-on-surface font-body-sm text-body-sm rounded-lg pl-4 pr-10 py-2 focus:ring-2 focus:ring-primary focus:border-primary outline-none cursor-pointer">
+          <select className="appearance-none bg-surface border border-outline-variant text-on-surface font-body-sm text-body-sm rounded-lg pl-4 pr-10 py-2 focus:ring-2 focus:ring-primary focus:border-primary outline-none cursor-pointer" aria-label="Category filter">
             <option>All Categories</option>
             <option>Food & Dining</option>
             <option>Transportation</option>
             <option>Shopping</option>
             <option>Salary</option>
           </select>
-          <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">expand_more</span>
+          <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none" aria-hidden="true">expand_more</span>
         </div>
       </div>
 
@@ -54,7 +54,7 @@ export default function TransactionsPage() {
             <div className="flex items-center justify-between px-6 py-4 hover:bg-surface-container-low transition-colors group cursor-pointer border-b border-surface-container last:border-0">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-tertiary-fixed flex items-center justify-center text-on-tertiary-fixed">
-                  <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>restaurant</span>
+                  <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }} aria-hidden="true">restaurant</span>
                 </div>
                 <div className="flex flex-col">
                   <span className="font-body-base text-body-base font-semibold text-on-surface">Jollibee Lunch</span>
@@ -67,7 +67,7 @@ export default function TransactionsPage() {
             <div className="flex items-center justify-between px-6 py-4 hover:bg-surface-container-low transition-colors group cursor-pointer border-b border-surface-container last:border-0">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed">
-                  <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>directions_bus</span>
+                  <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }} aria-hidden="true">directions_bus</span>
                 </div>
                 <div className="flex flex-col">
                   <span className="font-body-base text-body-base font-semibold text-on-surface">Jeepney Fare</span>
@@ -89,7 +89,7 @@ export default function TransactionsPage() {
             <div className="flex items-center justify-between px-6 py-4 hover:bg-surface-container-low transition-colors group cursor-pointer border-b border-surface-container last:border-0">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center text-on-primary-fixed">
-                  <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>payments</span>
+                  <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }} aria-hidden="true">payments</span>
                 </div>
                 <div className="flex flex-col">
                   <span className="font-body-base text-body-base font-semibold text-on-surface">Part-time Salary</span>
@@ -102,7 +102,7 @@ export default function TransactionsPage() {
             <div className="flex items-center justify-between px-6 py-4 hover:bg-surface-container-low transition-colors group cursor-pointer border-b border-surface-container last:border-0">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-surface-variant flex items-center justify-center text-on-surface-variant">
-                  <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>shopping_bag</span>
+                  <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }} aria-hidden="true">shopping_bag</span>
                 </div>
                 <div className="flex flex-col">
                   <span className="font-body-base text-body-base font-semibold text-on-surface">National Book Store</span>
@@ -115,7 +115,7 @@ export default function TransactionsPage() {
             <div className="flex items-center justify-between px-6 py-4 hover:bg-surface-container-low transition-colors group cursor-pointer border-b border-surface-container last:border-0">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-tertiary-fixed flex items-center justify-center text-on-tertiary-fixed">
-                  <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>local_cafe</span>
+                  <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }} aria-hidden="true">local_cafe</span>
                 </div>
                 <div className="flex flex-col">
                   <span className="font-body-base text-body-base font-semibold text-on-surface">Coffee Shop Study</span>
@@ -131,7 +131,7 @@ export default function TransactionsPage() {
       {/* Load More Action */}
       <div className="flex justify-center mt-4">
         <button className="border border-primary text-primary font-label-md text-label-md px-6 py-3 rounded-lg hover:bg-primary-container hover:text-on-primary-container hover:border-transparent transition-all active:scale-95 flex items-center gap-2">
-          <span className="material-symbols-outlined text-[18px]">refresh</span>
+          <span className="material-symbols-outlined text-[18px]" aria-hidden="true">refresh</span>
           Load more transactions
         </button>
       </div>

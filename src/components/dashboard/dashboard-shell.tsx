@@ -31,13 +31,13 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         <div className="hidden text-green-600 dark:text-green-500 font-manrope text-sm font-semibold">Ipon</div>
         <div className="flex-1 flex justify-start">
           <div className="relative w-64">
-            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
-            <input className="w-full pl-10 pr-4 py-2 bg-surface-container-low border border-slate-200 rounded-full text-body-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" placeholder="Search..." type="text"/>
+            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" aria-hidden="true">search</span>
+            <input className="w-full pl-10 pr-4 py-2 bg-surface-container-low border border-slate-200 rounded-full text-body-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" placeholder="Search..." type="text" aria-label="Search"/>
           </div>
         </div>
         <div className="flex items-center gap-4">
           <button className="text-slate-500 hover:text-green-600 transition-colors p-2 rounded-full hover:bg-slate-100">
-            <span className="material-symbols-outlined">notifications</span>
+            <span className="material-symbols-outlined" aria-hidden="true">notifications</span>
           </button>
           <div className="w-8 h-8 rounded-full overflow-hidden border border-slate-200">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -57,33 +57,33 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         </div>
         <div className="flex-1 flex flex-col gap-2 font-manrope antialiased text-sm font-medium">
           <Link href="/dashboard" className={`${pathname === '/dashboard' ? 'bg-green-600 text-white' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'} rounded-lg px-4 py-2 flex items-center gap-3 transition-all active:scale-95 duration-150 ease-in-out`}>
-            <span className="material-symbols-outlined" style={{ fontVariationSettings: pathname === '/dashboard' ? "'FILL' 1" : "" }}>dashboard</span>
+            <span className="material-symbols-outlined" style={{ fontVariationSettings: pathname === '/dashboard' ? "'FILL' 1" : "" }} aria-hidden="true">dashboard</span>
             Dashboard
           </Link>
           <Link href="/dashboard/transactions" className={`${pathname === '/dashboard/transactions' ? 'bg-green-600 text-white' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'} rounded-lg px-4 py-2 flex items-center gap-3 transition-all active:scale-95 duration-150 ease-in-out`}>
-            <span className="material-symbols-outlined" style={{ fontVariationSettings: pathname === '/dashboard/transactions' ? "'FILL' 1" : "" }}>receipt_long</span>
+            <span className="material-symbols-outlined" style={{ fontVariationSettings: pathname === '/dashboard/transactions' ? "'FILL' 1" : "" }} aria-hidden="true">receipt_long</span>
             Transactions
           </Link>
           <Link href="/dashboard/savings-goals" className={`${pathname === '/dashboard/savings-goals' ? 'bg-green-600 text-white' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'} rounded-lg px-4 py-2 flex items-center gap-3 transition-all active:scale-95 duration-150 ease-in-out`}>
-            <span className="material-symbols-outlined" style={{ fontVariationSettings: pathname === '/dashboard/savings-goals' ? "'FILL' 1" : "" }}>savings</span>
+            <span className="material-symbols-outlined" style={{ fontVariationSettings: pathname === '/dashboard/savings-goals' ? "'FILL' 1" : "" }} aria-hidden="true">savings</span>
             Savings Goals
           </Link>
           <Link href="/dashboard/budget" className={`${pathname === '/dashboard/budget' ? 'bg-green-600 text-white' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'} rounded-lg px-4 py-2 flex items-center gap-3 transition-all active:scale-95 duration-150 ease-in-out`}>
-            <span className="material-symbols-outlined" style={{ fontVariationSettings: pathname === '/dashboard/budget' ? "'FILL' 1" : "" }}>account_balance_wallet</span>
+            <span className="material-symbols-outlined" style={{ fontVariationSettings: pathname === '/dashboard/budget' ? "'FILL' 1" : "" }} aria-hidden="true">account_balance_wallet</span>
             Budget
           </Link>
           <Link href="/dashboard/chat" className={`${pathname === '/dashboard/chat' ? 'bg-green-600 text-white' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'} rounded-lg px-4 py-2 flex items-center gap-3 transition-all active:scale-95 duration-150 ease-in-out`}>
-            <span className="material-symbols-outlined" style={{ fontVariationSettings: pathname === '/dashboard/chat' ? "'FILL' 1" : "" }}>chat</span>
+            <span className="material-symbols-outlined" style={{ fontVariationSettings: pathname === '/dashboard/chat' ? "'FILL' 1" : "" }} aria-hidden="true">chat</span>
             Chat
           </Link>
         </div>
         <div className="mt-auto flex flex-col gap-2 font-manrope antialiased text-sm font-medium border-t border-slate-200 pt-4">
           <Link href="/dashboard/settings" className="text-slate-600 dark:text-slate-400 px-4 py-2 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-all active:scale-95 duration-150 ease-in-out">
-            <span className="material-symbols-outlined">settings</span>
+            <span className="material-symbols-outlined" aria-hidden="true">settings</span>
             Settings
           </Link>
           <button onClick={() => useUIStore.getState().setLoggedIn(false)} className="text-slate-600 dark:text-slate-400 px-4 py-2 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-all active:scale-95 duration-150 ease-in-out w-full text-left">
-            <span className="material-symbols-outlined">logout</span>
+            <span className="material-symbols-outlined" aria-hidden="true">logout</span>
             Logout
           </button>
         </div>
@@ -97,24 +97,24 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       {/* Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-slate-200 z-50 px-6 py-3 flex justify-between items-center shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
         <Link href="/dashboard" className={`flex flex-col items-center ${pathname === '/dashboard' ? 'text-primary' : 'text-slate-400 hover:text-slate-600'} gap-1`}>
-          <span className="material-symbols-outlined" style={{ fontVariationSettings: pathname === '/dashboard' ? "'FILL' 1" : "" }}>dashboard</span>
+          <span className="material-symbols-outlined" style={{ fontVariationSettings: pathname === '/dashboard' ? "'FILL' 1" : "" }} aria-hidden="true">dashboard</span>
           <span className="font-label-xs text-[10px]">Dashboard</span>
         </Link>
         <Link href="/dashboard/transactions" className={`flex flex-col items-center ${pathname === '/dashboard/transactions' ? 'text-primary' : 'text-slate-400 hover:text-slate-600'} gap-1`}>
-          <span className="material-symbols-outlined" style={{ fontVariationSettings: pathname === '/dashboard/transactions' ? "'FILL' 1" : "" }}>receipt_long</span>
+          <span className="material-symbols-outlined" style={{ fontVariationSettings: pathname === '/dashboard/transactions' ? "'FILL' 1" : "" }} aria-hidden="true">receipt_long</span>
           <span className="font-label-xs text-[10px]">Transactions</span>
         </Link>
         <div className="relative -top-6">
           <button className="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white shadow-lg hover:bg-primary-container transition-colors">
-            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>add</span>
+            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }} aria-hidden="true">add</span>
           </button>
         </div>
         <Link href="/dashboard/budget" className={`flex flex-col items-center ${pathname === '/dashboard/budget' ? 'text-primary' : 'text-slate-400 hover:text-slate-600'} gap-1`}>
-          <span className="material-symbols-outlined" style={{ fontVariationSettings: pathname === '/dashboard/budget' ? "'FILL' 1" : "" }}>account_balance_wallet</span>
+          <span className="material-symbols-outlined" style={{ fontVariationSettings: pathname === '/dashboard/budget' ? "'FILL' 1" : "" }} aria-hidden="true">account_balance_wallet</span>
           <span className="font-label-xs text-[10px]">Budget</span>
         </Link>
         <Link href="/dashboard/settings" className={`flex flex-col items-center ${pathname === '/dashboard/settings' ? 'text-primary' : 'text-slate-400 hover:text-slate-600'} gap-1`}>
-          <span className="material-symbols-outlined" style={{ fontVariationSettings: pathname === '/dashboard/settings' ? "'FILL' 1" : "" }}>person</span>
+          <span className="material-symbols-outlined" style={{ fontVariationSettings: pathname === '/dashboard/settings' ? "'FILL' 1" : "" }} aria-hidden="true">person</span>
           <span className="font-label-xs text-[10px]">Profile</span>
         </Link>
       </nav>

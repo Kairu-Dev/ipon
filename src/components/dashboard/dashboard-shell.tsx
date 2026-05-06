@@ -1,28 +1,21 @@
 "use client";
 import { useUIStore } from "@/store/ui-store";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const isLoggedIn = useUIStore((s) => s.isLoggedIn);
   const router = useRouter();
-  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
-
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (mounted && !isLoggedIn) {
-      router.push("/login");
+    if (!isLoggedIn) {
+      router.replace("/login");
     }
-  }, [mounted, isLoggedIn, router]);
+  }, [isLoggedIn, router]);
 
-  if (!mounted || !isLoggedIn) return null;
+  if (!isLoggedIn) return null;
 
   return (
     <div className="bg-background text-on-background font-body-base h-screen overflow-hidden">

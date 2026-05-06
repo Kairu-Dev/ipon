@@ -5,7 +5,8 @@ import { CreateGoalModal } from "@/components/dashboard/create-goal-modal";
 import { ContributeGoalPanel } from "@/components/dashboard/contribute-goal-panel";
 
 export default function SavingsGoalsPage() {
-  const { setCreateGoalModalOpen, setContributeGoalPanelOpen } = useUIStore();
+  const setCreateGoalModalOpen = useUIStore((s) => s.setCreateGoalModalOpen);
+  const setContributeGoalPanelOpen = useUIStore((s) => s.setContributeGoalPanelOpen);
 
   return (
     <>

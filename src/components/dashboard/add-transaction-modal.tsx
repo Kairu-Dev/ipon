@@ -2,27 +2,25 @@
 
 import { useState } from "react";
 import { useUIStore } from "@/store/ui-store";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export function AddTransactionModal() {
-  const { isAddTransactionModalOpen, setAddTransactionModalOpen } = useUIStore();
+  const isAddTransactionModalOpen = useUIStore((s) => s.isAddTransactionModalOpen);
+  const setAddTransactionModalOpen = useUIStore((s) => s.setAddTransactionModalOpen);
   const [type, setType] = useState<"expense" | "income">("expense");
 
-  if (!isAddTransactionModalOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0 modal-overlay backdrop-blur-sm">
-      {/* Modal Card */}
-      <div className="bg-surface w-full max-w-md rounded-2xl shadow-2xl border border-outline-variant/30 flex flex-col max-h-[921px] animate-in fade-in zoom-in duration-200">
+    <Dialog open={isAddTransactionModalOpen} onOpenChange={setAddTransactionModalOpen}>
+      <DialogContent className="sm:max-w-md bg-surface p-0 overflow-hidden border-outline-variant/30 flex flex-col max-h-[90vh] rounded-2xl gap-0">
         {/* Modal Header */}
-        <div className="px-6 py-4 border-b border-outline-variant/50 flex justify-between items-center bg-white/50 rounded-t-2xl">
-          <h3 className="font-h3 text-h3 text-on-surface">Add Transaction</h3>
-          <button 
-            onClick={() => setAddTransactionModalOpen(false)}
-            className="text-secondary hover:text-on-surface transition-colors p-1 rounded-full hover:bg-surface-variant"
-          >
-            <span className="material-symbols-outlined">close</span>
-          </button>
-        </div>
+        <DialogHeader className="px-6 py-4 border-b border-outline-variant/50 flex justify-between items-center bg-white/50 rounded-t-2xl">
+          <DialogTitle className="font-h3 text-h3 text-on-surface">Add Transaction</DialogTitle>
+        </DialogHeader>
 
         {/* Modal Body (Scrollable) */}
         <div className="p-6 overflow-y-auto space-y-8 flex-1">
@@ -173,7 +171,7 @@ export function AddTransactionModal() {
         </div>
 
         {/* Modal Footer */}
-        <div className="p-6 border-t border-outline-variant/50 bg-white/50 rounded-b-2xl">
+        <div className="p-6 border-t border-outline-variant/50 bg-white/50 rounded-b-2xl mt-auto">
           <button 
             onClick={() => setAddTransactionModalOpen(false)}
             className="w-full py-3.5 bg-primary text-on-primary rounded-xl font-label-md text-label-md shadow-sm hover:bg-primary-container transition-colors flex items-center justify-center gap-2 active:scale-[0.98]"
@@ -182,7 +180,7 @@ export function AddTransactionModal() {
             Save Entry
           </button>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

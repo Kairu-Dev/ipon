@@ -1,6 +1,6 @@
-import { render, screen } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import { DashboardShell } from "./dashboard-shell";
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, vi } from "vitest";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({

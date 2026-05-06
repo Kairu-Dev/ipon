@@ -4,7 +4,7 @@ import { useUIStore } from "@/store/ui-store";
 import { AddTransactionModal } from "@/components/dashboard/add-transaction-modal";
 
 export default function TransactionsPage() {
-  const { setAddTransactionModalOpen } = useUIStore();
+  const setAddTransactionModalOpen = useUIStore((s) => s.setAddTransactionModalOpen);
 
   return (
     <div className="flex flex-col gap-12">

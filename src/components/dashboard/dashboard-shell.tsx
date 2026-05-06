@@ -12,6 +12,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
@@ -39,6 +40,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             <span className="material-symbols-outlined">notifications</span>
           </button>
           <div className="w-8 h-8 rounded-full overflow-hidden border border-slate-200">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img alt="User profile" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDwte5fih0oaheTK_OB0sx3yBM879Nd8qfOBZwRMV_y0--lpi3jB9jq1GqunUMI4bZPxW7C6DDoBteDf3xRplCC1WxWkZkXuSgeg4DEdHWsBmjUho1A-KmXgl9dXkXR3xmBJrmIqPfolp36IEEM6irBKAReQ60HBUeaGVvl_l6rJTAhlyKf9gQ-4VkSZ7MZSBb5diHb_i4qg2j3NluAVXSLjRmDkt_PlfrM4aQH1uV5fUApiAMq69KylBwssAAdF6H58xN32PpQqat7"/>
           </div>
         </div>

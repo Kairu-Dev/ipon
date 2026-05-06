@@ -7,6 +7,7 @@ export default function SignUpPage() {
       <div className="hidden md:flex md:w-1/2 lg:w-5/12 bg-primary relative overflow-hidden flex-col justify-between p-12">
         {/* Background Image Overlay */}
         <div className="absolute inset-0 z-0">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img alt="abstract dark green geometric financial lines with subtle warm lighting" className="w-full h-full object-cover opacity-20 mix-blend-overlay" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDxEdhFiqXlZgoSWQ83N2KdqwrQX7zvwdm5_8cibECL6y0TOnIgBRBz0OUPPUPhtb4T1BOBwVm2DHHxBqMob8OoO4T87udhFSMqWF7IG19T72hVtX9pqTjFjArOF3oppPjZ48yGKpgv4_LMPDKWZPQu6QNd2zULof9WsX6t4QNHFwM4ftbH02NEygAG_YKtOkTGNcF2SgDvwhzUhNyrGQS-pxB-JMiyibtzPbFWh0NAL2aPTJIANf20G_DKDFbmEb_33g_hUN4G3Xfg"/>
           <div className="absolute inset-0 bg-gradient-to-b from-primary/80 to-primary/95"></div>
         </div>

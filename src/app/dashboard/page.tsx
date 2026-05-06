@@ -6,7 +6,7 @@ export default function DashboardPage() {
       {/* Header Section */}
       <section className="space-y-2">
         <h1 className="font-h1 text-h1 text-on-surface">Kumusta, Marco!</h1>
-        <p className="font-body-base text-body-base text-secondary">Here's your financial overview for this month.</p>
+        <p className="font-body-base text-body-base text-secondary">Here&apos;s your financial overview for this month.</p>
       </section>
 
       {/* Summary Cards */}
@@ -181,7 +181,7 @@ export default function DashboardPage() {
                 <span className="material-symbols-outlined text-primary text-sm">lightbulb</span>
               </div>
               <div>
-                <p className="font-body-sm text-body-sm text-on-surface">You usually spend ₱500 on coffee by this time. You've only spent ₱200! Great job saving.</p>
+                <p className="font-body-sm text-body-sm text-on-surface">You usually spend ₱500 on coffee by this time. You&apos;ve only spent ₱200! Great job saving.</p>
               </div>
             </div>
             <div className="flex gap-3 items-start">
@@ -189,7 +189,7 @@ export default function DashboardPage() {
                 <span className="material-symbols-outlined text-primary text-sm">trending_up</span>
               </div>
               <div>
-                <p className="font-body-sm text-body-sm text-on-surface">If you save an extra ₱500 a week, you'll reach your Emergency Fund goal 2 months early.</p>
+                <p className="font-body-sm text-body-sm text-on-surface">If you save an extra ₱500 a week, you&apos;ll reach your Emergency Fund goal 2 months early.</p>
               </div>
             </div>
           </div>

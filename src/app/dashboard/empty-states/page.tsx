@@ -1,4 +1,3 @@
-import { CreateGoalModal } from "@/components/dashboard/create-goal-modal";
 
 
 export default function EmptyStatesPage() {
@@ -7,7 +6,7 @@ export default function EmptyStatesPage() {
       {/* Page Greeting */}
       <div className="mb-12">
         <h2 className="font-display text-display text-on-surface mb-1">Welcome to your Dashboard</h2>
-        <p className="font-body-base text-body-base text-on-surface-variant">Let's get your finances set up.</p>
+        <p className="font-body-base text-body-base text-on-surface-variant">Let&apos;s get your finances set up.</p>
       </div>
 
       {/* Empty States Bento Grid */}

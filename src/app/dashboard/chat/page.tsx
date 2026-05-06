@@ -27,13 +27,14 @@ export default function ChatPage() {
               <span className="material-symbols-outlined text-on-primary-container text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>colors_spark</span>
             </div>
             <div className="chat-bubble-ai-text">
-              <p>Hi! I'm your Ipon AI assistant. I've analyzed your recent spending. You're doing great on groceries, but dining out is slightly above your usual budget this week. How can I help you today?</p>
+              <p>Hi! I&apos;m your Ipon AI assistant. I&apos;ve analyzed your recent spending. You&apos;re doing great on groceries, but dining out is slightly above your usual budget this week. How can I help you today?</p>
             </div>
           </div>
 
           {/* User Bubble */}
           <div className="flex gap-3 max-w-[85%] self-end flex-row-reverse">
             <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 mt-1">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img alt="User profile" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAc9dUthN5WZD0wLD4YPCDkT7oMKVujg2l2zgAleBIiP0QzCTd1QpLcwTV0CN4hhsmHRgw_-Knpwrvr5Z62XLiwtYqoLYYX4azDTB-16IzAcMyfVE87JkaavK0olRco-OW6eRtu-z1UB7qLmnvnf2ocaNjTu-39VEEgM8OmsxnYOfA4AxfEgA3fgAXLbFBZcm5voXJLNsmFeV08gtVNaCPpvH3OuDiuihD_0JxhYd0UCXHEBIsWUNqvRXLf_HWlZtvV214AdSh--_pc"/>
             </div>
             <div className="chat-bubble-user">
@@ -49,7 +50,7 @@ export default function ChatPage() {
             <div className="chat-bubble-ai">
               <p>Looking at your current budget for this month:</p>
               <ul className="list-disc list-inside space-y-1 text-sm">
-                <li>You have <strong>₱8,500</strong> left in your general "Shopping/Wants" category.</li>
+                <li>You have <strong>₱8,500</strong> left in your general &quot;Shopping/Wants&quot; category.</li>
                 <li>Your essential bills are already covered.</li>
               </ul>
               <p><strong>Yes, you can afford it!</strong> It will leave you with ₱5,500 in your discretionary fund for the rest of the month.</p>

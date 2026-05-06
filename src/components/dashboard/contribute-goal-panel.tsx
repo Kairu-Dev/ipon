@@ -1,33 +1,24 @@
 "use client";
 
 import { useUIStore } from "@/store/ui-store";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 
 export function ContributeGoalPanel() {
-  const { isContributeGoalPanelOpen, setContributeGoalPanelOpen } = useUIStore();
-
-  if (!isContributeGoalPanelOpen) return null;
+  const isContributeGoalPanelOpen = useUIStore((s) => s.isContributeGoalPanelOpen);
+  const setContributeGoalPanelOpen = useUIStore((s) => s.setContributeGoalPanelOpen);
 
   return (
-    <>
-      {/* Backdrop for Panel Overlay */}
-      <div 
-        className="fixed inset-0 bg-on-surface/20 z-50 transition-opacity"
-        onClick={() => setContributeGoalPanelOpen(false)}
-      ></div>
-      
-      {/* RIGHT SIDE PANEL: Contribute to Goal */}
-      <aside className="fixed top-0 right-0 h-screen w-full max-w-[440px] bg-surface-container-lowest shadow-2xl border-l border-outline-variant z-50 flex flex-col transform transition-transform duration-300 translate-x-0">
-        
+    <Sheet open={isContributeGoalPanelOpen} onOpenChange={setContributeGoalPanelOpen}>
+      <SheetContent className="w-full max-w-[440px] sm:max-w-[440px] p-0 bg-surface-container-lowest border-l border-outline-variant flex flex-col">
         {/* Panel Header */}
-        <div className="px-6 py-5 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
-          <h2 className="font-h2 text-h2 text-on-surface">Contribute to Goal</h2>
-          <button 
-            onClick={() => setContributeGoalPanelOpen(false)}
-            className="w-8 h-8 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors"
-          >
-            <span className="material-symbols-outlined">close</span>
-          </button>
-        </div>
+        <SheetHeader className="px-6 py-5 border-b border-outline-variant bg-surface-container-lowest text-left">
+          <SheetTitle className="font-h2 text-h2 text-on-surface">Contribute to Goal</SheetTitle>
+        </SheetHeader>
 
         {/* Panel Content Scrollable Area */}
         <div className="flex-1 overflow-y-auto p-6 space-y-8">
@@ -107,7 +98,7 @@ export function ContributeGoalPanel() {
         </div>
 
         {/* Panel Footer Actions */}
-        <div className="p-6 border-t border-outline-variant bg-surface-container-lowest">
+        <div className="p-6 border-t border-outline-variant bg-surface-container-lowest mt-auto">
           <button 
             onClick={() => setContributeGoalPanelOpen(false)}
             className="w-full bg-primary text-on-primary font-label-md text-label-md py-4 rounded-xl shadow-sm hover:bg-primary-container focus:ring-4 focus:ring-primary/20 transition-all active:scale-[0.98] flex justify-center items-center gap-2"
@@ -117,7 +108,7 @@ export function ContributeGoalPanel() {
           </button>
         </div>
 
-      </aside>
-    </>
+      </SheetContent>
+    </Sheet>
   );
 }

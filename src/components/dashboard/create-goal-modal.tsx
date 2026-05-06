@@ -1,26 +1,28 @@
 "use client";
 
 import { useUIStore } from "@/store/ui-store";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export function CreateGoalModal() {
-  const { isCreateGoalModalOpen, setCreateGoalModalOpen } = useUIStore();
-
-  if (!isCreateGoalModalOpen) return null;
+  const isCreateGoalModalOpen = useUIStore((s) => s.isCreateGoalModalOpen);
+  const setCreateGoalModalOpen = useUIStore((s) => s.setCreateGoalModalOpen);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-900/40 backdrop-blur-sm">
-      {/* Modal Content */}
-      <div className="bg-surface-container-lowest rounded-xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col transform transition-all border border-slate-200">
+    <Dialog open={isCreateGoalModalOpen} onOpenChange={setCreateGoalModalOpen}>
+      <DialogContent className="sm:max-w-md bg-surface-container-lowest p-0 overflow-hidden border-slate-200">
+
         {/* Modal Header */}
-        <div className="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-surface-bright">
-          <h2 className="font-h2 text-h2 text-on-surface">Create New Goal</h2>
-          <button onClick={() => setCreateGoalModalOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors p-1 rounded-full hover:bg-slate-100">
-            <span className="material-symbols-outlined">close</span>
-          </button>
-        </div>
+        <DialogHeader className="px-6 py-5 border-b border-slate-100 bg-surface-bright">
+          <DialogTitle className="font-h2 text-h2 text-on-surface">Create New Goal</DialogTitle>
+        </DialogHeader>
 
         {/* Modal Body */}
-        <div className="p-6 overflow-y-auto flex-1">
+        <div className="p-6 overflow-y-auto max-h-[60vh] flex-1">
           <form className="flex flex-col gap-6">
             {/* Icon Selector Row */}
             <div>
@@ -87,14 +89,14 @@ export function CreateGoalModal() {
 
         {/* Modal Footer */}
         <div className="px-6 py-5 bg-surface-bright border-t border-slate-100 flex flex-col gap-3">
-          <button className="w-full py-3 px-4 bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md rounded-lg transition-colors flex items-center justify-center shadow-sm" type="button">
+          <button onClick={() => setCreateGoalModalOpen(false)} className="w-full py-3 px-4 bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md rounded-lg transition-colors flex items-center justify-center shadow-sm" type="button">
             Create Goal
           </button>
           <button onClick={() => setCreateGoalModalOpen(false)} className="w-full py-2 px-4 text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors text-center bg-transparent border-none" type="button">
             Cancel
           </button>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -14,8 +14,13 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
       // This is the correct way to write `name` into the user document —
       // do NOT call a separate createUser mutation from the client.
       profile(params) {
-        const name = (params.name as string) ?? "";
+        const name = ((params.name as string) ?? "").trim();
         const email = params.email as string;
+
+        // Reject empty or whitespace-only names
+        if (name.length === 0) {
+          throw new ConvexError("Name must not be empty.");
+        }
 
         // Prevent data bloat: reject abnormally long names
         // (matches the 50-char Zod rule in src/lib/validation.ts)

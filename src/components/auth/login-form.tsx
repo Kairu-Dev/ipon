@@ -44,10 +44,11 @@ export function LoginForm() {
     try {
       // The hidden "flow" field tells Convex Auth this is a sign-in, not signup.
       await signIn("password", formData);
-      // Success: reset the failed attempt counter
-      await resetAttempts({ email });
+      // Success: reset the failed attempt counter (fire-and-forget)
+      // Uses .catch to avoid triggering the outer catch block on reset failure
+      resetAttempts({ email }).catch(() => {});
       router.push("/dashboard");
-    } catch (err: unknown) {
+    } catch {
       // Record this failed attempt
       await recordFailed({ email });
       // Generic message to avoid leaking whether an email exists

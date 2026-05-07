@@ -14,7 +14,7 @@ vi.mock("@convex-dev/auth/react", () => ({
 
 // Mock Convex hooks for rate limiting
 const mockUseQuery = vi.fn();
-const mockUseMutation = vi.fn();
+const mockUseMutation = vi.fn().mockResolvedValue(undefined);
 vi.mock("convex/react", () => ({
   useQuery: (...args: unknown[]) => mockUseQuery(...args),
   useMutation: () => mockUseMutation,

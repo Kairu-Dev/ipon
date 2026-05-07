@@ -25,6 +25,15 @@ describe("signUpSchema", () => {
     expect(result.success).toBe(false);
   });
 
+  it("rejects whitespace-only name", () => {
+    const result = signUpSchema.safeParse({
+      name: "   ",
+      email: "juan@example.com",
+      password: "Secure@123",
+    });
+    expect(result.success).toBe(false);
+  });
+
   it("rejects name longer than 50 characters", () => {
     const result = signUpSchema.safeParse({
       name: "A".repeat(51),

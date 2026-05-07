@@ -67,7 +67,7 @@ Use those sources for:
 
 For shared auth behavior, use the official Convex docs as the source of truth:
 
-- [Auth in Functions](https://docs.convex.dev/auth/functions-auth) for `ctx.auth.getUserIdentity()`
+- [Auth in Functions](https://docs.convex.dev/auth/functions-auth) for `getAuthUserId(ctx)` (Do NOT use `ctx.auth.getUserIdentity()` or `tokenIdentifier` in this project)
 - [Storing Users in the Convex Database](https://docs.convex.dev/auth/database-auth) for optional app-level user storage
 - [Authentication](https://docs.convex.dev/auth) for general auth and authorization guidance
 - [Convex Auth Authorization](https://labs.convex.dev/auth/authz) when the provider is Convex Auth

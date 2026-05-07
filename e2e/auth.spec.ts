@@ -146,7 +146,9 @@ test.describe("Logout Flow", () => {
     await expect(page).toHaveURL(/\/dashboard/, { timeout: 15000 });
 
     // Then, click logout (visible on desktop sidebar)
-    await page.getByText("Logout").click();
+    // force: true bypasses the Next.js dev overlay (<nextjs-portal>) that
+    // intercepts pointer events in CI's dev-mode server
+    await page.getByText("Logout").click({ force: true });
 
     // Should redirect to login
     await expect(page).toHaveURL(/\/login/, { timeout: 15000 });

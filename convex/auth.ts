@@ -14,10 +14,16 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
       // This is the correct way to write `name` into the user document —
       // do NOT call a separate createUser mutation from the client.
       profile(params) {
-        return {
-          email: params.email as string,
-          name: params.name as string,
-        };
+        const name = (params.name as string) ?? "";
+        const email = params.email as string;
+
+        // Prevent data bloat: reject abnormally long names
+        // (matches the 50-char Zod rule in src/lib/validation.ts)
+        if (name.length > 50) {
+          throw new ConvexError("Name must be 50 characters or fewer.");
+        }
+
+        return { email, name };
       },
       // Server-side password validation.
       // Runs before the account is created — rejects weak passwords early.

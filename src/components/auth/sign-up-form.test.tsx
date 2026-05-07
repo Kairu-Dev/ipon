@@ -128,8 +128,8 @@ describe("SignUpForm", () => {
     expect(mockPush).not.toHaveBeenCalled();
   });
 
-  // --- Server error ---
-  it("shows server error message on signup failure", async () => {
+  // --- Security: error message does not leak email existence ---
+  it("shows generic error message regardless of failure reason", async () => {
     mockSignIn.mockRejectedValueOnce(new Error("Email already registered"));
     render(<SignUpForm />);
 
@@ -143,25 +143,7 @@ describe("SignUpForm", () => {
     fireEvent.submit(form);
 
     await vi.waitFor(() => {
-      expect(screen.getByText("Email already registered")).toBeDefined();
-    });
-  });
-
-  it("shows generic fallback for non-Error exceptions", async () => {
-    mockSignIn.mockRejectedValueOnce("string error");
-    render(<SignUpForm />);
-
-    await userEvent.type(screen.getByPlaceholderText("John Doe"), "Juan");
-    await userEvent.type(screen.getByPlaceholderText("name@example.com"), "test@example.com");
-    const passwordInputs = screen.getAllByPlaceholderText("••••••••");
-    await userEvent.type(passwordInputs[0], "Secure@123");
-    await userEvent.type(passwordInputs[1], "Secure@123");
-
-    const form = screen.getByPlaceholderText("name@example.com").closest("form")!;
-    fireEvent.submit(form);
-
-    await vi.waitFor(() => {
-      expect(screen.getByText("Something went wrong. Please try again.")).toBeDefined();
+      expect(screen.getByText("Could not create account. Please check your details and try again.")).toBeDefined();
     });
   });
 

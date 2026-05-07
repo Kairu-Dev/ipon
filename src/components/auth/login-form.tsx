@@ -6,6 +6,8 @@ import { useAuthActions } from "@convex-dev/auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "../../../convex/_generated/api";
 
 export function LoginForm() {
   const { signIn } = useAuthActions();
@@ -13,19 +15,41 @@ export function LoginForm() {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [loginEmail, setLoginEmail] = useState("");
+
+  const loginAllowed = useQuery(
+    api.loginAttempts.checkLoginAllowed,
+    loginEmail ? { email: loginEmail } : "skip"
+  );
+  const recordFailed = useMutation(api.loginAttempts.recordFailedLogin);
+  const resetAttempts = useMutation(api.loginAttempts.resetLoginAttempts);
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
-    setIsSubmitting(true);
 
     const formData = new FormData(e.currentTarget);
+    const email = formData.get("email") as string;
+    setLoginEmail(email);
+
+    // Check rate limit before attempting login
+    if (loginAllowed && !loginAllowed.ok) {
+      const minutes = Math.ceil((loginAllowed.retryAfter || 0) / 60000);
+      setError(`Too many login attempts. Please try again in ${minutes} minute(s).`);
+      return;
+    }
+
+    setIsSubmitting(true);
 
     try {
       // The hidden "flow" field tells Convex Auth this is a sign-in, not signup.
       await signIn("password", formData);
+      // Success: reset the failed attempt counter
+      await resetAttempts({ email });
       router.push("/dashboard");
     } catch (err: unknown) {
+      // Record this failed attempt
+      await recordFailed({ email });
       // Generic message to avoid leaking whether an email exists
       setError("Invalid email or password.");
     } finally {
@@ -78,7 +102,7 @@ export function LoginForm() {
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-outline">
               <span className="material-symbols-outlined text-xl" aria-hidden="true">mail</span>
             </div>
-            <input className="w-full pl-10 pr-4 py-2.5 bg-surface-container-lowest border border-outline-variant rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-body-base text-body-base text-on-surface placeholder:text-outline-variant" id="email" name="email" placeholder="name@example.com" type="email" required />
+            <input className="w-full pl-10 pr-4 py-2.5 bg-surface-container-lowest border border-outline-variant rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-body-base text-body-base text-on-surface placeholder:text-outline-variant" id="email" name="email" placeholder="name@example.com" type="email" required onChange={(e) => setLoginEmail(e.target.value)} />
           </div>
         </div>
 

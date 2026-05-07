@@ -12,6 +12,24 @@ vi.mock("@convex-dev/auth/react", () => ({
   useAuthActions: () => ({ signIn: mockSignIn }),
 }));
 
+// Mock Convex hooks for rate limiting
+const mockUseQuery = vi.fn();
+const mockUseMutation = vi.fn();
+vi.mock("convex/react", () => ({
+  useQuery: (...args: unknown[]) => mockUseQuery(...args),
+  useMutation: () => mockUseMutation,
+}));
+
+vi.mock("../../../convex/_generated/api", () => ({
+  api: {
+    loginAttempts: {
+      checkLoginAllowed: "checkLoginAllowed",
+      recordFailedLogin: "recordFailedLogin",
+      resetLoginAttempts: "resetLoginAttempts",
+    },
+  },
+}));
+
 // Mock Next.js navigation
 const mockPush = vi.fn();
 vi.mock("next/navigation", () => ({
@@ -28,6 +46,7 @@ vi.mock("next/link", () => ({
 describe("LoginForm", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockUseQuery.mockReturnValue({ ok: true }); // Default: not rate limited
   });
 
   // --- Rendering ---
@@ -146,6 +165,25 @@ describe("LoginForm", () => {
     expect(hiddenInput).toBeDefined();
     expect(hiddenInput.value).toBe("signIn");
     expect(hiddenInput.type).toBe("hidden");
+  });
+
+  // --- Security Tests ---
+  it("blocks login if rate limit exceeded", async () => {
+    const user = userEvent.setup();
+    mockUseQuery.mockReturnValue({ ok: false, retryAfter: 120000 }); // 2 minutes
+    
+    render(<LoginForm />);
+
+    const emailInput = screen.getByPlaceholderText("name@example.com");
+    await user.type(emailInput, "spammer@example.com");
+    
+    // Attempt submission
+    const submitBtn = screen.getByRole("button", { name: /sign in/i });
+    fireEvent.submit(submitBtn);
+
+    // Verify rate limit message is shown and signIn was NOT called
+    expect(await screen.findByText("Too many login attempts. Please try again in 2 minute(s).")).toBeDefined();
+    expect(mockSignIn).not.toHaveBeenCalled();
   });
 
   // --- Security: error message does not leak email existence ---

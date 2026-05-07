@@ -36,11 +36,9 @@ export function SignUpForm() {
       await signIn("password", formData);
       router.push("/dashboard");
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("Something went wrong. Please try again.");
-      }
+      // Generic message to prevent user enumeration
+      // (do not reveal whether the email is already registered)
+      setError("Could not create account. Please check your details and try again.");
     } finally {
       setIsSubmitting(false);
     }

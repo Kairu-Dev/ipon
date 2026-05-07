@@ -122,6 +122,7 @@ export function LoginForm() {
               className="absolute inset-y-0 right-0 pr-3 flex items-center text-outline hover:text-on-surface transition-colors"
               type="button"
               onClick={() => setShowPassword(!showPassword)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
             >
               <span className="material-symbols-outlined text-xl" aria-hidden="true">
                 {showPassword ? "visibility" : "visibility_off"}

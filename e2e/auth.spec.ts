@@ -20,11 +20,15 @@ test.beforeAll(async ({ browser }) => {
   await passwordFields.nth(1).fill(TEST_PASSWORD);
   await page.getByRole("button", { name: /create account/i }).click();
   
-  // Wait for either a successful redirect to dashboard OR the generic error if it already exists locally
-  await Promise.race([
-    page.waitForURL(/\/dashboard/, { timeout: 5000 }),
-    page.waitForSelector("text=Could not create account", { timeout: 5000 })
-  ]).catch(() => {}); // Ignore timeouts
+  // Wait for signup to complete — either redirect or "already exists" error
+  try {
+    await Promise.race([
+      page.waitForURL(/\/dashboard/, { timeout: 10000 }),
+      page.waitForSelector("text=Could not create account", { timeout: 10000 })
+    ]);
+  } catch (err) {
+    throw new Error(`Test account setup failed in beforeAll: ${err}`);
+  }
   
   await page.close();
 });

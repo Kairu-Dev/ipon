@@ -68,27 +68,10 @@ test.describe("Session Security", () => {
     await expect(page.getByText("No account found")).not.toBeVisible();
   });
 
-  test("submit button is disabled during login submission", async ({ page }) => {
-    await page.goto("/login");
-    await page.getByPlaceholder("name@example.com").fill(TEST_EMAIL);
-    await page.getByPlaceholder("••••••••").fill(TEST_PASSWORD);
-
-    const submitButton = page.getByRole("button", { name: /sign in/i });
-
-    // Click and immediately check the button state
-    await submitButton.click();
-
-    // During submission, button should show loading state
-    // (either disabled or text changes to "Signing in…")
-    // We use a soft check since the request might complete very fast
-    const isDisabledOrLoading = await Promise.race([
-      submitButton.isDisabled().then(() => true),
-      page.getByText("Signing in…").isVisible().then(() => true),
-      new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 1000)),
-    ]);
-    // If the network is slow enough, we'll catch it; otherwise that's fine
-    expect(isDisabledOrLoading).toBeDefined();
-  });
+  // NOTE: The "submit button is disabled during submission" test was removed.
+  // The Promise.race between isDisabled/isVisible/timeout is inherently racy —
+  // on fast networks or CI, the request completes before the state is captured.
+  // The disabled state is tested deterministically in login-form.test.tsx (Vitest).
 });
 
 test.describe("Input Sanitization", () => {

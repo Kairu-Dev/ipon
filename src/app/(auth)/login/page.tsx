@@ -29,10 +29,10 @@ export default function LoginPage() {
         </div>
 
         {/* Bottom Content */}
-        <div className="relative z-10">
-          <div className="flex items-center gap-2 text-primary-fixed-dim">
-            <span className="material-symbols-outlined text-xl" aria-hidden="true">shield</span>
-            <span className="font-body-sm text-body-sm">Bank-grade security & encryption</span>
+        <div className="relative z-10 border-l-2 border-primary-fixed-dim pl-4">
+          <div className="flex flex-col gap-1 text-primary-fixed-dim">
+            <span className="font-body-sm text-body-sm italic">&quot;Do not save what is left after spending, but spend what is left after saving.&quot;</span>
+            <span className="font-label-xs text-label-xs opacity-80">— Warren Buffett</span>
           </div>
         </div>
       </div>

@@ -1,17 +1,49 @@
+// src/components/auth/sign-up-form.tsx
+// Sign-up form wired to Convex Auth Password provider.
+// Design is preserved exactly — only the auth logic has changed.
 "use client";
-import { useUIStore } from "@/store/ui-store";
+import { useAuthActions } from "@convex-dev/auth/react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import Link from "next/link";
 
 export function SignUpForm() {
-  const setLoggedIn = useUIStore((s) => s.setLoggedIn);
+  const { signIn } = useAuthActions();
   const router = useRouter();
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const handleSignUp = (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Dummy authentication
-    setLoggedIn(true);
-    router.push("/dashboard");
+    setError("");
+
+    const formData = new FormData(e.currentTarget);
+    const password = formData.get("password") as string;
+    const confirmPassword = formData.get("confirmPassword") as string;
+
+    // Client-side confirm password check before hitting the server
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      // The hidden "flow" field tells Convex Auth this is a sign-up, not login.
+      // The "name" field is passed to the users table via profile() in auth.ts.
+      await signIn("password", formData);
+      router.push("/dashboard");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -39,8 +71,19 @@ export function SignUpForm() {
         </div>
       </div>
 
+      {/* Error Message */}
+      {error && (
+        <div className="flex items-center gap-2 px-3 py-2 bg-error-container/10 border border-error/30 rounded text-error font-body-sm text-body-sm">
+          <span className="material-symbols-outlined text-lg" aria-hidden="true">error</span>
+          {error}
+        </div>
+      )}
+
       {/* Main Form */}
       <form onSubmit={handleSignUp} className="flex flex-col gap-4">
+        {/* Hidden field: tells Convex Auth this is a signup flow */}
+        <input type="hidden" name="flow" value="signUp" />
+
         {/* Full Name Field */}
         <div className="flex flex-col gap-1">
           <label className="font-label-md text-label-md text-on-surface" htmlFor="name">Full Name</label>
@@ -48,7 +91,7 @@ export function SignUpForm() {
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-outline">
               <span className="material-symbols-outlined text-xl" aria-hidden="true">person</span>
             </div>
-            <input className="w-full pl-10 pr-4 py-2.5 bg-surface-container-lowest border border-outline-variant rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-body-base text-body-base text-on-surface placeholder:text-outline-variant" id="name" placeholder="John Doe" type="text" required />
+            <input className="w-full pl-10 pr-4 py-2.5 bg-surface-container-lowest border border-outline-variant rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-body-base text-body-base text-on-surface placeholder:text-outline-variant" id="name" name="name" placeholder="John Doe" type="text" required />
           </div>
         </div>
 
@@ -59,7 +102,7 @@ export function SignUpForm() {
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-outline">
               <span className="material-symbols-outlined text-xl" aria-hidden="true">mail</span>
             </div>
-            <input className="w-full pl-10 pr-4 py-2.5 bg-surface-container-lowest border border-outline-variant rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-body-base text-body-base text-on-surface placeholder:text-outline-variant" id="email" placeholder="name@example.com" type="email" required />
+            <input className="w-full pl-10 pr-4 py-2.5 bg-surface-container-lowest border border-outline-variant rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-body-base text-body-base text-on-surface placeholder:text-outline-variant" id="email" name="email" placeholder="name@example.com" type="email" required />
           </div>
         </div>
 
@@ -70,9 +113,15 @@ export function SignUpForm() {
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-outline">
               <span className="material-symbols-outlined text-xl" aria-hidden="true">lock</span>
             </div>
-            <input className="w-full pl-10 pr-10 py-2.5 bg-surface-container-lowest border border-outline-variant rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-body-base text-body-base text-on-surface placeholder:text-outline-variant" id="password" placeholder="••••••••" type="password" required />
-            <button className="absolute inset-y-0 right-0 pr-3 flex items-center text-outline hover:text-on-surface transition-colors" type="button">
-              <span className="material-symbols-outlined text-xl" aria-hidden="true">visibility_off</span>
+            <input className="w-full pl-10 pr-10 py-2.5 bg-surface-container-lowest border border-outline-variant rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-body-base text-body-base text-on-surface placeholder:text-outline-variant" id="password" name="password" placeholder="••••••••" type={showPassword ? "text" : "password"} required />
+            <button
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-outline hover:text-on-surface transition-colors"
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              <span className="material-symbols-outlined text-xl" aria-hidden="true">
+                {showPassword ? "visibility" : "visibility_off"}
+              </span>
             </button>
           </div>
         </div>
@@ -84,17 +133,36 @@ export function SignUpForm() {
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-outline">
               <span className="material-symbols-outlined text-xl">lock</span>
             </div>
-            <input className="w-full pl-10 pr-10 py-2.5 bg-surface-container-lowest border border-outline-variant rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-body-base text-body-base text-on-surface placeholder:text-outline-variant" id="confirm-password" placeholder="••••••••" type="password" required />
-            <button className="absolute inset-y-0 right-0 pr-3 flex items-center text-outline hover:text-on-surface transition-colors" type="button">
-              <span className="material-symbols-outlined text-xl">visibility_off</span>
+            <input className="w-full pl-10 pr-10 py-2.5 bg-surface-container-lowest border border-outline-variant rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-body-base text-body-base text-on-surface placeholder:text-outline-variant" id="confirm-password" name="confirmPassword" placeholder="••••••••" type={showConfirmPassword ? "text" : "password"} required />
+            <button
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-outline hover:text-on-surface transition-colors"
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+            >
+              <span className="material-symbols-outlined text-xl">
+                {showConfirmPassword ? "visibility" : "visibility_off"}
+              </span>
             </button>
           </div>
         </div>
 
-        {/* Submit Button */}
-        <button className="w-full mt-2 py-3 bg-primary hover:bg-primary-container text-on-primary rounded font-label-md text-label-md transition-colors shadow-sm flex items-center justify-center gap-2" type="submit">
-          Create Account
-          <span className="material-symbols-outlined text-lg" aria-hidden="true">arrow_forward</span>
+        {/* Submit Button — shows spinner during submission */}
+        <button
+          className="w-full mt-2 py-3 bg-primary hover:bg-primary-container text-on-primary rounded font-label-md text-label-md transition-colors shadow-sm flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+          type="submit"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <>
+              <span className="material-symbols-outlined text-lg animate-spin" aria-hidden="true">progress_activity</span>
+              Creating account…
+            </>
+          ) : (
+            <>
+              Create Account
+              <span className="material-symbols-outlined text-lg" aria-hidden="true">arrow_forward</span>
+            </>
+          )}
         </button>
       </form>
     </div>

@@ -8,6 +8,27 @@ import { test, expect } from "@playwright/test";
 const TEST_EMAIL = "name@example.com";
 const TEST_PASSWORD = "12345678";
 
+// In GitHub Actions, the database is completely empty on every run.
+// This global beforeAll block ensures the TEST_EMAIL account exists before any tests run.
+test.beforeAll(async ({ browser }) => {
+  const page = await browser.newPage();
+  await page.goto("/sign-up");
+  await page.getByPlaceholder("John Doe").fill("Test User");
+  await page.getByPlaceholder("name@example.com").fill(TEST_EMAIL);
+  const passwordFields = page.getByPlaceholder("••••••••");
+  await passwordFields.nth(0).fill(TEST_PASSWORD);
+  await passwordFields.nth(1).fill(TEST_PASSWORD);
+  await page.getByRole("button", { name: /create account/i }).click();
+  
+  // Wait for either a successful redirect to dashboard OR the generic error if it already exists locally
+  await Promise.race([
+    page.waitForURL(/\/dashboard/, { timeout: 5000 }),
+    page.waitForSelector("text=Could not create account", { timeout: 5000 })
+  ]).catch(() => {}); // Ignore timeouts
+  
+  await page.close();
+});
+
 test.describe("Login Flow", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/login");
@@ -25,8 +46,8 @@ test.describe("Login Flow", () => {
     await expect(page.getByRole("button", { name: /sign in/i })).toBeVisible();
 
     // Tab links
-    await expect(page.getByText("Log In")).toBeVisible();
-    await expect(page.getByText("Sign Up")).toBeVisible();
+    await expect(page.getByText("Log In", { exact: true })).toBeVisible();
+    await expect(page.getByText("Sign Up", { exact: true })).toBeVisible();
 
     // Test account info
     await expect(page.getByText("Test account for this app")).toBeVisible();

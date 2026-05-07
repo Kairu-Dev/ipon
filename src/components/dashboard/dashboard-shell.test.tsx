@@ -59,6 +59,8 @@ describe("DashboardShell", () => {
     // Should render nothing (redirect via useEffect)
     expect(container.innerHTML).toBe("");
     expect(screen.queryByText("Secret Content")).toBeNull();
+    // Should trigger redirect to login
+    expect(mockReplace).toHaveBeenCalledWith("/login");
   });
 
   it("renders logout button when authenticated", () => {

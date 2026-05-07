@@ -92,19 +92,16 @@ export const getMyProfile = query({
 ```
 
 ```ts
-// Good: verifying identity server-side
+// Good: verifying identity server-side using Convex Auth
+import { getAuthUserId } from "@convex-dev/auth/server";
+
 export const getMyProfile = query({
   args: {},
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
 
-    return await ctx.db
-      .query("users")
-      .withIndex("by_tokenIdentifier", (q) =>
-        q.eq("tokenIdentifier", identity.tokenIdentifier),
-      )
-      .unique();
+    return await ctx.db.get(userId);
   },
 });
 ```
@@ -143,7 +140,7 @@ If it does not, give the user a short manual validation checklist instead.
 - [ ] Used the official Convex docs for shared auth behavior and authorization patterns
 - [ ] Only added app-level user storage if the app actually needs it
 - [ ] Did not invent a cross-provider `users` table or `storeUser` flow for Convex Auth
-- [ ] Added authentication checks in protected backend functions
+- [ ] Added authentication checks using `getAuthUserId(ctx)` (Do NOT use `tokenIdentifier` or `getUserIdentity()` for this project)
 - [ ] Added authorization checks where the app actually needs them
 - [ ] Clear error messages ("Not authenticated", "Unauthorized")
 - [ ] Client auth provider configured for the chosen provider

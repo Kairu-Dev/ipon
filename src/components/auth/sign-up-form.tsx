@@ -8,7 +8,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { PasswordChecklist } from "@/components/auth/password-checklist";
 import { signUpSchema } from "@/lib/validation";
-import { AUTH_STRINGS } from "@/constants/auth";
+import { AUTH_STRINGS } from "@/locale/auth";
 
 export function SignUpForm() {
   const { signIn } = useAuthActions();

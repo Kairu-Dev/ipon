@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
-import { AUTH_STRINGS } from "@/constants/auth";
+import { AUTH_STRINGS } from "@/locale/auth";
 
 export function ForgotPasswordForm() {
   const [email, setEmail] = useState("");

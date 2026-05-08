@@ -1,8 +1,15 @@
-// src/constants/auth.ts
+// src/locale/auth.ts
+// Temporary location for all authentication strings (i18n ready)
 
 export const AUTH_STRINGS = {
   // Brand
   BRAND_NAME: "Ipon",
+
+  // Hero Section (Left Panel)
+  HERO_TITLE: "Your personal savings companion.",
+  HERO_SUBTITLE: "Build sustainable financial habits, track your expenses, and reach your goals with confidence. The smart way to handle your budget.",
+  HERO_QUOTE: "Do not save what is left after spending, but spend what is left after saving.",
+  HERO_QUOTE_AUTHOR: "Warren Buffett",
 
   // Headings & Descriptions
   LOGIN_TITLE: "Welcome back",
@@ -57,6 +64,8 @@ export const AUTH_STRINGS = {
   // Validation Messages
   ERR_REQ_EMAIL: "Email is required",
   ERR_REQ_PASSWORD: "Password is required",
+  ERR_REQ_NAME: "Name is required",
+  ERR_INVALID_EMAIL: "Invalid email address",
   
   // Rate Limiting
   rateLimitMessage: (minutes: number) => `Too many login attempts. Please try again in ${minutes} minute(s).`,

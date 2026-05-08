@@ -3,7 +3,7 @@
 // Shows ✓/✗ indicators that update in real-time as the user types.
 "use client";
 import { memo } from "react";
-import { AUTH_STRINGS } from "@/constants/auth";
+import { AUTH_STRINGS } from "@/locale/auth";
 
 interface PasswordChecklistProps {
   /** Current password value from the input field */

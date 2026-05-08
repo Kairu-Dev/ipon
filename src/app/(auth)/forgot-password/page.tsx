@@ -1,6 +1,6 @@
-import { LoginForm } from "@/components/auth/login-form";
+import { ForgotPasswordForm } from "@/components/auth/forgot-password-form";
 
-export default function LoginPage() {
+export default function ForgotPasswordPage() {
   return (
     <div className="flex h-screen w-full font-body-base antialiased bg-background text-on-background">
       {/* Left Panel: Branding / Hero */}
@@ -24,7 +24,7 @@ export default function LoginPage() {
             Your personal savings companion.
           </h1>
           <p className="font-body-base text-body-base text-primary-fixed-dim max-w-md">
-            Build sustainable financial habits, track your expenses, and reach your goals with confidence. The smart way to handle your budget.
+            Empowering Filipino students and young professionals to take control of their financial future, one peso at a time.
           </p>
         </div>
 
@@ -39,7 +39,7 @@ export default function LoginPage() {
 
       {/* Right Panel: Auth Form */}
       <div className="w-full md:w-1/2 lg:w-7/12 flex items-center justify-center p-8 sm:p-12 bg-surface-container-lowest">
-        <LoginForm />
+        <ForgotPasswordForm />
       </div>
     </div>
   );

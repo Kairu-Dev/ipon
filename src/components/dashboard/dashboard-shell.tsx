@@ -1,21 +1,56 @@
 "use client";
-import { useUIStore } from "@/store/ui-store";
+import { useConvexAuth } from "convex/react";
+import { useAuthActions } from "@convex-dev/auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
-  const isLoggedIn = useUIStore((s) => s.isLoggedIn);
+  const { isAuthenticated, isLoading } = useConvexAuth();
+  const { signOut } = useAuthActions();
   const router = useRouter();
   const pathname = usePathname();
+
+  // Redirect to login if session expires mid-use.
+  // proxy.ts handles unauthenticated page loads on the server side.
   useEffect(() => {
-    if (!isLoggedIn) {
+    if (!isLoading && !isAuthenticated) {
       router.replace("/login");
     }
-  }, [isLoggedIn, router]);
+  }, [isAuthenticated, isLoading, router]);
 
-  if (!isLoggedIn) return null;
+  // Show a branded skeleton while auth state resolves.
+  // This fires exactly once per page load — no re-render concern.
+  if (isLoading) {
+    return (
+      <div className="bg-background text-on-background font-body-base h-screen overflow-hidden flex">
+        {/* Skeleton sidebar */}
+        <div className="hidden md:flex w-64 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex-col p-4">
+          <div className="mb-8 px-4 flex items-center gap-3">
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-on-primary font-bold">I</div>
+            <div>
+              <div className="text-2xl font-bold tracking-tight text-green-600 dark:text-green-500 font-h2">Ipon</div>
+              <div className="text-slate-500 text-xs font-label-xs">Financial Growth</div>
+            </div>
+          </div>
+          <div className="flex flex-col gap-3 mt-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-10 bg-slate-100 dark:bg-slate-800 rounded-lg animate-pulse" />
+            ))}
+          </div>
+        </div>
+        {/* Skeleton main content */}
+        <div className="flex-1 flex flex-col items-center justify-center gap-4">
+          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-on-primary font-bold animate-pulse">I</div>
+          <p className="text-sm text-slate-400 animate-pulse">Loading your dashboard…</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Not authenticated — render nothing, useEffect will redirect
+  if (!isAuthenticated) return null;
 
   return (
     <div className="bg-background text-on-background font-body-base h-screen overflow-hidden">
@@ -75,7 +110,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             <span className="material-symbols-outlined" aria-hidden="true">settings</span>
             Settings
           </Link>
-          <button onClick={() => useUIStore.getState().setLoggedIn(false)} className="text-slate-600 dark:text-slate-400 px-4 py-2 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-all active:scale-95 duration-150 ease-in-out w-full text-left">
+          <button onClick={() => void signOut()} className="text-slate-600 dark:text-slate-400 px-4 py-2 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-all active:scale-95 duration-150 ease-in-out w-full text-left">
             <span className="material-symbols-outlined" aria-hidden="true">logout</span>
             Logout
           </button>

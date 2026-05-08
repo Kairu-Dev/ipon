@@ -143,7 +143,7 @@ export function LoginForm() {
         <div className="flex flex-col gap-1">
           <div className="flex justify-between items-center">
             <label className="font-label-md text-label-md text-on-surface" htmlFor="password">{AUTH_STRINGS.LABEL_PASSWORD}</label>
-            <a className="font-label-xs text-label-xs text-primary hover:text-primary-container transition-colors" href="#">{AUTH_STRINGS.LINK_FORGOT_PASSWORD}</a>
+            <Link className="font-label-xs text-label-xs text-primary hover:text-primary-container transition-colors" href="/forgot-password">{AUTH_STRINGS.LINK_FORGOT_PASSWORD}</Link>
           </div>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-outline">

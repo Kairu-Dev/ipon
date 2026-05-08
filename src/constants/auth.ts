@@ -65,4 +65,18 @@ export const AUTH_STRINGS = {
   TEST_ACCOUNT_HEADER: "Test account for this app",
   TEST_ACCOUNT_EMAIL: "Email: name@example.com",
   TEST_ACCOUNT_PASS: "Password: 12345678",
+
+  // Forgot Password
+  FORGOT_PASSWORD_TITLE: "Forgot password?",
+  FORGOT_PASSWORD_SUBTITLE: "No worries, we'll send you reset instructions.",
+  BTN_RESET_PASSWORD: "Reset Password",
+  LINK_BACK_TO_LOGIN: "Back to Log In",
+  LINK_REMEMBER_PASSWORD: "Remember your password? Log In",
+
+  // Verification
+  VERIFY_TITLE: "Verify your identity",
+  VERIFY_SUBTITLE: "We've sent a 6-digit code to your email",
+  VERIFY_RESEND: "Resend code in",
+  BTN_VERIFY: "Verify & Continue",
+  LINK_CHANGE_EMAIL: "Change email",
 } as const;

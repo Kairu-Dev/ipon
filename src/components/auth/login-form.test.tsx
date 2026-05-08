@@ -1,7 +1,7 @@
 // src/components/auth/login-form.test.tsx
 // Unit tests for the Login form component.
 // Mocks Convex Auth and Next.js navigation to test form behavior in isolation.
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { LoginForm } from "./login-form";
 import { describe, it, expect, vi, beforeEach } from "vitest";
@@ -125,7 +125,7 @@ describe("LoginForm", () => {
     fireEvent.submit(form);
 
     // Wait for async signIn to complete
-    await vi.waitFor(() => {
+    await waitFor(() => {
       expect(mockSignIn).toHaveBeenCalledTimes(1);
     });
 
@@ -133,7 +133,7 @@ describe("LoginForm", () => {
     expect(mockSignIn).toHaveBeenCalledWith("password", expect.any(FormData));
 
     // Verify redirect to dashboard
-    await vi.waitFor(() => {
+    await waitFor(() => {
       expect(mockPush).toHaveBeenCalledWith("/dashboard");
     });
   });
@@ -149,7 +149,7 @@ describe("LoginForm", () => {
     fireEvent.submit(form);
 
     // Should show generic error (not leaking whether email exists)
-    await vi.waitFor(() => {
+    await waitFor(() => {
       expect(screen.getByText("Invalid email or password.")).toBeDefined();
     });
 
@@ -161,10 +161,10 @@ describe("LoginForm", () => {
   it("includes hidden flow=signIn field in form", () => {
     render(<LoginForm />);
     const form = screen.getByPlaceholderText("name@example.com").closest("form")!;
-    const hiddenInput = form.querySelector('input[name="flow"]') as HTMLInputElement;
-    expect(hiddenInput).toBeDefined();
-    expect(hiddenInput.value).toBe("signIn");
-    expect(hiddenInput.type).toBe("hidden");
+    const hiddenInput = form.querySelector('input[name="flow"]') as HTMLInputElement | null;
+    expect(hiddenInput).not.toBeNull();
+    expect(hiddenInput?.value).toBe("signIn");
+    expect(hiddenInput?.type).toBe("hidden");
   });
 
   // --- Security Tests ---
@@ -201,7 +201,7 @@ describe("LoginForm", () => {
     const form = screen.getByPlaceholderText("name@example.com").closest("form")!;
     fireEvent.submit(form);
 
-    await vi.waitFor(() => {
+    await waitFor(() => {
       // Should always say "Invalid email or password." — never "User not found"
       expect(screen.getByText("Invalid email or password.")).toBeDefined();
       expect(screen.queryByText("User not found")).toBeNull();

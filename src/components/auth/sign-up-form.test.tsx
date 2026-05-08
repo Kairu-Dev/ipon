@@ -1,7 +1,7 @@
 // src/components/auth/sign-up-form.test.tsx
 // Unit tests for the Sign Up form component.
 // Mocks Convex Auth and Next.js navigation to test form behavior in isolation.
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { SignUpForm } from "./sign-up-form";
 import { describe, it, expect, vi, beforeEach } from "vitest";
@@ -94,12 +94,12 @@ describe("SignUpForm", () => {
     const form = screen.getByPlaceholderText("name@example.com").closest("form")!;
     fireEvent.submit(form);
 
-    await vi.waitFor(() => {
+    await waitFor(() => {
       expect(mockSignIn).toHaveBeenCalledTimes(1);
     });
     expect(mockSignIn).toHaveBeenCalledWith("password", expect.any(FormData));
 
-    await vi.waitFor(() => {
+    await waitFor(() => {
       expect(mockPush).toHaveBeenCalledWith("/dashboard");
     });
   });
@@ -116,7 +116,7 @@ describe("SignUpForm", () => {
     const form = screen.getByPlaceholderText("name@example.com").closest("form")!;
     fireEvent.submit(form);
 
-    await vi.waitFor(() => {
+    await waitFor(() => {
       expect(screen.getByText("Passwords do not match.")).toBeDefined();
     });
 
@@ -138,7 +138,7 @@ describe("SignUpForm", () => {
     const form = screen.getByPlaceholderText("name@example.com").closest("form")!;
     fireEvent.submit(form);
 
-    await vi.waitFor(() => {
+    await waitFor(() => {
       expect(screen.getByText("Could not create account. Please try again.")).toBeDefined();
     });
   });
@@ -147,10 +147,10 @@ describe("SignUpForm", () => {
   it("includes hidden flow=signUp field in form", () => {
     render(<SignUpForm />);
     const form = screen.getByPlaceholderText("name@example.com").closest("form")!;
-    const hiddenInput = form.querySelector('input[name="flow"]') as HTMLInputElement;
-    expect(hiddenInput).toBeDefined();
-    expect(hiddenInput.value).toBe("signUp");
-    expect(hiddenInput.type).toBe("hidden");
+    const hiddenInput = form.querySelector('input[name="flow"]') as HTMLInputElement | null;
+    expect(hiddenInput).not.toBeNull();
+    expect(hiddenInput?.value).toBe("signUp");
+    expect(hiddenInput?.type).toBe("hidden");
   });
 
   // --- Security: name field accepts but doesn't execute HTML ---
@@ -177,7 +177,7 @@ describe("SignUpForm", () => {
     const form = screen.getByPlaceholderText("name@example.com").closest("form")!;
     fireEvent.submit(form);
 
-    await vi.waitFor(() => {
+    await waitFor(() => {
       expect(screen.getByText("Name is required")).toBeDefined();
     });
 
@@ -199,7 +199,7 @@ describe("SignUpForm", () => {
     const form = emailInput.closest("form")!;
     fireEvent.submit(form);
 
-    await vi.waitFor(() => {
+    await waitFor(() => {
       expect(screen.getByText("Invalid email address")).toBeDefined();
     });
 

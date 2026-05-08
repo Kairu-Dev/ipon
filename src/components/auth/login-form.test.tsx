@@ -177,6 +177,9 @@ describe("LoginForm", () => {
     const emailInput = screen.getByPlaceholderText("name@example.com");
     await user.type(emailInput, "spammer@example.com");
     
+    const passInput = screen.getByPlaceholderText("••••••••");
+    await user.type(passInput, "12345678");
+    
     // Attempt submission
     const submitBtn = screen.getByRole("button", { name: /sign in/i });
     fireEvent.submit(submitBtn);

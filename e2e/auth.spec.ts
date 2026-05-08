@@ -15,9 +15,8 @@ test.beforeAll(async ({ browser }) => {
   await page.goto("/sign-up");
   await page.getByPlaceholder("John Doe").fill("Test User");
   await page.getByPlaceholder("name@example.com").fill(TEST_EMAIL);
-  const passwordFields = page.getByPlaceholder("••••••••");
-  await passwordFields.nth(0).fill(TEST_PASSWORD);
-  await passwordFields.nth(1).fill(TEST_PASSWORD);
+  await page.getByPlaceholder("Enter your password").fill(TEST_PASSWORD);
+  await page.getByPlaceholder("••••••••").fill(TEST_PASSWORD);
   await page.getByRole("button", { name: /create account/i }).click();
   
   // Wait for signup to complete — either redirect or "already exists" error
@@ -114,9 +113,9 @@ test.describe("Sign Up Flow", () => {
     await expect(page.getByRole("heading", { name: "Create your account" })).toBeVisible();
     await expect(page.getByPlaceholder("John Doe")).toBeVisible();
     await expect(page.getByPlaceholder("name@example.com")).toBeVisible();
-    // Two password fields
-    const passwordFields = page.getByPlaceholder("••••••••");
-    await expect(passwordFields).toHaveCount(2);
+    // Password + confirm password fields
+    await expect(page.getByPlaceholder("Enter your password")).toBeVisible();
+    await expect(page.getByPlaceholder("••••••••")).toBeVisible();
   });
 
   test("Log In tab navigates to login page", async ({ page }) => {
@@ -127,9 +126,8 @@ test.describe("Sign Up Flow", () => {
   test("shows error when passwords do not match", async ({ page }) => {
     await page.getByPlaceholder("John Doe").fill("Test User");
     await page.getByPlaceholder("name@example.com").fill("newuser@test.com");
-    const passwordFields = page.getByPlaceholder("••••••••");
-    await passwordFields.nth(0).fill("Secure@123");
-    await passwordFields.nth(1).fill("Different@123");
+    await page.getByPlaceholder("Enter your password").fill("Secure@123");
+    await page.getByPlaceholder("••••••••").fill("Different@123");
 
     await page.getByRole("button", { name: /create account/i }).click();
     await expect(page.getByText("Passwords do not match.")).toBeVisible();

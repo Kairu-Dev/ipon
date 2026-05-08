@@ -35,9 +35,9 @@ describe("SignUpForm", () => {
     render(<SignUpForm />);
     expect(screen.getByPlaceholderText("John Doe")).toBeDefined();
     expect(screen.getByPlaceholderText("name@example.com")).toBeDefined();
-    // Two password fields (password + confirm)
-    const passwordInputs = screen.getAllByPlaceholderText("••••••••");
-    expect(passwordInputs.length).toBe(2);
+    // Password field has a unique placeholder; confirm password uses bullet dots
+    expect(screen.getByPlaceholderText("Enter your password")).toBeDefined();
+    expect(screen.getByPlaceholderText("••••••••")).toBeDefined();
   });
 
   it("renders the submit button with 'Create Account' text", () => {
@@ -60,9 +60,8 @@ describe("SignUpForm", () => {
   // --- Password visibility toggle ---
   it("toggles password visibility independently for each field", async () => {
     render(<SignUpForm />);
-    const passwordInputs = screen.getAllByPlaceholderText("••••••••");
-    const passwordField = passwordInputs[0];
-    const confirmField = passwordInputs[1];
+    const passwordField = screen.getByPlaceholderText("Enter your password");
+    const confirmField = screen.getByPlaceholderText("••••••••");
 
     // Both start as type=password
     expect(passwordField.getAttribute("type")).toBe("password");
@@ -89,9 +88,8 @@ describe("SignUpForm", () => {
 
     await userEvent.type(screen.getByPlaceholderText("John Doe"), "Juan Dela Cruz");
     await userEvent.type(screen.getByPlaceholderText("name@example.com"), "juan@example.com");
-    const passwordInputs = screen.getAllByPlaceholderText("••••••••");
-    await userEvent.type(passwordInputs[0], "Secure@123");
-    await userEvent.type(passwordInputs[1], "Secure@123");
+    await userEvent.type(screen.getByPlaceholderText("Enter your password"), "Secure@123");
+    await userEvent.type(screen.getByPlaceholderText("••••••••"), "Secure@123");
 
     const form = screen.getByPlaceholderText("name@example.com").closest("form")!;
     fireEvent.submit(form);
@@ -112,9 +110,8 @@ describe("SignUpForm", () => {
 
     await userEvent.type(screen.getByPlaceholderText("John Doe"), "Juan");
     await userEvent.type(screen.getByPlaceholderText("name@example.com"), "juan@example.com");
-    const passwordInputs = screen.getAllByPlaceholderText("••••••••");
-    await userEvent.type(passwordInputs[0], "Secure@123");
-    await userEvent.type(passwordInputs[1], "Different@123");
+    await userEvent.type(screen.getByPlaceholderText("Enter your password"), "Secure@123");
+    await userEvent.type(screen.getByPlaceholderText("••••••••"), "Different@123");
 
     const form = screen.getByPlaceholderText("name@example.com").closest("form")!;
     fireEvent.submit(form);
@@ -135,15 +132,14 @@ describe("SignUpForm", () => {
 
     await userEvent.type(screen.getByPlaceholderText("John Doe"), "Juan");
     await userEvent.type(screen.getByPlaceholderText("name@example.com"), "existing@example.com");
-    const passwordInputs = screen.getAllByPlaceholderText("••••••••");
-    await userEvent.type(passwordInputs[0], "Secure@123");
-    await userEvent.type(passwordInputs[1], "Secure@123");
+    await userEvent.type(screen.getByPlaceholderText("Enter your password"), "Secure@123");
+    await userEvent.type(screen.getByPlaceholderText("••••••••"), "Secure@123");
 
     const form = screen.getByPlaceholderText("name@example.com").closest("form")!;
     fireEvent.submit(form);
 
     await vi.waitFor(() => {
-      expect(screen.getByText("Could not create account. Please check your details and try again.")).toBeDefined();
+      expect(screen.getByText("Could not create account. Please try again.")).toBeDefined();
     });
   });
 
@@ -167,5 +163,46 @@ describe("SignUpForm", () => {
 
     // The value should be stored as plain text, not rendered as HTML
     expect((nameInput as HTMLInputElement).value).toBe('<img src=x onerror=alert(1)>');
+  });
+
+  // --- On-submit validation: name errors ---
+  it("shows name validation error on submit with empty name", async () => {
+    render(<SignUpForm />);
+
+    // Leave name empty, fill other fields
+    await userEvent.type(screen.getByPlaceholderText("name@example.com"), "test@example.com");
+    await userEvent.type(screen.getByPlaceholderText("Enter your password"), "Secure@123");
+    await userEvent.type(screen.getByPlaceholderText("••••••••"), "Secure@123");
+
+    const form = screen.getByPlaceholderText("name@example.com").closest("form")!;
+    fireEvent.submit(form);
+
+    await vi.waitFor(() => {
+      expect(screen.getByText("Name is required")).toBeDefined();
+    });
+
+    // signIn should NOT have been called
+    expect(mockSignIn).not.toHaveBeenCalled();
+  });
+
+  // --- On-submit validation: email errors ---
+  it("shows email validation error on submit with invalid email", async () => {
+    render(<SignUpForm />);
+
+    await userEvent.type(screen.getByPlaceholderText("John Doe"), "Juan");
+    // Type invalid email — clear the field first since type="email" has browser validation
+    const emailInput = screen.getByPlaceholderText("name@example.com");
+    await userEvent.type(emailInput, "not-an-email");
+    await userEvent.type(screen.getByPlaceholderText("Enter your password"), "Secure@123");
+    await userEvent.type(screen.getByPlaceholderText("••••••••"), "Secure@123");
+
+    const form = emailInput.closest("form")!;
+    fireEvent.submit(form);
+
+    await vi.waitFor(() => {
+      expect(screen.getByText("Invalid email address")).toBeDefined();
+    });
+
+    expect(mockSignIn).not.toHaveBeenCalled();
   });
 });

@@ -4,6 +4,20 @@
 import { z } from "zod";
 
 /**
+ * Password requirement rules — single source of truth for the UI checklist.
+ * Each rule has a key, label (shown to the user), and a test function.
+ * Mirrors the regex rules in signUpSchema below.
+ */
+export const PASSWORD_RULES = [
+  { key: "length", label: "At least 8 characters", test: (v: string) => v.length >= 8 },
+  { key: "uppercase", label: "One uppercase letter", test: (v: string) => /[A-Z]/.test(v) },
+  { key: "lowercase", label: "One lowercase letter", test: (v: string) => /[a-z]/.test(v) },
+  { key: "number", label: "One number", test: (v: string) => /[0-9]/.test(v) },
+  { key: "special", label: "One special character", test: (v: string) => /[^A-Za-z0-9]/.test(v) },
+  { key: "notBlank", label: "Cannot be blank", test: (v: string) => v.trim().length > 0 },
+] as const;
+
+/**
  * Schema for the sign-up form.
  * - name: required, max 50 characters
  * - email: must be a valid email format
@@ -15,7 +29,7 @@ export const signUpSchema = z.object({
     .trim()
     .min(1, "Name is required")
     .max(50, "Name must be 50 characters or fewer"),
-  email: z.string().email("Invalid email address"),
+  email: z.string().trim().min(1, "Email is required").email("Invalid email address"),
   password: z
     .string()
     .min(8, "Password must be at least 8 characters")

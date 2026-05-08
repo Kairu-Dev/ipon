@@ -3,9 +3,6 @@
 // Tests route protection, session handling, and input sanitization.
 import { test, expect } from "@playwright/test";
 
-const TEST_EMAIL = "name@example.com";
-const TEST_PASSWORD = "12345678";
-
 test.describe("Route Protection (proxy.ts)", () => {
   test("unauthenticated user cannot access /dashboard", async ({ page }) => {
     // Go directly to dashboard without logging in

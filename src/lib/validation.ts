@@ -63,7 +63,7 @@ export type LoginInput = z.infer<typeof loginSchema>;
 export const transactionSchema = z.object({
   type: z.enum(["income", "expense"]),
   title: z.string().trim().min(1, "Title is required").max(50, "Title is too long"),
-  amount: z.coerce.number().positive("Amount must be greater than ₱0").max(999999.99, "Amount cannot exceed ₱999,999.99"),
+  amount: z.number({ message: "Amount is required" }).positive("Amount must be greater than ₱0").max(999999.99, "Amount cannot exceed ₱999,999.99"),
   category: z.string().min(1, "Please select a category"),
   paymentMethod: z.string().min(1, "Please select a payment method"),
   date: z.string().min(1, "Date is required"),

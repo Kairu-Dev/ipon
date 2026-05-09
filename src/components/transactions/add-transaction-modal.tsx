@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useUIStore } from "@/store/ui-store";
 import { useMutation, useAction } from "convex/react";
@@ -32,7 +32,7 @@ export function AddTransactionModal() {
   const addTransaction = useMutation(api.transactions.addTransaction);
   const suggestCategory = useAction(api.transactions.suggestCategory);
 
-  const { register, handleSubmit, watch, setValue, reset, formState: { errors, isSubmitting } } = useForm<TransactionInput>({
+  const { register, handleSubmit, control, setValue, reset, formState: { errors, isSubmitting } } = useForm<TransactionInput>({
     resolver: zodResolver(transactionSchema),
     defaultValues: {
       type: "expense",
@@ -45,9 +45,9 @@ export function AddTransactionModal() {
     },
   });
 
-  const type = watch("type");
-  const note = watch("note");
-  const category = watch("category");
+  const type = useWatch({ control, name: "type" });
+  const note = useWatch({ control, name: "note" });
+  const category = useWatch({ control, name: "category" });
 
   const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
 

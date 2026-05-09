@@ -16,21 +16,18 @@ export function VerifyForm() {
   ];
 
   const handleChange = (index: number, value: string) => {
-    // Only allow numbers
     if (value && !/^\d+$/.test(value)) return;
 
     const newCode = [...code];
     newCode[index] = value;
     setCode(newCode);
 
-    // Auto-advance to next input
     if (value && index < 5) {
       inputRefs[index + 1].current?.focus();
     }
   };
 
   const handleKeyDown = (index: number, e: KeyboardEvent<HTMLInputElement>) => {
-    // Move to previous input on backspace if current is empty
     if (e.key === "Backspace" && !code[index] && index > 0) {
       inputRefs[index - 1].current?.focus();
     }
@@ -47,7 +44,6 @@ export function VerifyForm() {
       }
       setCode(newCode);
       
-      // Focus the next empty input or the last one
       const focusIndex = Math.min(pastedData.length, 5);
       inputRefs[focusIndex].current?.focus();
     }
@@ -61,7 +57,6 @@ export function VerifyForm() {
     setIsSubmitting(true);
 
     try {
-      // Mock API call for mockup
       await new Promise((resolve) => setTimeout(resolve, 1000));
       console.log("Verified code:", fullCode);
     } finally {

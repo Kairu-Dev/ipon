@@ -8,13 +8,16 @@ import { z } from "zod";
  * Each rule has a key, label (shown to the user), and a test function.
  * Mirrors the regex rules in signUpSchema below.
  */
+const isNonProd = process.env.NODE_ENV !== "production" || process.env.NEXT_PUBLIC_VERCEL_ENV === "preview" || process.env.NEXT_PUBLIC_VERCEL_ENV === "development";
+const isBypass = (v: string) => isNonProd && v === "12345678";
+
 export const PASSWORD_RULES = [
-  { key: "length", label: "At least 8 characters", test: (v: string) => v.length >= 8 },
-  { key: "uppercase", label: "One uppercase letter", test: (v: string) => /[A-Z]/.test(v) },
-  { key: "lowercase", label: "One lowercase letter", test: (v: string) => /[a-z]/.test(v) },
-  { key: "number", label: "One number", test: (v: string) => /[0-9]/.test(v) },
-  { key: "special", label: "One special character", test: (v: string) => /[^A-Za-z0-9]/.test(v) },
-  { key: "notBlank", label: "Cannot be blank", test: (v: string) => v.trim().length > 0 },
+  { key: "length", label: "At least 8 characters", test: (v: string) => isBypass(v) || v.length >= 8 },
+  { key: "uppercase", label: "One uppercase letter", test: (v: string) => isBypass(v) || /[A-Z]/.test(v) },
+  { key: "lowercase", label: "One lowercase letter", test: (v: string) => isBypass(v) || /[a-z]/.test(v) },
+  { key: "number", label: "One number", test: (v: string) => isBypass(v) || /[0-9]/.test(v) },
+  { key: "special", label: "One special character", test: (v: string) => isBypass(v) || /[^A-Za-z0-9]/.test(v) },
+  { key: "notBlank", label: "Cannot be blank", test: (v: string) => isBypass(v) || v.trim().length > 0 },
 ] as const;
 
 /**
@@ -32,12 +35,15 @@ export const signUpSchema = z.object({
   email: z.string().trim().min(1, "Email is required").email("Invalid email address"),
   password: z
     .string()
-    .min(8, "Password must be at least 8 characters")
-    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-    .regex(/[0-9]/, "Password must contain at least one number")
-    .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character")
-    .refine((val) => val.trim().length > 0, "Password cannot be blank"),
+    .superRefine((val, ctx) => {
+      if (isBypass(val)) return; // Seeder bypass
+      if (val.length < 8) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Password must be at least 8 characters" });
+      if (!/[A-Z]/.test(val)) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Password must contain at least one uppercase letter" });
+      if (!/[a-z]/.test(val)) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Password must contain at least one lowercase letter" });
+      if (!/[0-9]/.test(val)) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Password must contain at least one number" });
+      if (!/[^A-Za-z0-9]/.test(val)) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Password must contain at least one special character" });
+      if (val.trim().length === 0) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Password cannot be blank" });
+    }),
 });
 
 /**
@@ -53,3 +59,18 @@ export const loginSchema = z.object({
 /** TypeScript types derived from the schemas for use in form components. */
 export type SignUpInput = z.infer<typeof signUpSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
+
+/**
+ * Schema for transactions (both income and expense).
+ */
+export const transactionSchema = z.object({
+  type: z.enum(["income", "expense"]),
+  title: z.string().trim().min(1, "Title is required").max(50, "Title is too long"),
+  amount: z.number({ message: "Amount is required" }).positive("Amount must be greater than ₱0").max(999999.99, "Amount cannot exceed ₱999,999.99"),
+  category: z.string().min(1, "Please select a category"),
+  paymentMethod: z.string().min(1, "Please select a payment method"),
+  date: z.iso.date("Invalid date format"),
+  note: z.string().max(150, "Note cannot exceed 150 characters").optional(),
+});
+
+export type TransactionInput = z.infer<typeof transactionSchema>;

@@ -43,7 +43,6 @@ export function LoginForm() {
 
     if (emailError || passwordError) return;
 
-    // Check rate limit before attempting login
     if (loginAllowed && !loginAllowed.ok) {
       const minutes = Math.ceil((loginAllowed.retryAfter || 0) / 60000);
       setError(AUTH_STRINGS.rateLimitMessage(minutes));
@@ -55,12 +54,10 @@ export function LoginForm() {
     try {
       // The hidden "flow" field tells Convex Auth this is a sign-in, not signup.
       await signIn("password", formData);
-      // Success: reset the failed attempt counter (fire-and-forget)
       // Uses .catch to avoid triggering the outer catch block on reset failure
       resetAttempts({ email }).catch(() => {});
       router.push("/dashboard");
     } catch {
-      // Record this failed attempt
       await recordFailed({ email });
       // Generic message to avoid leaking whether an email exists
       setError(AUTH_STRINGS.ERR_INVALID_CREDENTIALS);

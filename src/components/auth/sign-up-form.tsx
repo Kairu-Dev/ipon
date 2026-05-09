@@ -31,8 +31,6 @@ export function SignUpForm() {
     const formData = new FormData(e.currentTarget);
     const confirmPassword = formData.get("confirmPassword") as string;
 
-    // 1. Validate with Zod to catch name/email errors.
-    // We run the full schema but only extract name/email errors for the UI.
     // Password errors are NOT shown here — the real-time PasswordChecklist
     // guides the user, and the server's validatePasswordRequirements blocks weak passwords.
     const result = signUpSchema.safeParse({ name, email, password });
@@ -47,7 +45,6 @@ export function SignUpForm() {
 
     setFieldErrors({ name: nameError, email: emailError, password: pwdError, confirmPassword: confirmPasswordError });
 
-    // Block submission if any field has an error
     if (nameError || emailError || pwdError || confirmPasswordError) return;
 
     setIsSubmitting(true);
@@ -124,7 +121,6 @@ export function SignUpForm() {
               value={name}
               onChange={(e) => {
                 setName(e.target.value);
-                // Clear error as user types after a failed submit
                 if (fieldErrors.name) setFieldErrors((prev) => ({ ...prev, name: undefined }));
               }}
             />
@@ -158,7 +154,6 @@ export function SignUpForm() {
               value={email}
               onChange={(e) => {
                 setEmail(e.target.value);
-                // Clear error as user types after a failed submit
                 if (fieldErrors.email) setFieldErrors((prev) => ({ ...prev, email: undefined }));
               }}
             />

@@ -1,5 +1,5 @@
 import { mutation, action } from "./_generated/server";
-import { v } from "convex/values";
+import { v, ConvexError } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { parseGeminiCategorySuggestion } from "../src/lib/gemini-parser";
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from "../src/constants/transactions";
@@ -17,18 +17,23 @@ export const addTransaction = mutation({
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
+    if (!userId) throw new ConvexError("Not authenticated");
 
     if (args.amount <= 0 || args.amount > 999999.99) {
-      throw new Error("Amount must be greater than 0 and up to 999,999.99");
+      throw new ConvexError("Amount must be greater than 0 and up to 999,999.99");
     }
 
     const trimmedTitle = args.title.trim();
     const trimmedCategory = args.category.trim();
     const trimmedPaymentMethod = args.paymentMethod.trim();
+    
+    const trimmedNote = args.note?.trim() || undefined;
+    if (trimmedNote && trimmedNote.length > 150) {
+      throw new ConvexError("Note cannot exceed 150 characters");
+    }
 
     if (!trimmedTitle || !trimmedCategory || !trimmedPaymentMethod) {
-      throw new Error("Title, category, and payment method cannot be empty or just whitespace");
+      throw new ConvexError("Title, category, and payment method cannot be empty or just whitespace");
     }
 
     return await ctx.db.insert("transactions", {
@@ -39,7 +44,7 @@ export const addTransaction = mutation({
       category: trimmedCategory,
       paymentMethod: trimmedPaymentMethod,
       date: args.date,
-      note: args.note,
+      note: trimmedNote,
     });
   },
 });

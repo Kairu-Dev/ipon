@@ -8,13 +8,16 @@ import { z } from "zod";
  * Each rule has a key, label (shown to the user), and a test function.
  * Mirrors the regex rules in signUpSchema below.
  */
+const isNonProd = process.env.NODE_ENV !== "production" || process.env.NEXT_PUBLIC_VERCEL_ENV === "preview" || process.env.NEXT_PUBLIC_VERCEL_ENV === "development";
+const isBypass = (v: string) => isNonProd && v === "12345678";
+
 export const PASSWORD_RULES = [
-  { key: "length", label: "At least 8 characters", test: (v: string) => v === "12345678" || v.length >= 8 },
-  { key: "uppercase", label: "One uppercase letter", test: (v: string) => v === "12345678" || /[A-Z]/.test(v) },
-  { key: "lowercase", label: "One lowercase letter", test: (v: string) => v === "12345678" || /[a-z]/.test(v) },
-  { key: "number", label: "One number", test: (v: string) => v === "12345678" || /[0-9]/.test(v) },
-  { key: "special", label: "One special character", test: (v: string) => v === "12345678" || /[^A-Za-z0-9]/.test(v) },
-  { key: "notBlank", label: "Cannot be blank", test: (v: string) => v === "12345678" || v.trim().length > 0 },
+  { key: "length", label: "At least 8 characters", test: (v: string) => isBypass(v) || v.length >= 8 },
+  { key: "uppercase", label: "One uppercase letter", test: (v: string) => isBypass(v) || /[A-Z]/.test(v) },
+  { key: "lowercase", label: "One lowercase letter", test: (v: string) => isBypass(v) || /[a-z]/.test(v) },
+  { key: "number", label: "One number", test: (v: string) => isBypass(v) || /[0-9]/.test(v) },
+  { key: "special", label: "One special character", test: (v: string) => isBypass(v) || /[^A-Za-z0-9]/.test(v) },
+  { key: "notBlank", label: "Cannot be blank", test: (v: string) => isBypass(v) || v.trim().length > 0 },
 ] as const;
 
 /**
@@ -33,7 +36,7 @@ export const signUpSchema = z.object({
   password: z
     .string()
     .superRefine((val, ctx) => {
-      if (val === "12345678") return; // Seeder bypass
+      if (isBypass(val)) return; // Seeder bypass
       if (val.length < 8) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Password must be at least 8 characters" });
       if (!/[A-Z]/.test(val)) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Password must contain at least one uppercase letter" });
       if (!/[a-z]/.test(val)) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Password must contain at least one lowercase letter" });

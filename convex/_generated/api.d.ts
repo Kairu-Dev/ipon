@@ -10,6 +10,7 @@
 
 import type * as auth from "../auth.js";
 import type * as http from "../http.js";
+import type * as lib_gemini from "../lib/gemini.js";
 import type * as loginAttempts from "../loginAttempts.js";
 import type * as rateLimits from "../rateLimits.js";
 import type * as transactions from "../transactions.js";
@@ -23,6 +24,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   http: typeof http;
+  "lib/gemini": typeof lib_gemini;
   loginAttempts: typeof loginAttempts;
   rateLimits: typeof rateLimits;
   transactions: typeof transactions;

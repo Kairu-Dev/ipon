@@ -1,4 +1,4 @@
-import { mutation, action } from "./_generated/server";
+import { mutation, action, query } from "./_generated/server";
 import { v, ConvexError } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { parseGeminiCategorySuggestion } from "../src/lib/gemini-parser";
@@ -69,4 +69,39 @@ export const suggestCategory = action({
     const cleanText = text.replace(/["']/g, "").trim();
     return parseGeminiCategorySuggestion(cleanText, args.type);
   },
+});
+
+export const getTotals = query({
+  args: { month: v.string() }, // "YYYY-MM" format expected
+  handler: async (ctx, args) => {
+    if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(args.month)) {
+      throw new ConvexError("Invalid month format. Expected YYYY-MM.");
+    }
+
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return { totalIncome: 0, totalExpenses: 0, remainingBalance: 0 };
+
+    const currentMonthTx = await ctx.db
+      .query("transactions")
+      .withIndex("by_user_and_date", (q) => 
+        q.eq("userId", userId)
+         .gte("date", `${args.month}-01`)
+         .lte("date", `${args.month}-31`)
+      )
+      .collect();
+
+    const totalIncome = currentMonthTx
+      .filter(tx => tx.type === "income")
+      .reduce((sum, tx) => sum + tx.amount, 0);
+      
+    const totalExpenses = currentMonthTx
+      .filter(tx => tx.type === "expense")
+      .reduce((sum, tx) => sum + tx.amount, 0);
+
+    return {
+      totalIncome,
+      totalExpenses,
+      remainingBalance: totalIncome - totalExpenses
+    };
+  }
 });

@@ -74,6 +74,10 @@ export const suggestCategory = action({
 export const getTotals = query({
   args: { month: v.string() }, // "YYYY-MM" format expected
   handler: async (ctx, args) => {
+    if (!/^\d{4}-\d{2}$/.test(args.month)) {
+      throw new ConvexError("Invalid month format. Expected YYYY-MM.");
+    }
+
     const userId = await getAuthUserId(ctx);
     if (!userId) return { totalIncome: 0, totalExpenses: 0, remainingBalance: 0 };
 

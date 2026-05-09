@@ -1,7 +1,7 @@
 "use client";
 
 import { useUIStore } from "@/store/ui-store";
-import { AddTransactionModal } from "@/components/dashboard/add-transaction-modal";
+import { AddTransactionModal } from "@/components/transactions";
 
 export default function TransactionsPage() {
   const setAddTransactionModalOpen = useUIStore((s) => s.setAddTransactionModalOpen);

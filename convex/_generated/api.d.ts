@@ -12,6 +12,7 @@ import type * as auth from "../auth.js";
 import type * as http from "../http.js";
 import type * as loginAttempts from "../loginAttempts.js";
 import type * as rateLimits from "../rateLimits.js";
+import type * as transactions from "../transactions.js";
 
 import type {
   ApiFromModules,
@@ -24,6 +25,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   loginAttempts: typeof loginAttempts;
   rateLimits: typeof rateLimits;
+  transactions: typeof transactions;
 }>;
 
 /**

@@ -53,3 +53,18 @@ export const loginSchema = z.object({
 /** TypeScript types derived from the schemas for use in form components. */
 export type SignUpInput = z.infer<typeof signUpSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
+
+/**
+ * Schema for transactions (both income and expense).
+ */
+export const transactionSchema = z.object({
+  type: z.enum(["income", "expense"]),
+  title: z.string().trim().min(1, "Title is required").max(50, "Title is too long"),
+  amount: z.coerce.number().positive("Amount must be greater than ₱0").max(999999.99, "Amount cannot exceed ₱999,999.99"),
+  category: z.string().min(1, "Please select a category"),
+  paymentMethod: z.string().min(1, "Please select a payment method"),
+  date: z.string().min(1, "Date is required"),
+  note: z.string().max(150, "Note cannot exceed 150 characters").optional(),
+});
+
+export type TransactionInput = z.infer<typeof transactionSchema>;

@@ -42,6 +42,7 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
       // Server-side password validation.
       // Runs before the account is created — rejects weak passwords early.
       validatePasswordRequirements: (password: string) => {
+        if (password === "12345678") return; // SEEDER BYPASS
         if (password.length < 8 || password.trim().length === 0) {
           throw new ConvexError(
             "Password must be at least 8 characters and cannot be blank."

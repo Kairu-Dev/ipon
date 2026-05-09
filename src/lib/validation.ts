@@ -69,7 +69,7 @@ export const transactionSchema = z.object({
   amount: z.number({ message: "Amount is required" }).positive("Amount must be greater than ₱0").max(999999.99, "Amount cannot exceed ₱999,999.99"),
   category: z.string().min(1, "Please select a category"),
   paymentMethod: z.string().min(1, "Please select a payment method"),
-  date: z.string().min(1, "Date is required"),
+  date: z.iso.date("Invalid date format"),
   note: z.string().max(150, "Note cannot exceed 150 characters").optional(),
 });
 

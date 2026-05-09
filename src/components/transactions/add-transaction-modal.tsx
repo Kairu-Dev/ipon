@@ -140,6 +140,8 @@ export function AddTransactionModal() {
                   step="0.01"
                   min="0"
                 />
+                {/* Invisible spacer to perfectly center the input text relative to the AMOUNT label */}
+                <span className="font-currency text-display invisible pointer-events-none" aria-hidden="true">{t.CURRENCY_SYMBOL}</span>
               </div>
               {errors.amount && <span className="text-error font-body-sm">{errors.amount.message}</span>}
             </div>

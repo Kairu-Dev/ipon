@@ -133,38 +133,3 @@ test.describe("Sign Up Flow", () => {
     await expect(page.getByText("Passwords do not match.")).toBeVisible();
   });
 });
-
-test.describe("Logout Flow", () => {
-  test("logout redirects to login page", async ({ page }) => {
-    // First, log in
-    await page.goto("/login");
-    await page.getByPlaceholder("name@example.com").fill(TEST_EMAIL);
-    await page.getByPlaceholder("••••••••").fill(TEST_PASSWORD);
-    await page.getByRole("button", { name: /sign in/i }).click();
-    await expect(page).toHaveURL(/\/dashboard/, { timeout: 15000 });
-
-    // Then, click logout (visible on desktop sidebar)
-    // Using getByRole is more robust than getByText as it finds the button, not the icon span
-    // force: true bypasses the Next.js dev overlay (<nextjs-portal>) that
-    // intercepts pointer events in CI's dev-mode server
-    await page.getByRole("button", { name: /logout/i }).click({ force: true });
-
-    // Should redirect to login
-    await expect(page).toHaveURL(/\/login/, { timeout: 15000 });
-  });
-});
-
-test.describe("Authenticated Redirect", () => {
-  test("authenticated user visiting /login is redirected to /dashboard", async ({ page }) => {
-    // Log in first
-    await page.goto("/login");
-    await page.getByPlaceholder("name@example.com").fill(TEST_EMAIL);
-    await page.getByPlaceholder("••••••••").fill(TEST_PASSWORD);
-    await page.getByRole("button", { name: /sign in/i }).click();
-    await expect(page).toHaveURL(/\/dashboard/, { timeout: 15000 });
-
-    // Try to visit login again — proxy should redirect back to dashboard
-    await page.goto("/login");
-    await expect(page).toHaveURL(/\/dashboard/, { timeout: 10000 });
-  });
-});

@@ -1,4 +1,5 @@
 import { mutation, action, query } from "./_generated/server";
+import { paginationOptsValidator } from "convex/server";
 import { v, ConvexError } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { parseGeminiCategorySuggestion } from "../src/lib/gemini-parser";
@@ -104,4 +105,34 @@ export const getTotals = query({
       remainingBalance: totalIncome - totalExpenses
     };
   }
+});
+
+// Paginated query for the transaction history page.
+// Supports optional type and category filters applied at the query level.
+export const getTransactions = query({
+  args: {
+    type: v.optional(v.union(v.literal("income"), v.literal("expense"))),
+    category: v.optional(v.string()),
+    paginationOpts: paginationOptsValidator,
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new ConvexError("Not authenticated");
+
+    // Use the compound index for efficient user-scoped date-ordered retrieval
+    let q = ctx.db
+      .query("transactions")
+      .withIndex("by_user_and_date", (q) => q.eq("userId", userId))
+      .order("desc");
+
+    // Apply optional filters (AND logic)
+    if (args.type) {
+      q = q.filter((q) => q.eq(q.field("type"), args.type));
+    }
+    if (args.category) {
+      q = q.filter((q) => q.eq(q.field("category"), args.category));
+    }
+
+    return await q.paginate(args.paginationOpts);
+  },
 });

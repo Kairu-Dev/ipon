@@ -8,7 +8,7 @@ import { useMutation, useAction } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { transactionSchema, TransactionInput } from "@/lib/validation";
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES, PAYMENT_METHODS } from "@/constants/transactions";
-import { Utensils, Bus, Wifi, Home, ShoppingBag, MoreHorizontal, Briefcase, Layout, Monitor } from "lucide-react";
+import { Utensils, Bus, Wifi, Home, ShoppingBag, MoreHorizontal, Briefcase, Layout, Monitor, PiggyBank } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { TRANSACTIONS_STRINGS as t } from "@/locale/transactions";
@@ -23,6 +23,7 @@ const ICON_MAP = {
   briefcase: Briefcase,
   layout: Layout,
   monitor: Monitor,
+  "piggy-bank": PiggyBank,
 } as const;
 
 export function AddTransactionModal() {

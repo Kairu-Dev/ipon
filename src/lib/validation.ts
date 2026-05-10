@@ -74,3 +74,25 @@ export const transactionSchema = z.object({
 });
 
 export type TransactionInput = z.infer<typeof transactionSchema>;
+
+/**
+ * Schema for savings goals.
+ */
+export const createGoalSchema = z.object({
+  name: z.string().min(1, "Goal name is required").max(40, "Goal name must be 40 characters or less"),
+  icon: z.string().min(1, "Icon is required"),
+  targetAmount: z.number().min(1, "Target amount must be greater than ₱0").max(9999999, "Target amount cannot exceed ₱9,999,999"),
+  initialDeposit: z.number().min(0, "Initial deposit cannot be negative").optional(),
+  deadline: z.string().min(1, "Target deadline is required"),
+  date: z.string().min(1, "Date is required"),
+}).refine((data) => {
+  if (data.initialDeposit && data.initialDeposit > data.targetAmount) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Initial deposit cannot exceed target amount",
+  path: ["initialDeposit"],
+});
+
+export type CreateGoalInput = z.infer<typeof createGoalSchema>;

@@ -4,6 +4,7 @@ import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { GoalCard } from "./goal-card";
 import { Target } from "lucide-react";
+import { GOALS_STRINGS } from "@/locale/goals";
 
 export function GoalGrid() {
   const goals = useQuery(api.goals.getGoals);
@@ -25,9 +26,9 @@ export function GoalGrid() {
         <div className="w-16 h-16 bg-primary/10 text-primary rounded-full flex items-center justify-center mb-4">
           <Target className="w-8 h-8" />
         </div>
-        <h3 className="font-h3 text-h3 text-on-surface mb-2">No Savings Goals Yet</h3>
+        <h3 className="font-h3 text-h3 text-on-surface mb-2">{GOALS_STRINGS.EMPTY_STATE_TITLE}</h3>
         <p className="font-body-sm text-body-sm text-on-surface-variant max-w-md">
-          Start building your future by setting up a savings goal. We&apos;ll help you track your progress.
+          {GOALS_STRINGS.EMPTY_STATE_DESC}
         </p>
       </div>
     );

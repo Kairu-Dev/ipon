@@ -29,6 +29,11 @@ export const createGoal = mutation({
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new ConvexError("Not authenticated");
 
+    const trimmedName = args.name.trim();
+    if (trimmedName.length === 0) {
+      throw new ConvexError("Goal name cannot be empty");
+    }
+
     if (args.targetAmount <= 0 || args.targetAmount > 9999999) {
       throw new ConvexError("Target amount must be between ₱1 and ₱9,999,999");
     }
@@ -46,14 +51,18 @@ export const createGoal = mutation({
       throw new ConvexError("Deadline must be in the future");
     }
 
+    const isCompleted = initialDeposit >= args.targetAmount;
+    const completedAt = isCompleted ? args.date : undefined;
+
     const goalId = await ctx.db.insert("goals", {
       userId,
-      name: args.name.trim(),
+      name: trimmedName,
       icon: args.icon,
       targetAmount: args.targetAmount,
       savedAmount: initialDeposit,
       deadline: args.deadline,
-      isCompleted: false,
+      isCompleted,
+      ...(completedAt && { completedAt }),
     });
 
     if (initialDeposit > 0) {

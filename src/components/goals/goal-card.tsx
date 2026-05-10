@@ -6,6 +6,7 @@ import { GOAL_ICON_MAP } from "@/constants/goals";
 import { calculateGoalProgress } from "@/lib/goals";
 import { formatCurrency, formatGoalDate } from "@/lib/formatters";
 import { Check, Calendar } from "lucide-react";
+import { GOALS_STRINGS } from "@/locale/goals";
 
 export function GoalCard({ goal }: { goal: Doc<"goals"> }) {
   const setContributeGoalPanelOpen = useUIStore((s) => s.setContributeGoalPanelOpen);
@@ -29,7 +30,7 @@ export function GoalCard({ goal }: { goal: Doc<"goals"> }) {
     >
       {isCompletedState ? (
         <div className="absolute top-6 right-6 bg-primary text-on-primary px-3 py-1 rounded-full font-label-xs text-label-xs flex items-center gap-1 shadow-sm">
-          Completed <Check className="w-3.5 h-3.5" />
+          {GOALS_STRINGS.LABEL_COMPLETED} <Check className="w-3.5 h-3.5" />
         </div>
       ) : (
         <div className="absolute top-6 right-6 bg-primary-container text-on-primary-container px-3 py-1 rounded-full font-label-xs text-label-xs">
@@ -46,12 +47,12 @@ export function GoalCard({ goal }: { goal: Doc<"goals"> }) {
       <h3 className="font-h3 text-h3 text-on-surface mb-1">{goal.name}</h3>
       <p className="font-body-sm text-body-sm text-on-surface-variant mb-4 flex items-center gap-1">
         <Calendar className="w-4 h-4" />
-        {isCompletedState ? `Achieved ${formattedDate}` : formattedDate}
+        {isCompletedState ? `${GOALS_STRINGS.LABEL_ACHIEVED} ${formattedDate}` : formattedDate}
       </p>
 
       <div className="mt-auto">
         <div className="flex justify-between items-end mb-2">
-          <span className="font-body-sm text-body-sm text-on-surface-variant">Saved</span>
+          <span className="font-body-sm text-body-sm text-on-surface-variant">{GOALS_STRINGS.LABEL_SAVED}</span>
           <div className="text-right">
             <span className="font-currency text-currency text-primary">{formatCurrency(goal.savedAmount)}</span>
             <span className="font-body-sm text-body-sm text-on-surface-variant"> / {formatCurrency(goal.targetAmount)}</span>

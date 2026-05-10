@@ -104,6 +104,11 @@ export const contributeToGoal = mutation({
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new ConvexError("Not authenticated");
 
+    const isoDateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!isoDateRegex.test(args.date)) {
+      throw new ConvexError("Invalid date format. Expected YYYY-MM-DD");
+    }
+
     if (args.amount <= 0) {
       throw new ConvexError("Amount must be greater than 0");
     }

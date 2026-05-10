@@ -56,10 +56,18 @@ export function ContributeGoalSheet() {
     setValue("amount", amount, { shouldValidate: true });
   };
 
-  if (!goal || totals === undefined) return (
+  if (goal === undefined || totals === undefined) return (
     <Sheet open={isContributeGoalPanelOpen} onOpenChange={setContributeGoalPanelOpen}>
       <SheetContent className="w-full max-w-[440px] sm:max-w-[440px] p-0 bg-surface-container-lowest border-l border-outline-variant flex flex-col justify-center">
         <div className="p-8 text-center text-secondary font-body-base">Loading...</div>
+      </SheetContent>
+    </Sheet>
+  );
+
+  if (goal === null) return (
+    <Sheet open={isContributeGoalPanelOpen} onOpenChange={setContributeGoalPanelOpen}>
+      <SheetContent className="w-full max-w-[440px] sm:max-w-[440px] p-0 bg-surface-container-lowest border-l border-outline-variant flex flex-col justify-center">
+        <div className="p-8 text-center text-on-surface-variant font-body-base">Goal not found or access revoked.</div>
       </SheetContent>
     </Sheet>
   );

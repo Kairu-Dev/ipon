@@ -80,3 +80,60 @@ export const createGoal = mutation({
     return goalId;
   },
 });
+
+export const getGoal = query({
+  args: { id: v.id("goals") },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new ConvexError("Not authenticated");
+    
+    const goal = await ctx.db.get(args.id);
+    if (!goal || goal.userId !== userId) return null;
+    
+    return goal;
+  },
+});
+
+export const contributeToGoal = mutation({
+  args: {
+    goalId: v.id("goals"),
+    amount: v.number(),
+    date: v.string(), // ISO date string "YYYY-MM-DD"
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new ConvexError("Not authenticated");
+
+    if (args.amount <= 0) {
+      throw new ConvexError("Amount must be greater than 0");
+    }
+
+    const goal = await ctx.db.get(args.goalId);
+    if (!goal || goal.userId !== userId) {
+      throw new ConvexError("Goal not found");
+    }
+
+    const newSavedAmount = goal.savedAmount + args.amount;
+    const isNowCompleted = newSavedAmount >= goal.targetAmount;
+    
+    // Only update completion state if it wasn't already completed
+    const completionUpdate = (!goal.isCompleted && isNowCompleted) 
+      ? { isCompleted: true, completedAt: args.date }
+      : {};
+
+    await ctx.db.patch(args.goalId, {
+      savedAmount: newSavedAmount,
+      ...completionUpdate,
+    });
+
+    await ctx.db.insert("transactions", {
+      userId,
+      type: "expense",
+      title: `${goal.name} contribution`,
+      amount: args.amount,
+      category: "Savings",
+      paymentMethod: "Main Savings",
+      date: args.date,
+    });
+  },
+});

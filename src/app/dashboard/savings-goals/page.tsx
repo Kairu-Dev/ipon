@@ -1,8 +1,7 @@
 "use client";
 
 import { useUIStore } from "@/store/ui-store";
-import { CreateGoalModal, GoalGrid } from "@/components/goals";
-import { ContributeGoalPanel } from "@/components/dashboard/contribute-goal-panel";
+import { CreateGoalModal, GoalGrid, ContributeGoalSheet } from "@/components/goals";
 
 export default function SavingsGoalsPage() {
   const setCreateGoalModalOpen = useUIStore((s) => s.setCreateGoalModalOpen);
@@ -27,7 +26,7 @@ export default function SavingsGoalsPage() {
       <GoalGrid />
 
       <CreateGoalModal />
-      <ContributeGoalPanel />
+      <ContributeGoalSheet />
     </>
   );
 }

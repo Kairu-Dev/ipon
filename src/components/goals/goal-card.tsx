@@ -9,7 +9,12 @@ import { Check, Calendar } from "lucide-react";
 import { GOALS_STRINGS } from "@/locale/goals";
 
 export function GoalCard({ goal }: { goal: Doc<"goals"> }) {
-  const setContributeGoalPanelOpen = useUIStore((s) => s.setContributeGoalPanelOpen);
+  const { setContributeGoalPanelOpen, setSelectedGoalId } = useUIStore();
+
+  const handleCardClick = () => {
+    setSelectedGoalId(goal._id);
+    setContributeGoalPanelOpen(true);
+  };
 
   const percentage = calculateGoalProgress(goal.savedAmount, goal.targetAmount);
   const isCompletedState = goal.isCompleted || percentage >= 100;
@@ -23,7 +28,7 @@ export function GoalCard({ goal }: { goal: Doc<"goals"> }) {
 
   return (
     <div 
-      onClick={() => setContributeGoalPanelOpen(true)}
+      onClick={handleCardClick}
       className={`bg-surface rounded-xl p-[24px] shadow-sm relative flex flex-col group hover:shadow-md transition-shadow cursor-pointer ${
         isCompletedState ? "border border-primary/30" : "border border-outline-variant"
       }`}

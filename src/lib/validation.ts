@@ -96,3 +96,10 @@ export const createGoalSchema = z.object({
 });
 
 export type CreateGoalInput = z.infer<typeof createGoalSchema>;
+
+export const contributeGoalSchema = z.object({
+  amount: z.number().min(1, "Amount must be at least ₱1"),
+  date: z.string().min(1, "Date is required"),
+});
+
+export type ContributeGoalInput = z.infer<typeof contributeGoalSchema>;

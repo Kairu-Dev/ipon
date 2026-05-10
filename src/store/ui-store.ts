@@ -3,6 +3,7 @@
 // Auth state is NOT stored here — it comes from Convex Auth hooks.
 // See Standards/state-management.md for the full rules.
 import { create } from "zustand";
+import { Id } from "../../convex/_generated/dataModel";
 
 interface UIState {
   // Modal/panel visibility flags
@@ -12,6 +13,8 @@ interface UIState {
   setCreateGoalModalOpen: (val: boolean) => void;
   isContributeGoalPanelOpen: boolean;
   setContributeGoalPanelOpen: (val: boolean) => void;
+  selectedGoalId: Id<"goals"> | null;
+  setSelectedGoalId: (id: Id<"goals"> | null) => void;
   // Resets all UI state — called by SessionWatcher on session expiry
   clearStore: () => void;
 }
@@ -23,10 +26,13 @@ export const useUIStore = create<UIState>((set) => ({
   setCreateGoalModalOpen: (val) => set({ isCreateGoalModalOpen: val }),
   isContributeGoalPanelOpen: false,
   setContributeGoalPanelOpen: (val) => set({ isContributeGoalPanelOpen: val }),
+  selectedGoalId: null,
+  setSelectedGoalId: (id) => set({ selectedGoalId: id }),
   clearStore: () =>
     set({
       isAddTransactionModalOpen: false,
       isCreateGoalModalOpen: false,
       isContributeGoalPanelOpen: false,
+      selectedGoalId: null,
     }),
 }));

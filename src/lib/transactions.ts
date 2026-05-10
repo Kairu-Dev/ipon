@@ -30,7 +30,9 @@ export function groupByDate<T extends { date: string }>(transactions: T[]) {
 
   return Array.from(groups.entries()).map(([dateStr, txs]) => {
     // Parse the date string to get month abbreviation and day number
-    const dateObj = new Date(dateStr);
+    // Manually parse YYYY-MM-DD to avoid timezone shifts from new Date(string)
+    const [year, monthStr, dayStr] = dateStr.split("-");
+    const dateObj = new Date(parseInt(year), parseInt(monthStr) - 1, parseInt(dayStr));
     const month = dateObj.toLocaleString("en-US", { month: "short" });
     const day = dateObj.getDate();
     const formattedDate = `${month} ${day}`;

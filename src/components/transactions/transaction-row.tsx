@@ -45,7 +45,7 @@ export function TransactionRow({ transaction }: { transaction: Doc<"transactions
   };
 
   return (
-    <div className="flex items-center justify-between px-6 py-4 hover:bg-surface-container-low transition-colors group cursor-pointer border-b border-surface-container last:border-0">
+    <div className="flex items-center justify-between px-6 py-4 hover:bg-surface-container-low transition-colors group border-b border-surface-container last:border-0">
       <div className="flex items-center gap-4">
         {/* Category icon circle — income gets primary tint, expense gets tertiary */}
         <div

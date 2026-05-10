@@ -241,4 +241,6 @@
     .primary-btn { @apply w-full py-3 px-4 bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md rounded-lg transition-colors flex items-center justify-center shadow-sm; }
     .secondary-btn { @apply w-full py-2 px-4 text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors text-center bg-transparent border-none; }
   }
+
+  .empty-state-card { @apply bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm p-12 flex flex-col items-center justify-center text-center; }
 }

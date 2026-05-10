@@ -1,0 +1,7 @@
+# .coderabbit.yaml
+language: "en-US"
+reviews:
+  # Disables automatic reviews on all branches. 
+  # You can now manually trigger a review on a PR by commenting `@coderabbitai review`
+  auto_review: 
+    enabled: false

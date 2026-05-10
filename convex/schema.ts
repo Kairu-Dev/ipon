@@ -31,6 +31,7 @@ export default defineSchema({
         savedAmount: v.number(),
         deadline: v.string(),
         isCompleted: v.boolean(),
+        completedAt: v.optional(v.string()),
     }).index("by_user", ["userId"]),
     budgets: defineTable({
         userId: v.id("users"),

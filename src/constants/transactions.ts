@@ -4,6 +4,7 @@ export const EXPENSE_CATEGORIES = [
   { value: "Load & Bills",    label: "Load",     icon: "wifi" },
   { value: "Rent",            label: "Rent",     icon: "home" },
   { value: "Shopping",        label: "Shopping", icon: "shopping-bag" },
+  { value: "Savings",         label: "Savings",  icon: "piggy-bank" },
   { value: "Others",          label: "Others",   icon: "more-horizontal" },
 ] as const;
 
@@ -19,5 +20,6 @@ export const PAYMENT_METHODS = [
   "Debit Card",
   "GCash",
   "Bank Transfer",
+  "Main Savings",
   "Others",
 ] as const;

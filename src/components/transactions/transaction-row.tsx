@@ -1,5 +1,5 @@
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from "@/constants/transactions";
-import { Utensils, Bus, Wifi, Home, ShoppingBag, MoreHorizontal, Briefcase, Layout, Monitor } from "lucide-react";
+import { Utensils, Bus, Wifi, Home, ShoppingBag, MoreHorizontal, Briefcase, Layout, Monitor, PiggyBank } from "lucide-react";
 import { Doc } from "../../../convex/_generated/dataModel";
 
 /**
@@ -16,7 +16,10 @@ const ICON_MAP = {
   briefcase: Briefcase,
   layout: Layout,
   monitor: Monitor,
+  "piggy-bank": PiggyBank,
 } as const;
+
+import { formatCurrency } from "@/lib/formatters";
 
 /** All categories merged so we can look up icon metadata by value. */
 const ALL_CATEGORIES = [...EXPENSE_CATEGORIES, ...INCOME_CATEGORIES];
@@ -34,15 +37,6 @@ export function TransactionRow({ transaction }: { transaction: Doc<"transactions
     categoryMeta && ICON_MAP[categoryMeta.icon as keyof typeof ICON_MAP]
       ? ICON_MAP[categoryMeta.icon as keyof typeof ICON_MAP]
       : MoreHorizontal;
-
-  // Format the amount with PHP currency formatting
-  const formatCurrency = (amount: number) => {
-    const formatted = new Intl.NumberFormat("en-PH", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(amount);
-    return isIncome ? `+₱${formatted}` : `-₱${formatted}`;
-  };
 
   return (
     <div className="flex items-center justify-between px-6 py-4 hover:bg-surface-container-low transition-colors group border-b border-surface-container last:border-0">
@@ -72,7 +66,7 @@ export function TransactionRow({ transaction }: { transaction: Doc<"transactions
       <span
         className={`font-currency text-currency ${isIncome ? "text-primary" : "text-error"}`}
       >
-        {formatCurrency(transaction.amount)}
+        {formatCurrency(transaction.amount, { showDecimals: true, showSign: true, type: transaction.type })}
       </span>
     </div>
   );

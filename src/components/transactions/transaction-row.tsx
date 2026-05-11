@@ -1,23 +1,7 @@
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from "@/constants/transactions";
-import { Utensils, Bus, Wifi, Home, ShoppingBag, MoreHorizontal, Briefcase, Layout, Monitor, PiggyBank } from "lucide-react";
+import { ICON_MAP } from "@/constants/icons";
+import { MoreHorizontal } from "lucide-react";
 import { Doc } from "../../../convex/_generated/dataModel";
-
-/**
- * Static mapping from category icon string → Lucide component.
- * Matches the same pattern used in AddTransactionModal.
- */
-const ICON_MAP = {
-  utensils: Utensils,
-  bus: Bus,
-  wifi: Wifi,
-  home: Home,
-  "shopping-bag": ShoppingBag,
-  "more-horizontal": MoreHorizontal,
-  briefcase: Briefcase,
-  layout: Layout,
-  monitor: Monitor,
-  "piggy-bank": PiggyBank,
-} as const;
 
 import { formatCurrency } from "@/lib/formatters";
 

@@ -169,3 +169,35 @@ export const saveBudgets = mutation({
     }
   },
 });
+
+/**
+ * Returns custom categories created by the user for the given month.
+ */
+export const getCustomCategories = query({
+  args: { month: v.string() },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return [];
+
+    const budgets = await ctx.db
+      .query("budgets")
+      .withIndex("by_user_and_month", q =>
+        q.eq("userId", userId).eq("month", args.month)
+      )
+      .collect();
+
+    // Return only categories not in the standard EXPENSE_CATEGORIES list
+    const standardValues = [
+      "Food & Dining", "Transportation", "Load & Bills",
+      "Rent", "Shopping", "Savings", "Others"
+    ];
+
+    return budgets
+      .filter(b => !standardValues.includes(b.category))
+      .map(b => ({
+        value: b.category,
+        label: b.category,
+        icon: "more-horizontal" as const,
+      }));
+  },
+});

@@ -150,3 +150,58 @@ git commit -m "feat: add budget row and add category modal"
 git add src/app/dashboard/budget/page.tsx
 git commit -m "feat: wire up budget dashboard page"
 ```
+
+---
+
+## Post-Implementation Audit (US-08 & US-09)
+
+### Part 1 — US-08 Bug Fix (Must Fix Before US-09)
+**Root Cause:**
+When a user clicked "Save Changes", the `saveBudgets` mutation correctly persisted the non-zero budgets to the Convex database and deleted the others. However, upon reloading the page, the initial component state population (`isInitialized = false`) fetched `budgets` and mapped *only* those persisted items into the `rows` state. Since the blank default categories were deleted from the DB during save, they disappeared from the UI, creating the appearance of a failed save or broken UI. 
+
+**Exact Fix Applied:**
+Updated the render phase initialization in `src/app/dashboard/budget/page.tsx` to always map over `BUDGET_ELIGIBLE_CATEGORIES` first, merging any `monthlyLimit` found in the persisted `budgets`. It then appends any custom categories the user created. This ensures the 6 default categories are *always* displayed (either with their saved limits or blank limits) alongside custom ones, fixing the UI rendering after a save/reload. We also added logging and a user-facing alert in `handleSave` to surface any future errors.
+
+### Part 2 — US-08 Wiring Checklist
+#### Summary Cards
+- ✅ **Wired correctly** - Total Remaining shows `totalBudgeted - totalSpent`
+- ✅ **Wired correctly** - "SPENT / BUDGETED" shows `₱X / ₱Y` without truncation
+- ✅ **Wired correctly** - Progress bar width reflects `totalSpent / totalBudgeted` capped at 100%
+- ✅ **Wired correctly** - "X% Used" and "Y% Left" labels are correct
+- ✅ **Wired correctly** - Income Allocated percentage = `sum of limits / totalIncome * 100`
+- ✅ **Wired correctly** - Donut chart fills correctly matching the percentage (Recharts PieChart)
+- ✅ **Wired correctly** - "₱X unallocated funds" = `totalIncome - sum of limits`
+- ✅ **Wired correctly** - "On Track" badge shows when allocated ≤ 100%
+
+#### Category Rows
+- ✅ **Wired correctly** - All 6 default categories shown | Food & Dining, Transportation, Load & Bills, Rent, Shopping, Others
+- ✅ **Wired correctly** - "Savings" category NOT shown | Excluded from budget page
+- ✅ **Wired correctly** - Category subtitle shown below name | From `CATEGORY_SUBTITLES` constant
+- ✅ **Wired correctly** - "Spent ₱X" sourced from `getSpentPerCategory`
+- ✅ **Wired correctly** - Input value sourced from `getBudgets` for current month
+- ✅ **Wired correctly** - Rows keyed by `category` value not `_id`
+- ✅ **Wired correctly** - Blank input = no budget set
+- ✅ **Wired correctly** - Delete button removes row from local state
+- ✅ **Wired correctly** - Save Changes sends only rows with valid limits > 0
+
+#### UX Improvements (Add These)
+- ✅ **Wired correctly** - Column header ("Monthly Limit" added)
+- ✅ **Wired correctly** - Placeholder text (`placeholder="Set limit"` added)
+
+### Part 3 — US-09 Design Wiring Checklist
+#### Per-Category Row Color States
+- ✅ **Wired correctly** - `none` (No limit set)
+- ✅ **Wired correctly** - `normal` (< 80% spent)
+- ✅ **Wired correctly** - `warning` (80–99% spent)
+- ✅ **Wired correctly** - `exceeded` (≥ 100% spent)
+- ✅ **Wired correctly** - Visual elements (Progress bar color, Icon background, Percentage label, "Spent ₱X" text, Input border, "OVER BUDGET" pill, Progress bar shown)
+
+#### Percentage Label — Uncapped vs Capped
+- ✅ **Wired correctly** - Progress bar width (Capped at 100%)
+- ✅ **Wired correctly** - Percentage label text (Shows real uncapped value)
+
+#### Dashboard Spending Breakdown
+- ✅ **Wired correctly** - Spending Breakdown fetches `getBudgets` for current month
+- ✅ **Wired correctly** - Spending Breakdown fetches `getSpentPerCategory` for current month
+- ✅ **Wired correctly** - Color states applied to each bar using same `getBudgetStatus` utility
+- ⚠️ **Partially wired** -> ✅ **Fixed** - Category with no budget limit shows no color state | Raw amount only (Fixed by rewriting `validBudgets` logic in `dashboard-spending-breakdown.tsx` to include categories from `spentMap` that have no corresponding budget limit).

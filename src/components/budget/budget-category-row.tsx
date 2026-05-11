@@ -3,9 +3,10 @@
 // src/components/budget/budget-category-row.tsx
 // A single editable budget category row with icon, progress, limit input, and delete.
 import { ICON_MAP } from "@/constants/icons";
-import { CATEGORY_SUBTITLES } from "@/constants/budget";
+import { CATEGORY_SUBTITLES, BUDGET_STATUS_STYLES } from "@/constants/budget";
 import { formatCurrency } from "@/lib/formatters";
 import { BUDGET_STRINGS as t } from "@/locale/budget";
+import { getBudgetStatus, getBudgetPercentage } from "@/lib/budget";
 import { MoreHorizontal, Trash2 } from "lucide-react";
 
 interface BudgetCategoryRowProps {
@@ -32,27 +33,37 @@ export function BudgetCategoryRow({
   onDelete,
 }: BudgetCategoryRowProps) {
   const Icon = ICON_MAP[icon as keyof typeof ICON_MAP] || MoreHorizontal;
-  const subtitle = CATEGORY_SUBTITLES[category] || "";
+  const subtitle = CATEGORY_SUBTITLES[category] ?? "Custom category";
   const limit = parseFloat(limitValue);
   const hasLimit = !isNaN(limit) && limit > 0;
 
   // Calculate percentage and determine if the limit value is invalid (zero)
-  const percentage = hasLimit ? Math.min(Math.round((spent / limit) * 100), 999) : 0;
+  const status = getBudgetStatus(spent, hasLimit ? limit : null);
+  const styles = BUDGET_STATUS_STYLES[status];
+  const displayPercentage = hasLimit ? Math.round((spent / limit) * 100) : 0; // uncapped — for label
+  const barPercentage = getBudgetPercentage(spent, hasLimit ? limit : null); // capped at 100 — for bar width
   const isZeroError = limitValue.trim() !== "" && (limit === 0 || (limitValue.trim() !== "" && !isNaN(limit) && limit <= 0));
 
   // Progress bar rendering (shared between desktop and mobile)
   const progressBar = hasLimit ? (
     <div>
-      <div className="flex justify-between font-label-xs text-label-xs mb-1.5">
-        <span className="text-on-surface-variant">
+      <div className="flex justify-between items-center font-label-xs text-label-xs mb-1.5">
+        <span className={status === "exceeded" ? styles.text : "text-on-surface-variant"}>
           {t.LABEL_SPENT} {formatCurrency(spent)}
         </span>
-        <span className="text-primary font-medium">{percentage}%</span>
+        <div className="flex items-center gap-2">
+          {styles.showPill && (
+            <span className="bg-error text-on-error px-2 py-0.5 rounded-full font-label-xs">
+              OVER BUDGET
+            </span>
+          )}
+          <span className={`${styles.text} font-medium`}>{displayPercentage}%</span>
+        </div>
       </div>
-      <div className="h-2 w-full bg-primary/10 rounded-full overflow-hidden">
+      <div className="h-2 w-full bg-surface-container-high rounded-full overflow-hidden">
         <div
-          className="h-full bg-primary rounded-full transition-all duration-300"
-          style={{ width: `${Math.min(percentage, 100)}%` }}
+          className={`h-full rounded-full transition-all duration-300 ${styles.bar}`}
+          style={{ width: `${barPercentage}%` }}
         ></div>
       </div>
     </div>
@@ -68,7 +79,7 @@ export function BudgetCategoryRow({
     <div className="category-row">
       {/* Icon + Name + Subtitle */}
       <div className="flex items-center gap-4 flex-1">
-        <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+        <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${styles.iconBg}`}>
           <Icon className="w-5 h-5" />
         </div>
         <div>
@@ -93,16 +104,12 @@ export function BudgetCategoryRow({
             {t.CURRENCY_SYMBOL}
           </span>
           <input
-            className={isZeroError ? "category-input-error" : "category-input"}
+            className={isZeroError ? "category-input-error" : `category-input ${styles.inputBorder}`}
             type="number"
             value={limitValue}
             onChange={(e) => onLimitChange(e.target.value)}
-            placeholder="—"
+            placeholder="Set Limit"
             min="0"
-            style={{
-              MozAppearance: "textfield",
-              WebkitAppearance: "none",
-            }}
           />
         </div>
         <button

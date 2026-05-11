@@ -3,7 +3,7 @@
 // src/app/dashboard/budget/page.tsx
 // Budget page — manages monthly spending limits per category.
 // Local state holds editable row values; persisted on "Save Changes".
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { BUDGET_ELIGIBLE_CATEGORIES } from "@/constants/budget";
@@ -41,32 +41,29 @@ export default function BudgetPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   // Initialize local state from query data — only once on first load
-  useEffect(() => {
-    if (isInitialized || budgets === undefined) return;
-
-    if (budgets.length > 0) {
-      // Build rows from existing/carried-over budgets
-      const existingRows: LocalBudgetRow[] = budgets.map((b) => {
-        // Find the icon from BUDGET_ELIGIBLE_CATEGORIES by category value
-        const catDef = BUDGET_ELIGIBLE_CATEGORIES.find((c) => c.value === b.category);
-        return {
-          category: b.category,
-          icon: catDef?.icon || "more-horizontal",
-          limitValue: String(b.monthlyLimit),
-        };
-      });
-      setRows(existingRows);
-    } else {
-      // No budgets at all — show all eligible categories with blank limits
-      const defaultRows: LocalBudgetRow[] = BUDGET_ELIGIBLE_CATEGORIES.map((c) => ({
+  if (!isInitialized && budgets !== undefined) {
+    const existingRows: LocalBudgetRow[] = BUDGET_ELIGIBLE_CATEGORIES.map((c) => {
+      const persisted = budgets.find((b) => b.category === c.value);
+      return {
         category: c.value,
         icon: c.icon,
-        limitValue: "",
-      }));
-      setRows(defaultRows);
-    }
+        limitValue: persisted ? String(persisted.monthlyLimit) : "",
+      };
+    });
+
+    // Append custom categories that user created (not in default list)
+    const customBudgets = budgets.filter(
+      (b) => !BUDGET_ELIGIBLE_CATEGORIES.some((c) => c.value === b.category)
+    );
+    const customRows: LocalBudgetRow[] = customBudgets.map((b) => ({
+      category: b.category,
+      icon: "more-horizontal", // Custom categories get the generic icon
+      limitValue: String(b.monthlyLimit),
+    }));
+
+    setRows([...existingRows, ...customRows]);
     setIsInitialized(true);
-  }, [budgets, isInitialized]);
+  }
 
   // Row handlers — keyed by category, not _id
   const handleLimitChange = useCallback((category: string, value: string) => {
@@ -97,9 +94,12 @@ export default function BudgetPage() {
         }))
         .filter((b) => !isNaN(b.monthlyLimit) && b.monthlyLimit > 0);
 
+      console.log("Saving budgets payload:", { month: currentMonth, budgets: validBudgets });
       await saveBudgets({ month: currentMonth, budgets: validBudgets });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Failed to save budgets:", error);
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      alert(`Failed to save budgets: ${errorMessage}`);
     } finally {
       setIsSaving(false);
     }
@@ -166,6 +166,12 @@ export default function BudgetPage() {
             <span className="material-symbols-outlined text-sm">add</span>
             {t.BTN_ADD_CATEGORY}
           </button>
+        </div>
+
+        <div className="flex justify-end pr-16 mb-2 hidden sm:flex">
+          <span className="font-label-xs text-label-xs text-on-surface-variant uppercase tracking-wider">
+            Monthly Limit
+          </span>
         </div>
 
         <div className="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm overflow-hidden flex flex-col gap-[1px] bg-outline-variant/30">

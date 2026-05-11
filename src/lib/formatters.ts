@@ -33,6 +33,7 @@ export function formatGoalDate(dateStr: string): string {
   
   return dateObj.toLocaleDateString("en-US", { 
     month: "short", 
+    day: "numeric",
     year: "numeric" 
   });
 }

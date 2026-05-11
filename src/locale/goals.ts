@@ -25,4 +25,16 @@ export const GOALS_STRINGS = {
   LABEL_ACHIEVED: "Achieved",
   LABEL_SAVED: "Saved",
   LABEL_COMPLETED: "Completed",
+
+  // Contribute Panel
+  PANEL_TITLE: "Contribute to Goal",
+  LABEL_CURRENT_BALANCE: "Current Balance",
+  LABEL_REMAINING: "Remaining",
+  LABEL_AMOUNT_TO_ADD: "Amount to Add",
+  LABEL_FROM_ACCOUNT: "From Account",
+  MAIN_SAVINGS: "Main Savings",
+  LABEL_AVAILABLE: "Available",
+  BTN_ADD_CONTRIBUTION: "Add Contribution",
+  WARNING_EXCEEDS_BALANCE_1: "This contribution exceeds your available balance by ",
+  WARNING_EXCEEDS_BALANCE_2: ". You can still proceed, but your balance will go negative.",
 } as const;

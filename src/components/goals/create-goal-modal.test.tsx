@@ -1,7 +1,20 @@
 import { render, screen } from "@testing-library/react";
+import { vi, describe, it, expect } from "vitest";
 import { CreateGoalModal } from "./create-goal-modal";
-import { describe, it, expect } from "vitest";
 import { useUIStore } from "@/store/ui-store";
+
+// Mock Convex hooks
+vi.mock("convex/react", () => ({
+  useMutation: vi.fn().mockReturnValue(vi.fn().mockResolvedValue(undefined)),
+}));
+
+vi.mock("../../../convex/_generated/api", () => ({
+  api: {
+    goals: {
+      createGoal: "createGoal",
+    },
+  },
+}));
 
 describe("CreateGoalModal", () => {
   it("renders modal content when open", () => {

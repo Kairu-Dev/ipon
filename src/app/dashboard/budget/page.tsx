@@ -1,251 +1,206 @@
+"use client";
+
+// src/app/dashboard/budget/page.tsx
+// Budget page — manages monthly spending limits per category.
+// Local state holds editable row values; persisted on "Save Changes".
+import { useState, useCallback } from "react";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "../../../../convex/_generated/api";
+import { BUDGET_ELIGIBLE_CATEGORIES } from "@/constants/budget";
+import { calculateTotalBudget } from "@/lib/budget";
+import { BudgetSummaryCard, IncomeAllocatedCard, BudgetCategoryRow, AddCategoryModal } from "@/components/budget";
+import { BUDGET_STRINGS as t } from "@/locale/budget";
+
+/** Pad a number to 2 digits — timezone-safe date formatting. */
+const pad = (n: number) => String(n).padStart(2, "0");
+
+/** A single row in the local editable state. */
+interface LocalBudgetRow {
+  category: string;
+  icon: string;
+  limitValue: string; // string to allow blank inputs
+}
 
 export default function BudgetPage() {
+  // Current month using pad() pattern — not toISOString()
+  const today = new Date();
+  const currentMonth = `${today.getFullYear()}-${pad(today.getMonth() + 1)}`;
+
+  // Convex queries
+  const budgets = useQuery(api.budgets.getBudgets, { month: currentMonth });
+  const spentMap = useQuery(api.budgets.getSpentPerCategory, { month: currentMonth });
+  const totals = useQuery(api.transactions.getTotals, { month: currentMonth });
+
+  // Mutation
+  const saveBudgets = useMutation(api.budgets.saveBudgets);
+
+  // Local state for editable rows
+  const [rows, setRows] = useState<LocalBudgetRow[]>([]);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+  // Initialize local state from query data — only once on first load
+  if (!isInitialized && budgets !== undefined) {
+    const existingRows: LocalBudgetRow[] = BUDGET_ELIGIBLE_CATEGORIES.map((c) => {
+      const persisted = budgets.find((b) => b.category === c.value);
+      return {
+        category: c.value,
+        icon: c.icon,
+        limitValue: persisted ? String(persisted.monthlyLimit) : "",
+      };
+    });
+
+    // Append custom categories that user created (not in default list)
+    const customBudgets = budgets.filter(
+      (b) => !BUDGET_ELIGIBLE_CATEGORIES.some((c) => c.value === b.category)
+    );
+    const customRows: LocalBudgetRow[] = customBudgets.map((b) => ({
+      category: b.category,
+      icon: "more-horizontal", // Custom categories get the generic icon
+      limitValue: String(b.monthlyLimit),
+    }));
+
+    setRows([...existingRows, ...customRows]);
+    setIsInitialized(true);
+  }
+
+  // Row handlers — keyed by category, not _id
+  const handleLimitChange = useCallback((category: string, value: string) => {
+    setRows((prev) =>
+      prev.map((r) => (r.category === category ? { ...r, limitValue: value } : r))
+    );
+  }, []);
+
+  const handleDeleteRow = useCallback((category: string) => {
+    setRows((prev) => prev.filter((r) => r.category !== category));
+  }, []);
+
+  const handleAddCategory = useCallback((name: string, limit: number) => {
+    setRows((prev) => [
+      ...prev,
+      { category: name, icon: "more-horizontal", limitValue: String(limit) },
+    ]);
+  }, []);
+
+  // Save — strip blank/zero rows, only send valid limits > 0
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      const validBudgets = rows
+        .map((r) => ({
+          category: r.category,
+          monthlyLimit: parseFloat(r.limitValue),
+        }))
+        .filter((b) => !isNaN(b.monthlyLimit) && b.monthlyLimit > 0);
+
+      console.log("Saving budgets payload:", { month: currentMonth, budgets: validBudgets });
+      await saveBudgets({ month: currentMonth, budgets: validBudgets });
+    } catch (error: unknown) {
+      console.error("Failed to save budgets:", error);
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      alert(`Failed to save budgets: ${errorMessage}`);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Loading state
+  if (budgets === undefined || spentMap === undefined || totals === undefined) {
+    return (
+      <div id="budget-page">
+        <div className="flex items-center justify-center py-20">
+          <p className="font-body-sm text-on-surface-variant">{t.LOADING}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Compute summary values
+  const validRows = rows
+    .map((r) => ({ category: r.category, monthlyLimit: parseFloat(r.limitValue) }))
+    .filter((b) => !isNaN(b.monthlyLimit) && b.monthlyLimit > 0);
+
+  const totalBudgeted = calculateTotalBudget(validRows);
+  const totalSpent = Object.values(spentMap).reduce((sum, v) => sum + v, 0);
+  const totalIncome = totals.totalIncome;
+
+  // Check if any row has a zero error (for disabling save)
+  const hasZeroError = rows.some((r) => {
+    const val = parseFloat(r.limitValue);
+    return r.limitValue.trim() !== "" && !isNaN(val) && val <= 0;
+  });
+
   return (
     <div id="budget-page">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-12 gap-4">
         <div>
-          <h2 className="font-h1 text-h1 text-on-surface">Budget Setup</h2>
-          <p className="font-body-sm text-body-sm text-on-surface-variant mt-1">Manage your monthly spending limits.</p>
+          <h2 className="font-h1 text-h1 text-on-surface">{t.PAGE_TITLE}</h2>
+          <p className="font-body-sm text-body-sm text-on-surface-variant mt-1">{t.PAGE_SUBTITLE}</p>
         </div>
-        <button className="header-button">
+        <button
+          className="header-button"
+          onClick={handleSave}
+          disabled={isSaving || hasZeroError}
+        >
           <span className="material-symbols-outlined text-sm">save</span>
-          Save Changes
+          {isSaving ? t.BTN_SAVING : t.BTN_SAVE}
         </button>
       </div>
 
       {/* Top Summary Bento */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
-        {/* Total Budget Summary Card */}
-        <div className="summary-card-main">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
-          <div className="z-10 flex justify-between items-start mb-4">
-            <div>
-              <h3 className="font-h3 text-h3 text-on-surface">Total Remaining</h3>
-              <div className="font-display text-display text-primary mt-1">₱12,450.00</div>
-            </div>
-            <div className="text-right">
-              <p className="font-label-xs text-label-xs text-on-surface-variant uppercase tracking-wider mb-1">Spent / Budgeted</p>
-              <p className="font-currency text-currency text-on-surface">₱17,550 <span className="text-on-surface-variant text-sm font-normal">/ ₱30,000</span></p>
-            </div>
-          </div>
-          <div className="z-10 mt-auto">
-            <div className="flex justify-between font-label-xs text-label-xs text-on-surface-variant mb-2">
-              <span>58.5% Used</span>
-              <span>41.5% Left</span>
-            </div>
-            <div className="h-3 w-full bg-primary/10 rounded-full overflow-hidden">
-              <div className="h-full bg-primary rounded-full transition-all duration-500" style={{ width: "58.5%" }}></div>
-            </div>
-          </div>
-        </div>
-
-        {/* Income Allocated Card */}
-        <div className="summary-card-secondary">
-          <div className="flex justify-between items-start mb-4">
-            <h3 className="font-h3 text-h3 text-on-surface">Income Allocated</h3>
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full font-label-xs text-label-xs bg-primary/10 text-primary border border-primary/20">
-              <span className="w-1.5 h-1.5 rounded-full bg-primary mr-1.5"></span>
-              On Track
-            </span>
-          </div>
-          <div className="flex-1 flex flex-col justify-center items-center text-center py-4">
-            <div className="relative w-32 h-32 flex items-center justify-center">
-              <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                <circle className="text-surface-container-high" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" strokeWidth="8"></circle>
-                <circle className="text-primary" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" strokeDasharray="251.2" strokeDashoffset="37.68" strokeWidth="8"></circle>
-              </svg>
-              <div className="absolute flex flex-col items-center">
-                <span className="font-currency text-currency text-on-surface">85%</span>
-                <span className="font-label-xs text-label-xs text-on-surface-variant">Allocated</span>
-              </div>
-            </div>
-          </div>
-          <div className="text-center font-body-sm text-body-sm text-on-surface-variant">
-            ₱4,500 unallocated funds
-          </div>
-        </div>
+        <BudgetSummaryCard totalBudgeted={totalBudgeted} totalSpent={totalSpent} />
+        <IncomeAllocatedCard totalAllocated={totalBudgeted} totalIncome={totalIncome} />
       </div>
 
       {/* Categories List */}
       <div>
         <div className="flex justify-between items-center mb-4">
-          <h3 className="font-h2 text-h2 text-on-surface">Expense Categories</h3>
-          <button className="text-primary font-label-md text-label-md hover:text-primary-container flex items-center gap-1 transition-colors">
+          <h3 className="font-h2 text-h2 text-on-surface">{t.CATEGORIES_HEADING}</h3>
+          <button
+            className="text-primary font-label-md text-label-md hover:text-primary-container flex items-center gap-1 transition-colors"
+            onClick={() => setIsAddModalOpen(true)}
+          >
             <span className="material-symbols-outlined text-sm">add</span>
-            Add Category
+            {t.BTN_ADD_CATEGORY}
           </button>
         </div>
 
+        <div className="flex justify-end pr-16 mb-2 hidden sm:flex">
+          <span className="font-label-xs text-label-xs text-on-surface-variant uppercase tracking-wider">
+            Monthly Limit
+          </span>
+        </div>
+
         <div className="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm overflow-hidden flex flex-col gap-[1px] bg-outline-variant/30">
-          {/* Category Row: Food (Under Budget - Green) */}
-          <div className="category-row">
-            <div className="flex items-center gap-4 flex-1">
-              <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                <span className="material-symbols-outlined">restaurant</span>
-              </div>
-              <div>
-                <h4 className="font-label-md text-label-md text-on-surface">Food & Dining</h4>
-                <p className="font-label-xs text-label-xs text-on-surface-variant mt-0.5">Groceries, restaurants, snacks</p>
-              </div>
+          {rows.length === 0 ? (
+            <div className="p-8 text-center text-on-surface-variant font-body-sm">
+              {t.NO_BUDGETS}
             </div>
-            <div className="desktop-progress-panel">
-              <div className="flex justify-between font-label-xs text-label-xs mb-1.5">
-                <span className="text-on-surface-variant">Spent ₱6,500</span>
-                <span className="text-primary font-medium">65%</span>
-              </div>
-              <div className="h-2 w-full bg-primary/10 rounded-full overflow-hidden">
-                <div className="h-full bg-primary rounded-full" style={{ width: "65%" }}></div>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 shrink-0">
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 font-body-sm text-on-surface-variant">₱</span>
-                <input className="category-input" type="number" defaultValue="10000"/>
-              </div>
-              <button className="delete-button">
-                <span className="material-symbols-outlined">delete</span>
-              </button>
-            </div>
-            {/* Mobile Progress */}
-            <div className="mobile-progress-panel">
-              <div className="flex justify-between font-label-xs text-label-xs mb-1.5">
-                <span className="text-on-surface-variant">Spent ₱6,500</span>
-                <span className="text-primary font-medium">65%</span>
-              </div>
-              <div className="h-2 w-full bg-primary/10 rounded-full overflow-hidden">
-                <div className="h-full bg-primary rounded-full" style={{ width: "65%" }}></div>
-              </div>
-            </div>
-          </div>
-
-          {/* Category Row: Transport (Warning Budget - Amber) */}
-          <div className="category-row">
-            <div className="flex items-center gap-4 flex-1">
-              <div className="w-12 h-12 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
-                <span className="material-symbols-outlined">directions_car</span>
-              </div>
-              <div>
-                <h4 className="font-label-md text-label-md text-on-surface">Transportation</h4>
-                <p className="font-label-xs text-label-xs text-on-surface-variant mt-0.5">Gas, commute, parking</p>
-              </div>
-            </div>
-            <div className="desktop-progress-panel">
-              <div className="flex justify-between font-label-xs text-label-xs mb-1.5">
-                <span className="text-on-surface-variant">Spent ₱4,500</span>
-                <span className="text-amber-600 font-medium">90%</span>
-              </div>
-              <div className="h-2 w-full bg-amber-100 rounded-full overflow-hidden">
-                <div className="h-full bg-amber-500 rounded-full" style={{ width: "90%" }}></div>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 shrink-0">
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 font-body-sm text-on-surface-variant">₱</span>
-                <input className="category-input" type="number" defaultValue="5000"/>
-              </div>
-              <button className="delete-button">
-                <span className="material-symbols-outlined">delete</span>
-              </button>
-            </div>
-            {/* Mobile Progress */}
-            <div className="mobile-progress-panel">
-              <div className="flex justify-between font-label-xs text-label-xs mb-1.5">
-                <span className="text-on-surface-variant">Spent ₱4,500</span>
-                <span className="text-amber-600 font-medium">90%</span>
-              </div>
-              <div className="h-2 w-full bg-amber-100 rounded-full overflow-hidden">
-                <div className="h-full bg-amber-500 rounded-full" style={{ width: "90%" }}></div>
-              </div>
-            </div>
-          </div>
-
-          {/* Category Row: Entertainment (Over Budget - Red) */}
-          <div className="category-row">
-            <div className="flex items-center gap-4 flex-1">
-              <div className="w-12 h-12 rounded-full bg-error-container text-error flex items-center justify-center shrink-0">
-                <span className="material-symbols-outlined">movie</span>
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h4 className="font-label-md text-label-md text-on-surface">Entertainment</h4>
-                  <span className="bg-error text-on-error font-label-xs text-[10px] px-2 py-0.5 rounded-sm uppercase tracking-wide">Over Budget</span>
-                </div>
-                <p className="font-label-xs text-label-xs text-on-surface-variant mt-0.5">Movies, subscriptions, hobbies</p>
-              </div>
-            </div>
-            <div className="desktop-progress-panel">
-              <div className="flex justify-between font-label-xs text-label-xs mb-1.5">
-                <span className="text-error font-medium">Spent ₱3,500</span>
-                <span className="text-error font-medium">116%</span>
-              </div>
-              <div className="h-2 w-full bg-error-container rounded-full overflow-hidden">
-                <div className="h-full bg-error rounded-full" style={{ width: "100%" }}></div>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 shrink-0">
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 font-body-sm text-on-surface-variant">₱</span>
-                <input className="category-input-error" type="number" defaultValue="3000"/>
-              </div>
-              <button className="delete-button">
-                <span className="material-symbols-outlined">delete</span>
-              </button>
-            </div>
-            {/* Mobile Progress */}
-            <div className="mobile-progress-panel">
-              <div className="flex justify-between font-label-xs text-label-xs mb-1.5">
-                <span className="text-error font-medium">Spent ₱3,500</span>
-                <span className="text-error font-medium">116%</span>
-              </div>
-              <div className="h-2 w-full bg-error-container rounded-full overflow-hidden">
-                <div className="h-full bg-error rounded-full" style={{ width: "100%" }}></div>
-              </div>
-            </div>
-          </div>
-
-          {/* Category Row: Utilities (Under Budget - Green) */}
-          <div className="category-row">
-            <div className="flex items-center gap-4 flex-1">
-              <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                <span className="material-symbols-outlined">bolt</span>
-              </div>
-              <div>
-                <h4 className="font-label-md text-label-md text-on-surface">Utilities</h4>
-                <p className="font-label-xs text-label-xs text-on-surface-variant mt-0.5">Electricity, water, internet</p>
-              </div>
-            </div>
-            <div className="desktop-progress-panel">
-              <div className="flex justify-between font-label-xs text-label-xs mb-1.5">
-                <span className="text-on-surface-variant">Spent ₱3,050</span>
-                <span className="text-primary font-medium">38%</span>
-              </div>
-              <div className="h-2 w-full bg-primary/10 rounded-full overflow-hidden">
-                <div className="h-full bg-primary rounded-full" style={{ width: "38%" }}></div>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 shrink-0">
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 font-body-sm text-on-surface-variant">₱</span>
-                <input className="category-input" type="number" defaultValue="8000"/>
-              </div>
-              <button className="delete-button">
-                <span className="material-symbols-outlined">delete</span>
-              </button>
-            </div>
-            {/* Mobile Progress */}
-            <div className="mobile-progress-panel">
-              <div className="flex justify-between font-label-xs text-label-xs mb-1.5">
-                <span className="text-on-surface-variant">Spent ₱3,050</span>
-                <span className="text-primary font-medium">38%</span>
-              </div>
-              <div className="h-2 w-full bg-primary/10 rounded-full overflow-hidden">
-                <div className="h-full bg-primary rounded-full" style={{ width: "38%" }}></div>
-              </div>
-            </div>
-          </div>
+          ) : (
+            rows.map((row) => (
+              <BudgetCategoryRow
+                key={row.category}
+                category={row.category}
+                icon={row.icon}
+                spent={spentMap[row.category] || 0}
+                limitValue={row.limitValue}
+                onLimitChange={(value) => handleLimitChange(row.category, value)}
+                onDelete={() => handleDeleteRow(row.category)}
+              />
+            ))
+          )}
         </div>
       </div>
+
+      {/* Add Category Modal */}
+      <AddCategoryModal
+        open={isAddModalOpen}
+        onOpenChange={setIsAddModalOpen}
+        onAdd={handleAddCategory}
+      />
     </div>
   );
 }

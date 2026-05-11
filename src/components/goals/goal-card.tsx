@@ -17,7 +17,7 @@ export function GoalCard({ goal }: { goal: Doc<"goals"> }) {
   };
 
   const percentage = calculateGoalProgress(goal.savedAmount, goal.targetAmount);
-  const isCompletedState = goal.isCompleted || percentage >= 100;
+  const isCompletedState = goal.isCompleted;
   
   // Look up icon from constants, fallback to star
   const Icon = GOAL_ICON_MAP[goal.icon as keyof typeof GOAL_ICON_MAP] || GOAL_ICON_MAP["star"];

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { DashboardSummary } from "@/components/dashboard";
+import { DashboardSummary, DashboardSpendingBreakdown } from "@/components/dashboard";
 
 export default function DashboardPage() {
   return (
@@ -71,43 +71,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Spending Breakdown */}
-          <div className="mt-8 bg-surface-container-lowest border border-slate-200 rounded-xl p-[24px] shadow-sm">
-            <h2 className="font-h3 text-h3 text-on-surface mb-6">Spending Breakdown</h2>
-            <div className="space-y-4">
-              {/* Category 1 */}
-              <div>
-                <div className="flex justify-between font-label-md text-label-md mb-2">
-                  <span className="text-on-surface">Food & Dining</span>
-                  <span className="text-secondary">₱8,500 / ₱10,000</span>
-                </div>
-                <div className="w-full bg-slate-100 rounded-full h-2">
-                  <div className="bg-amber-500 h-2 rounded-full" style={{ width: "85%" }}></div>
-                </div>
-              </div>
-
-              {/* Category 2 */}
-              <div>
-                <div className="flex justify-between font-label-md text-label-md mb-2">
-                  <span className="text-on-surface">Transport</span>
-                  <span className="text-secondary">₱3,200 / ₱5,000</span>
-                </div>
-                <div className="w-full bg-slate-100 rounded-full h-2">
-                  <div className="bg-primary h-2 rounded-full" style={{ width: "64%" }}></div>
-                </div>
-              </div>
-
-              {/* Category 3 */}
-              <div>
-                <div className="flex justify-between font-label-md text-label-md mb-2">
-                  <span className="text-on-surface">Entertainment</span>
-                  <span className="text-error">₱4,500 / ₱3,000</span>
-                </div>
-                <div className="w-full bg-slate-100 rounded-full h-2">
-                  <div className="bg-error h-2 rounded-full" style={{ width: "100%" }}></div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <DashboardSpendingBreakdown />
         </div>
 
         {/* Ipon AI Insights (1 column) */}

@@ -9,6 +9,7 @@
  */
 
 import type * as auth from "../auth.js";
+import type * as budgets from "../budgets.js";
 import type * as goals from "../goals.js";
 import type * as http from "../http.js";
 import type * as lib_gemini from "../lib/gemini.js";
@@ -24,6 +25,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  budgets: typeof budgets;
   goals: typeof goals;
   http: typeof http;
   "lib/gemini": typeof lib_gemini;

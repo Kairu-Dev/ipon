@@ -1,10 +1,9 @@
-# US-05 Task Tracker
+# US-08 Task Tracker
 
 | # | Task | Status |
 |---|------|--------|
-| 1 | Create `groupByDate` utility & tests | done |
-| 2 | Create `getTransactions` paginated query | done |
-| 3 | Create `EmptyTransactionState` component | done |
-| 4 | Create `TransactionRow` component | done |
-| 5 | Create `TransactionList` component | done |
-| 6 | Inject `TransactionList` into page | done |
+| 1 | Budget constants and utilities | done |
+| 2 | Convex backend (getBudgets, getSpentPerCategory, saveBudgets) | done |
+| 3 | Budget UI components (cards) | done |
+| 4 | Budget UI components (rows & modal) | done |
+| 5 | Budget page integration | done |

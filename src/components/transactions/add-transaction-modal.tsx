@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useUIStore } from "@/store/ui-store";
-import { useMutation, useAction } from "convex/react";
+import { useMutation, useAction, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { transactionSchema, TransactionInput } from "@/lib/validation";
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES, PAYMENT_METHODS } from "@/constants/transactions";
@@ -65,9 +65,19 @@ export function AddTransactionModal() {
     };
   }, [note, type, suggestCategory]);
 
-  const categories = type === "expense" ? EXPENSE_CATEGORIES : INCOME_CATEGORIES;
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const currentDate = new Date();
+  const currentMonth = `${currentDate.getFullYear()}-${pad(currentDate.getMonth() + 1)}`;
+  const customCategories = useQuery(api.budgets.getCustomCategories, { month: currentMonth });
+
+  const categories = type === "expense" 
+    ? [
+        ...EXPENSE_CATEGORIES.filter(c => c.value !== "Savings"),
+        ...(customCategories ?? []),
+      ]
+    : INCOME_CATEGORIES;
   
-  const today = new Date().toISOString().split("T")[0];
+  const today = currentDate.toISOString().split("T")[0];
 
   const onSubmit = async (data: TransactionInput) => {
     try {

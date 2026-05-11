@@ -166,6 +166,15 @@
   html {
     @apply font-sans;
   }
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type=number] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
 }
 
 @utility text-label-xs { font-size: 12px; line-height: 1; letter-spacing: 0.05em; font-weight: 500; }
@@ -215,8 +224,8 @@
     .summary-card-main { @apply lg:col-span-2 bg-surface-container-lowest rounded-xl p-8 border border-outline-variant shadow-sm flex flex-col justify-between relative overflow-hidden; }
     .summary-card-secondary { @apply bg-surface-container-lowest rounded-xl p-8 border border-outline-variant shadow-sm flex flex-col justify-between; }
     .category-row { @apply bg-surface-container-lowest p-4 flex flex-col sm:flex-row sm:items-center gap-4 hover:bg-surface-container-low transition-colors; }
-    .category-input { @apply w-28 pl-7 pr-3 py-2 bg-surface rounded-lg border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary outline-none font-body-sm text-on-surface transition-all text-right; }
-    .category-input-error { @apply w-28 pl-7 pr-3 py-2 bg-error-container/30 rounded-lg border border-error focus:border-error focus:ring-1 focus:ring-error outline-none font-body-sm text-error transition-all text-right font-medium; }
+    .category-input { @apply w-36 pl-7 pr-3 py-2 bg-surface rounded-lg border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary outline-none font-body-sm text-on-surface transition-all text-right; }
+    .category-input-error { @apply w-36 pl-7 pr-3 py-2 bg-error-container/30 rounded-lg border border-error focus:border-error focus:ring-1 focus:ring-error outline-none font-body-sm text-error transition-all text-right font-medium; }
     .delete-button { @apply text-on-surface-variant hover:text-error transition-colors p-2 rounded-full hover:bg-error/10; }
     .desktop-progress-panel { @apply flex-1 flex flex-col justify-center hidden md:flex px-4; }
     .mobile-progress-panel { @apply md:hidden mt-2 w-full; }

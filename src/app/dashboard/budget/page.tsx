@@ -96,9 +96,10 @@ export default function BudgetPage() {
 
       console.log("Saving budgets payload:", { month: currentMonth, budgets: validBudgets });
       await saveBudgets({ month: currentMonth, budgets: validBudgets });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to save budgets:", error);
-      alert(`Failed to save budgets: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      alert(`Failed to save budgets: ${errorMessage}`);
     } finally {
       setIsSaving(false);
     }

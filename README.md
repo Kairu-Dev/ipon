@@ -23,12 +23,12 @@ A personal finance tracker for Filipino students and working adults. Track daily
 
 ## Features
 
-- 📊 **Dashboard** — Monthly income, expenses, and remaining balance at a glance
-- 💸 **Transactions** — Log and filter income and expenses by category
-- 🎯 **Savings Goals** — Create goals, track progress, and contribute funds
-- 📋 **Budget** — Set monthly limits per category with visual warning states
-- 🤖 **AI Chat** — Ask questions about your finances powered by Gemini
-- ✨ **AI Insights** — Automatic spending analysis on your dashboard
+- 📊 **Dashboard** — Monthly income, expenses, and remaining balance at a glance (done)
+- 💸 **Transactions** — Log and filter income and expenses by category (done)
+- 🎯 **Savings Goals** — Create goals, track progress, and contribute funds (done)
+- 📋 **Budget** — Set monthly limits per category with visual warning states (done)
+- 🤖 **AI Chat** — Ask questions about your finances powered by Gemini (in_progress)
+- ✨ **AI Insights** — Automatic spending analysis on your dashboard (in_progress)
 
 ---
 

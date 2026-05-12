@@ -7,6 +7,8 @@ import { getBudgetStatus, getBudgetPercentage } from "@/lib/budget";
 import { formatCurrency } from "@/lib/formatters";
 import { ICON_MAP } from "@/constants/icons";
 import { MoreHorizontal } from "lucide-react";
+import { InfoTooltip } from "@/components/ui/info-tooltip";
+import { dashboardLocale } from "@/locale/dashboard";
 
 /** Pad a number to 2 digits — timezone-safe date formatting. */
 const pad = (n: number) => String(n).padStart(2, "0");
@@ -71,9 +73,23 @@ export function DashboardSpendingBreakdown() {
                        OVER BUDGET
                      </span>
                   )}
-                  <span className={status === "exceeded" ? styles.text : "text-secondary"}>
-                    {limit ? `${formatCurrency(spent)} / ${formatCurrency(limit)}` : formatCurrency(spent)}
-                  </span>
+                  {limit ? (
+                    <InfoTooltip
+                      content={dashboardLocale.tooltips.spendingBar
+                        .replace("{percent}", Math.round((spent / limit) * 100).toString())
+                        .replace("{category}", category)
+                        .replace("{limit}", formatCurrency(limit))}
+                      side="left"
+                    >
+                      <span className={status === "exceeded" ? styles.text : "text-secondary"}>
+                        {formatCurrency(spent)} / {formatCurrency(limit)}
+                      </span>
+                    </InfoTooltip>
+                  ) : (
+                    <span className={status === "exceeded" ? styles.text : "text-secondary"}>
+                      {formatCurrency(spent)}
+                    </span>
+                  )}
                 </div>
               </div>
               {limit !== null && (

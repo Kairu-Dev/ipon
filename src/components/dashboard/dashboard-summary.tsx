@@ -104,7 +104,7 @@ export function DashboardSummary() {
           </div>
         </div>
         <div>
-          <div className={`font-display text-display mb-1 ${remaining < 0 ? "text-error-container" : "text-on-primary"}`}>
+          <div className={`font-display text-display mb-1 ${remaining < 0 ? "text-error" : "text-on-primary"}`}>
             {formatCurrency(remaining)}
           </div>
           <InfoTooltip content={dashboardLocale.tooltips.safeToSpend} side="bottom">

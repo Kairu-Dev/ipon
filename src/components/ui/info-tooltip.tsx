@@ -32,7 +32,7 @@ export function InfoTooltip({ content, children, side = "top" }: InfoTooltipProp
   const triggerContent = (
     <>
       {children}
-      <Info className="w-3 h-3 text-black-600 shrink-0" />
+      <Info className="w-3 h-3 text-amber-400 shrink-0" />
     </>
   );
 

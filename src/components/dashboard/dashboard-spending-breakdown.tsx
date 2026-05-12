@@ -73,23 +73,26 @@ export function DashboardSpendingBreakdown() {
                        OVER BUDGET
                      </span>
                   )}
-                  {limit ? (
-                    <InfoTooltip
-                      content={dashboardLocale.tooltips.spendingBar
-                        .replace("{percent}", Math.round((spent / limit) * 100).toString())
-                        .replace("{category}", category)
-                        .replace("{limit}", formatCurrency(limit))}
-                      side="left"
-                    >
+                  {(() => {
+                    const amountSpan = (
                       <span className={status === "exceeded" ? styles.text : "text-secondary"}>
-                        {formatCurrency(spent)} / {formatCurrency(limit)}
+                        {formatCurrency(spent)}
+                        {limit !== null && ` / ${formatCurrency(limit)}`}
                       </span>
-                    </InfoTooltip>
-                  ) : (
-                    <span className={status === "exceeded" ? styles.text : "text-secondary"}>
-                      {formatCurrency(spent)}
-                    </span>
-                  )}
+                    );
+
+                    return limit !== null ? (
+                      <InfoTooltip
+                        content={dashboardLocale.tooltips.spendingBar
+                          .replace("{percent}", Math.round((spent / limit) * 100).toString())
+                          .replace("{category}", category)
+                          .replace("{limit}", formatCurrency(limit))}
+                        side="left"
+                      >
+                        {amountSpan}
+                      </InfoTooltip>
+                    ) : amountSpan;
+                  })()}
                 </div>
               </div>
               {limit !== null && (

@@ -2,6 +2,7 @@ import { mutation, action, query } from "./_generated/server";
 import { paginationOptsValidator } from "convex/server";
 import { v, ConvexError } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { SAVINGS_CATEGORY } from "./constants";
 import { parseGeminiCategorySuggestion } from "../src/lib/gemini-parser";
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from "../src/constants/transactions";
 import { askGemini } from "./lib/gemini";
@@ -164,7 +165,7 @@ export const getMonthOverMonthTrend = query({
 
       // Exclude Savings — goal contributions skew expense trends
       const expenses = txs
-        .filter((t) => t.type === "expense" && t.category !== "Savings")
+        .filter((t) => t.type === "expense" && t.category !== SAVINGS_CATEGORY)
         .reduce((sum, t) => sum + t.amount, 0);
 
       return { income, expenses };

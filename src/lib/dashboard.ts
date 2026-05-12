@@ -12,9 +12,15 @@ export function calculateSafeToSpend(remainingBalance: number, date: Date = new 
   
   const daysInMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
   const daysLeft = daysInMonth - date.getDate() + 1; // include today
-  const weeksLeft = daysLeft / 7;
   
-  return Math.floor(remainingBalance / weeksLeft);
+  // Guard against tiny weeksLeft (e.g. 1 day left) to avoid returning huge numbers.
+  // We treat anything less than 7 days as "1 week" for the remaining balance.
+  const weeksLeft = Math.max(daysLeft / 7, 1);
+  
+  const perWeek = Math.floor(remainingBalance / weeksLeft);
+  
+  // Cap at remainingBalance just in case of rounding/logic edge cases
+  return Math.min(perWeek, remainingBalance);
 }
 
 /**

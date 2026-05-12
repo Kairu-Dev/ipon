@@ -12,7 +12,10 @@ export default function DashboardPage() {
   const currentUser = useQuery(api.users.getCurrentUser);
 
   // Show first name only, fall back to "there" while loading or if no name set
-  const firstName = currentUser?.name?.split(" ")[0] ?? dashboardLocale.header.fallbackName;
+  const trimmedName = currentUser?.name?.trim();
+  const firstName = trimmedName && trimmedName.length > 0
+    ? trimmedName.split(/\s+/)[0]
+    : dashboardLocale.header.fallbackName;
 
   return (
     <>

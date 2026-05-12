@@ -5,12 +5,15 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useUIStore } from "@/store/ui-store";
+import { AddTransactionModal } from "@/components/transactions";
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useConvexAuth();
   const { signOut } = useAuthActions();
   const router = useRouter();
   const pathname = usePathname();
+  const setAddTransactionModalOpen = useUIStore((s) => s.setAddTransactionModalOpen);
 
   // Redirect to login if session expires mid-use.
   // proxy.ts handles unauthenticated page loads on the server side.
@@ -133,7 +136,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           <span className="font-label-xs text-[10px]">Transactions</span>
         </Link>
         <div className="relative -top-6">
-          <button className="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white shadow-lg hover:bg-primary-container transition-colors">
+          <button 
+            onClick={() => setAddTransactionModalOpen(true)}
+            className="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white shadow-lg hover:bg-primary-container transition-colors"
+          >
             <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }} aria-hidden="true">add</span>
           </button>
         </div>
@@ -141,11 +147,14 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           <span className="material-symbols-outlined" style={{ fontVariationSettings: pathname === '/dashboard/budget' ? "'FILL' 1" : "" }} aria-hidden="true">account_balance_wallet</span>
           <span className="font-label-xs text-[10px]">Budget</span>
         </Link>
-        <Link href="/dashboard/settings" className={`flex flex-col items-center ${pathname === '/dashboard/settings' ? 'text-primary' : 'text-slate-400 hover:text-slate-600'} gap-1`}>
-          <span className="material-symbols-outlined" style={{ fontVariationSettings: pathname === '/dashboard/settings' ? "'FILL' 1" : "" }} aria-hidden="true">person</span>
-          <span className="font-label-xs text-[10px]">Profile</span>
+        <Link href="/dashboard/chat" className={`flex flex-col items-center ${pathname === '/dashboard/chat' ? 'text-primary' : 'text-slate-400 hover:text-slate-600'} gap-1`}>
+          <span className="material-symbols-outlined" style={{ fontVariationSettings: pathname === '/dashboard/chat' ? "'FILL' 1" : "" }} aria-hidden="true">chat</span>
+          <span className="font-label-xs text-[10px]">Chat</span>
         </Link>
       </nav>
+
+      {/* Global Modals */}
+      <AddTransactionModal />
     </div>
   );
 }

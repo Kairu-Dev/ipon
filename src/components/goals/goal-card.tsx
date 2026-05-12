@@ -29,8 +29,8 @@ export function GoalCard({ goal }: { goal: Doc<"goals"> }) {
   return (
     <div 
       onClick={handleCardClick}
-      className={`bg-surface rounded-xl p-[24px] shadow-sm relative flex flex-col group hover:shadow-md transition-shadow cursor-pointer ${
-        isCompletedState ? "border border-primary/30" : "border border-outline-variant"
+      className={`bg-surface-container-lowest rounded-xl p-[24px] shadow-sm relative flex flex-col group hover:shadow-md transition-shadow cursor-pointer ${
+        isCompletedState ? "border border-primary/30" : "border border-slate-200"
       }`}
     >
       {isCompletedState ? (

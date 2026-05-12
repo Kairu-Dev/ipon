@@ -1,9 +1,9 @@
-# US-09 Task Tracker
+# US-10 Monthly Summary Dashboard — Task Tracker
 
 | # | Task | Status |
 |---|------|--------|
-| 1 | Budget Utilities | done |
-| 2 | Budget Constants | done |
-| 3 | Apply Warning States to BudgetCategoryRow | done |
-| 4 | Dashboard Spending Breakdown Component | done |
+| 1 | Setup Scrollbar Hiding | done |
+| 2 | Add Trend Query to Convex | done |
+| 3 | Apply Dynamic Trends & Negative Balance to Summary | done |
+| 4 | Create Top 3 Goals Section | done |
 | 5 | Integrate into Dashboard Page | done |

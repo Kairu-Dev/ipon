@@ -1,7 +1,7 @@
 "use client";
 
 import { useUIStore } from "@/store/ui-store";
-import { AddTransactionModal, TransactionList } from "@/components/transactions";
+import { TransactionList } from "@/components/transactions";
 
 export default function TransactionsPage() {
   const setAddTransactionModalOpen = useUIStore((s) => s.setAddTransactionModalOpen);
@@ -29,9 +29,6 @@ export default function TransactionsPage() {
 
       {/* Dynamic transaction list with filters and pagination */}
       <TransactionList />
-
-      {/* Add Transaction Modal */}
-      <AddTransactionModal />
     </div>
   );
 }

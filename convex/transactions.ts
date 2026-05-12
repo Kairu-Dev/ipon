@@ -2,6 +2,7 @@ import { mutation, action, query } from "./_generated/server";
 import { paginationOptsValidator } from "convex/server";
 import { v, ConvexError } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { SAVINGS_CATEGORY } from "./constants";
 import { parseGeminiCategorySuggestion } from "../src/lib/gemini-parser";
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from "../src/constants/transactions";
 import { askGemini } from "./lib/gemini";
@@ -134,5 +135,53 @@ export const getTransactions = query({
     }
 
     return await q.paginate(args.paginationOpts);
+  },
+});
+
+// Compares income and expense totals between two months to calculate % change.
+// Used by DashboardSummary to show month-over-month trend indicators.
+export const getMonthOverMonthTrend = query({
+  args: {
+    currentMonth: v.string(),  // "YYYY-MM"
+    previousMonth: v.string(), // "YYYY-MM"
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return null;
+
+    const sumForMonth = async (month: string) => {
+      const txs = await ctx.db
+        .query("transactions")
+        .withIndex("by_user_and_date", (q) =>
+          q.eq("userId", userId)
+           .gte("date", `${month}-01`)
+           .lte("date", `${month}-31`)
+        )
+        .collect();
+
+      const income = txs
+        .filter((t) => t.type === "income")
+        .reduce((sum, t) => sum + t.amount, 0);
+
+      // Exclude Savings — goal contributions skew expense trends
+      const expenses = txs
+        .filter((t) => t.type === "expense" && t.category !== SAVINGS_CATEGORY)
+        .reduce((sum, t) => sum + t.amount, 0);
+
+      return { income, expenses };
+    };
+
+    const current = await sumForMonth(args.currentMonth);
+    const previous = await sumForMonth(args.previousMonth);
+
+    const calcTrend = (curr: number, prev: number): number | null => {
+      if (prev === 0) return null; // no previous data — show N/A
+      return Math.round(((curr - prev) / prev) * 100);
+    };
+
+    return {
+      incomeTrend: calcTrend(current.income, previous.income),
+      expenseTrend: calcTrend(current.expenses, previous.expenses),
+    };
   },
 });

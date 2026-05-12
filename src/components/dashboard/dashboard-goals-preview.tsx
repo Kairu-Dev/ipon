@@ -45,7 +45,7 @@ export function DashboardGoalsPreview() {
           </Link>
         </div>
       ) : (
-        <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory -mx-4 px-4">
+        <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory -mx-4 px-4 max-md:scrollbar-hide">
           {topGoals.map((goal) => (
             <div
               key={goal._id}

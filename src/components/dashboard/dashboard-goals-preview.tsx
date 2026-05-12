@@ -16,8 +16,8 @@ export function DashboardGoalsPreview() {
     return <div className="animate-pulse h-48 rounded-xl bg-surface-container" />;
   }
 
-  // Only show the first 3 goals on the dashboard preview
-  const topGoals = goals.slice(0, 3);
+  // Show up to 10 goals in the dashboard preview for better horizontal scroll experience
+  const topGoals = goals.slice(0, 10);
 
   return (
     <div>
@@ -45,7 +45,7 @@ export function DashboardGoalsPreview() {
           </Link>
         </div>
       ) : (
-        <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory -mx-4 px-4">
+        <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory -mx-4 px-4">
           {topGoals.map((goal) => (
             <div
               key={goal._id}

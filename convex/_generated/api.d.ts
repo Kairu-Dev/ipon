@@ -15,6 +15,7 @@ import type * as goals from "../goals.js";
 import type * as http from "../http.js";
 import type * as insights from "../insights.js";
 import type * as lib_gemini from "../lib/gemini.js";
+import type * as lib_insightsPrompt from "../lib/insightsPrompt.js";
 import type * as loginAttempts from "../loginAttempts.js";
 import type * as rateLimits from "../rateLimits.js";
 import type * as transactions from "../transactions.js";
@@ -34,6 +35,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   insights: typeof insights;
   "lib/gemini": typeof lib_gemini;
+  "lib/insightsPrompt": typeof lib_insightsPrompt;
   loginAttempts: typeof loginAttempts;
   rateLimits: typeof rateLimits;
   transactions: typeof transactions;

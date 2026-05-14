@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { usePaginatedQuery } from "convex/react";
+import { usePaginatedQuery, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { EmptyTransactionState } from "./empty-transaction-state";
 import { TransactionRow } from "./transaction-row";
@@ -22,6 +22,15 @@ export function TransactionList() {
   // Local filter state — ephemeral, page-scoped, no Zustand needed
   const [typeFilter, setTypeFilter] = useState<"all" | "income" | "expense">("all");
   const [categoryFilter, setCategoryFilter] = useState<string>("All Categories");
+
+  // Fetch custom categories to resolve icons for custom categories
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const currentDate = new Date();
+  const currentMonth = `${currentDate.getFullYear()}-${pad(currentDate.getMonth() + 1)}`;
+  const customCategories = useQuery(api.budgets.getCustomCategories, { month: currentMonth });
+
+  // Create a mapping of category name -> icon for quick lookup in rows
+  const customIconMap = new Map(customCategories?.map(c => [c.value, c.icon]) ?? []);
 
   // Build strongly-typed query args — only include filters when active
   const queryArgs: {
@@ -115,7 +124,11 @@ export function TransactionList() {
               {/* Transactions within this date */}
               <div className="flex flex-col">
                 {group.transactions.map((tx) => (
-                  <TransactionRow key={tx._id} transaction={tx} />
+                  <TransactionRow 
+                    key={tx._id} 
+                    transaction={tx} 
+                    customIcon={customIconMap.get(tx.category)}
+                  />
                 ))}
               </div>
             </div>

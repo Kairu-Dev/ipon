@@ -52,6 +52,7 @@ export const getBudgets = query({
     // Return previous month limits as transient defaults (no _id)
     return previousBudgets.map((b) => ({
       category: b.category,
+      icon: b.icon,
       monthlyLimit: b.monthlyLimit,
       month: args.month,
       userId: b.userId,
@@ -111,6 +112,8 @@ export const saveBudgets = mutation({
       v.object({
         category: v.string(),
         monthlyLimit: v.number(),
+        icon: v.optional(v.string()),
+        description: v.optional(v.string()),
       })
     ),
   },
@@ -132,7 +135,6 @@ export const saveBudgets = mutation({
       }
     }
 
-    // Fetch existing budget records for this month
     const existing = await ctx.db
       .query("budgets")
       .withIndex("by_user_and_month", (q) =>
@@ -140,21 +142,23 @@ export const saveBudgets = mutation({
       )
       .collect();
 
-    // Build a lookup by category for existing records
-    const existingByCategory = new Map(existing.map((b) => [b.category, b]));
     const payloadCategories = new Set(args.budgets.map((b) => b.category));
 
-    // Upsert: update if exists, insert if new
+    // Upsert: update existing or insert new
     for (const budget of args.budgets) {
-      const existingRecord = existingByCategory.get(budget.category);
-      if (existingRecord) {
-        await ctx.db.patch(existingRecord._id, {
+      const existingBudget = existing.find((e) => e.category === budget.category);
+      if (existingBudget) {
+        await ctx.db.patch(existingBudget._id, {
           monthlyLimit: budget.monthlyLimit,
+          icon: budget.icon,
+          description: budget.description,
         });
       } else {
         await ctx.db.insert("budgets", {
           userId,
           category: budget.category,
+          icon: budget.icon,
+          description: budget.description,
           monthlyLimit: budget.monthlyLimit,
           month: args.month,
         });
@@ -197,7 +201,8 @@ export const getCustomCategories = query({
       .map(b => ({
         value: b.category,
         label: b.category,
-        icon: "more-horizontal" as const,
+        icon: b.icon || "more-horizontal",
+        description: b.description,
       }));
   },
 });

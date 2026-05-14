@@ -19,6 +19,7 @@ interface LocalBudgetRow {
   category: string;
   icon: string;
   limitValue: string; // string to allow blank inputs
+  description?: string;
 }
 
 export default function BudgetPage() {
@@ -57,7 +58,8 @@ export default function BudgetPage() {
     );
     const customRows: LocalBudgetRow[] = customBudgets.map((b) => ({
       category: b.category,
-      icon: "more-horizontal", // Custom categories get the generic icon
+      icon: b.icon || "more-horizontal", // Use persisted icon or fallback
+      description: b.description,
       limitValue: String(b.monthlyLimit),
     }));
 
@@ -76,10 +78,15 @@ export default function BudgetPage() {
     setRows((prev) => prev.filter((r) => r.category !== category));
   }, []);
 
-  const handleAddCategory = useCallback((name: string, limit: number) => {
+  const handleAddCategory = useCallback((name: string, limit: number, icon?: string, description?: string) => {
     setRows((prev) => [
       ...prev,
-      { category: name, icon: "more-horizontal", limitValue: String(limit) },
+      { 
+        category: name, 
+        icon: icon || "more-horizontal", 
+        limitValue: String(limit),
+        description 
+      },
     ]);
   }, []);
 
@@ -90,6 +97,8 @@ export default function BudgetPage() {
       const validBudgets = rows
         .map((r) => ({
           category: r.category,
+          icon: r.icon,
+          description: r.description,
           monthlyLimit: parseFloat(r.limitValue),
         }))
         .filter((b) => !isNaN(b.monthlyLimit) && b.monthlyLimit > 0);
@@ -187,6 +196,7 @@ export default function BudgetPage() {
                 icon={row.icon}
                 spent={spentMap[row.category] || 0}
                 limitValue={row.limitValue}
+                description={row.description}
                 onLimitChange={(value) => handleLimitChange(row.category, value)}
                 onDelete={() => handleDeleteRow(row.category)}
               />

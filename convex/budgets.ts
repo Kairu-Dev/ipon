@@ -53,6 +53,7 @@ export const getBudgets = query({
     return previousBudgets.map((b) => ({
       category: b.category,
       icon: b.icon,
+      description: b.description,
       monthlyLimit: b.monthlyLimit,
       month: args.month,
       userId: b.userId,

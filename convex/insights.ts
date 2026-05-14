@@ -197,6 +197,29 @@ export const getInsightData = internalQuery({
   },
 });
 
+export const consumeManualRegen = internalMutation({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const today = new Date().toISOString().split("T")[0];
+    const insight = await ctx.db
+      .query("insights")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .order("desc")
+      .first();
+
+    if (!insight) return true;
+
+    const count = insight.manualRegenResetAt === today ? insight.manualRegenCount : 0;
+    if (count >= MAX_DAILY_REGENS) return false;
+
+    await ctx.db.patch(insight._id, {
+      manualRegenCount: count + 1,
+      manualRegenResetAt: today,
+    });
+    return true;
+  },
+});
+
 /**
  * Internal mutation — persists the generated insight to the database.
  * Called by the generateInsight action after a successful Gemini response.
@@ -212,22 +235,17 @@ export const saveInsight = internalMutation({
   handler: async (ctx, args) => {
     const now = new Date();
     const today = now.toISOString().split("T")[0]; // "YYYY-MM-DD"
-    const generatedAt = now.toISOString().split(".")[0]; // "YYYY-MM-DDTHH:mm:ss"
+    const generatedAt = now.toISOString(); // "YYYY-MM-DDTHH:mm:ss.sssZ"
 
     if (args.existingInsightId) {
       // Update existing insight record
       const existing = await ctx.db.get(args.existingInsightId);
 
-      // Calculate updated manual regen count
+      // Preserve existing manual regen state (already incremented by consumeManualRegen if forced)
       let manualRegenCount = 0;
       let manualRegenResetAt = today;
 
-      if (args.force && existing) {
-        const resetDate = existing.manualRegenResetAt;
-        // Reset counter if it's a new day, otherwise increment
-        manualRegenCount = (resetDate === today ? existing.manualRegenCount : 0) + 1;
-      } else if (existing) {
-        // Auto-regen — preserve existing manual regen state
+      if (existing) {
         manualRegenCount = existing.manualRegenCount;
         manualRegenResetAt = existing.manualRegenResetAt;
       }
@@ -302,6 +320,13 @@ export const generateInsight = action({
     });
 
     // Call Gemini API — wrapped in try/catch for resilience
+    // If forced, atomically consume a manual regen token first
+    if (force) {
+      const canRegen = await ctx.runMutation(internal.insights.consumeManualRegen, { userId });
+      if (!canRegen) {
+        throw new ConvexError("Daily refresh limit reached. Try again tomorrow.");
+      }
+    }
     let rawResponse: string | null = null;
     try {
       rawResponse = await askGemini(prompt);

@@ -33,28 +33,26 @@ export function IponAIInsights() {
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [actionError, setActionError] = useState<false | "generic" | "rate_limit">(false);
 
-  // Auto-generate on mount if no cached insight exists
-  // Uses empty deps [] + hasTriggered ref to prevent infinite loops
+  // Background revalidation on mount
+  // Uses hasTriggered ref to prevent infinite loops
   useEffect(() => {
     if (hasTriggered.current) return;
     // insight is undefined while query is loading — wait for it to resolve
     if (insight === undefined) return;
 
-    // insight is null — no cached insight exists, trigger generation
-    if (insight === null) {
-      hasTriggered.current = true;
-      generateInsight({ force: false })
-        .then((res) => {
-          if (res.status === "rate_limit") {
-            setActionError("rate_limit");
-          } else if (res.status === "error") {
-            setActionError("generic");
-          }
-        })
-        .catch(() => {
+    // Query finished (cached insight may or may not exist) — trigger background revalidation
+    hasTriggered.current = true;
+    generateInsight({ force: false })
+      .then((res) => {
+        if (res.status === "rate_limit") {
+          setActionError("rate_limit");
+        } else if (res.status === "error") {
           setActionError("generic");
-        });
-    }
+        }
+      })
+      .catch(() => {
+        setActionError("generic");
+      });
   }, [insight, generateInsight]);
 
   // Calculate remaining manual regenerations for today
@@ -82,11 +80,23 @@ export function IponAIInsights() {
     }
   };
 
-  // Parse the insight content JSON string
+  // Parse the insight content JSON string safely
   let parsedContent: InsightContent | null = null;
   if (insight?.content) {
     try {
-      parsedContent = JSON.parse(insight.content) as InsightContent;
+      const parsed = JSON.parse(insight.content);
+      // Validate object shape before casting
+      if (
+        parsed &&
+        typeof parsed === "object" &&
+        typeof parsed.alert === "string" &&
+        typeof parsed.detail === "string" &&
+        Array.isArray(parsed.bullets)
+      ) {
+        parsedContent = parsed as InsightContent;
+      } else {
+        parsedContent = null;
+      }
     } catch {
       // Malformed content — treat as error state
       parsedContent = null;

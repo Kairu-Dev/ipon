@@ -9,7 +9,7 @@ import { v, ConvexError } from "convex/values";
 import { Id } from "./_generated/dataModel";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { askGemini } from "./lib/gemini";
-import { buildInsightPrompt } from "./lib/insights-prompt";
+import { buildInsightPrompt } from "./lib/insightsPrompt";
 
 // Return type for the generateInsight action
 export type InsightResult =

@@ -41,4 +41,12 @@ export default defineSchema({
     })
         .index("by_user", ["userId"])
         .index("by_user_and_month", ["userId", "month"]),
+    insights: defineTable({
+        userId: v.id("users"),
+        content: v.string(),              // sanitized insight JSON from Gemini
+        generatedAt: v.string(),           // ISO datetime "YYYY-MM-DDTHH:mm:ss"
+        manualRegenCount: v.number(),      // how many manual regens used today (0-3)
+        manualRegenResetAt: v.string(),    // ISO date "YYYY-MM-DD" — resets daily
+        transactionCount: v.number(),      // number of transactions used to generate
+    }).index("by_user", ["userId"]),
 });

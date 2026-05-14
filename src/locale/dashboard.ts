@@ -24,6 +24,13 @@ export const dashboardLocale = {
     title: "Ipon AI Insights",
     smartAlert: "Smart Alert",
     reviewBudget: "Review Budget",
+    fallback: "Add more transactions to get personalized insights.",
+    error: "Insights unavailable right now. Try again later.",
+    rateLimitError: "AI is currently very busy. Please try again in a few minutes.",
+    loading: "Analyzing your spending...",
+    refreshesLeft: "{count}/3 refreshes left today",
+    refreshButton: "Refresh insight",
+    refreshing: "Refreshing...",
   },
   goals: {
     title: "Savings Goals",

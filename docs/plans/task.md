@@ -1,9 +1,9 @@
-# US-10 Monthly Summary Dashboard — Task Tracker
+# US-11 AI Spending Insights — Task Tracker
 
 | # | Task | Status |
 |---|------|--------|
-| 1 | Setup Scrollbar Hiding | done |
-| 2 | Add Trend Query to Convex | done |
-| 3 | Apply Dynamic Trends & Negative Balance to Summary | done |
-| 4 | Create Top 3 Goals Section | done |
-| 5 | Integrate into Dashboard Page | done |
+| 1 | Add `insights` table to schema | done |
+| 2 | Create queries & internal queries (`getInsight`, `getInsightData`) | done |
+| 3 | Create action & internal mutation (`generateInsight`, `saveInsight`) | done |
+| 4 | Build `IponAIInsights` React component with loading/error states | done |
+| 5 | Integrate component into `DashboardPage` and replace static markup | done |

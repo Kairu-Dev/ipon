@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { BUDGET_STATUS_STYLES, BUDGET_ELIGIBLE_CATEGORIES } from "@/constants/budget";
@@ -35,8 +37,16 @@ export function DashboardSpendingBreakdown() {
   if (allCategories.length === 0) {
     return (
       <div className="mt-8 bg-surface-container-lowest border border-slate-200 rounded-xl p-[24px] shadow-sm">
-         <h2 className="font-h3 text-h3 text-on-surface mb-6">Spending Breakdown</h2>
-         <p className="text-secondary font-body-sm">No spending or budgets this month.</p>
+        <h2 className="font-h3 text-h3 text-on-surface mb-6">Spending Breakdown</h2>
+        <div className="flex flex-col items-center justify-center py-6 text-center gap-4">
+          <p className="font-body-base text-secondary">No spending or budgets this month.</p>
+          <Link
+            href="/dashboard/budget"
+            className="bg-primary text-on-primary px-6 py-2 rounded-lg font-label-md hover:opacity-90 transition-opacity"
+          >
+            Create Budget
+          </Link>
+        </div>
       </div>
     );
   }

@@ -10,8 +10,10 @@
 
 import type * as auth from "../auth.js";
 import type * as budgets from "../budgets.js";
+import type * as constants from "../constants.js";
 import type * as goals from "../goals.js";
 import type * as http from "../http.js";
+import type * as insights from "../insights.js";
 import type * as lib_gemini from "../lib/gemini.js";
 import type * as loginAttempts from "../loginAttempts.js";
 import type * as rateLimits from "../rateLimits.js";
@@ -27,8 +29,10 @@ import type {
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   budgets: typeof budgets;
+  constants: typeof constants;
   goals: typeof goals;
   http: typeof http;
+  insights: typeof insights;
   "lib/gemini": typeof lib_gemini;
   loginAttempts: typeof loginAttempts;
   rateLimits: typeof rateLimits;

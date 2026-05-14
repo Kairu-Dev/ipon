@@ -9,6 +9,9 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 const mockUseConvexAuth = vi.fn();
 vi.mock("convex/react", () => ({
   useConvexAuth: () => mockUseConvexAuth(),
+  useQuery: vi.fn(),
+  useMutation: vi.fn(),
+  useAction: vi.fn(),
 }));
 
 // Mock useAuthActions (signOut)

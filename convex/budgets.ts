@@ -1,7 +1,7 @@
 // convex/budgets.ts
 // Queries and mutations for monthly budget management.
 // Uses the `budgets` table defined in schema.ts.
-import { query, mutation } from "./_generated/server";
+import { query, mutation, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 import { ConvexError } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
@@ -210,5 +210,38 @@ export const getCustomCategories = query({
         icon: b.icon || "more-horizontal",
         description: b.description,
       }));
+  },
+});
+
+export const patchBudget = internalMutation({
+  args: {
+    id: v.id("budgets"),
+    monthlyLimit: v.number(),
+    description: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.id, {
+      monthlyLimit: args.monthlyLimit,
+      ...(args.description ? { description: args.description } : {}),
+    });
+  },
+});
+
+export const insertBudget = internalMutation({
+  args: {
+    userId: v.id("users"),
+    category: v.string(),
+    monthlyLimit: v.number(),
+    month: v.string(),
+    description: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.insert("budgets", {
+      userId: args.userId,
+      category: args.category,
+      monthlyLimit: args.monthlyLimit,
+      month: args.month,
+      description: args.description,
+    });
   },
 });

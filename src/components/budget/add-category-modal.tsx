@@ -1,21 +1,27 @@
 "use client";
-
 // src/components/budget/add-category-modal.tsx
-// Modal for adding a custom budget category with name and initial limit.
+// Modal for adding a custom budget category with name, initial limit, custom icon, and optional description.
+
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { BUDGET_STRINGS as t } from "@/locale/budget";
+import { GOAL_ICONS, GOAL_ICON_MAP } from "@/constants/goals";
+import { cn } from "@/lib/utils";
 
 interface AddCategoryModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** Called with the custom category name and limit when the user submits. */
-  onAdd: (category: string, limit: number) => void;
+  /** Array of existing categories to prevent duplicates */
+  existingCategories: string[];
+  /** Called with the custom category name, limit, icon, and optional description when the user submits. */
+  onAdd: (category: string, limit: number, icon?: string, description?: string) => void;
 }
 
-export function AddCategoryModal({ open, onOpenChange, onAdd }: AddCategoryModalProps) {
+export function AddCategoryModal({ open, onOpenChange, existingCategories, onAdd }: AddCategoryModalProps) {
   const [name, setName] = useState("");
   const [limit, setLimit] = useState("");
+  const [description, setDescription] = useState("");
+  const [selectedIcon, setSelectedIcon] = useState<string>(GOAL_ICONS[0].value);
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -28,16 +34,23 @@ export function AddCategoryModal({ open, onOpenChange, onAdd }: AddCategoryModal
       return;
     }
 
+    if (existingCategories.some((c) => c.toLowerCase() === trimmedName.toLowerCase())) {
+      setError(t.ERROR_DUPLICATE_CATEGORY);
+      return;
+    }
+
     const parsedLimit = parseFloat(limit);
     if (isNaN(parsedLimit) || parsedLimit <= 0) {
       setError(t.ERROR_BUDGET_ZERO);
       return;
     }
 
-    onAdd(trimmedName, parsedLimit);
+    onAdd(trimmedName, parsedLimit, selectedIcon, description.trim() || undefined);
     // Reset form
     setName("");
     setLimit("");
+    setDescription("");
+    setSelectedIcon(GOAL_ICONS[0].value);
     setError(null);
     onOpenChange(false);
   };
@@ -46,6 +59,8 @@ export function AddCategoryModal({ open, onOpenChange, onAdd }: AddCategoryModal
     if (!isOpen) {
       setName("");
       setLimit("");
+      setDescription("");
+      setSelectedIcon(GOAL_ICONS[0].value);
       setError(null);
     }
     onOpenChange(isOpen);
@@ -61,6 +76,33 @@ export function AddCategoryModal({ open, onOpenChange, onAdd }: AddCategoryModal
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
+          {/* Icon Selector Row */}
+          <div className="space-y-3">
+            <label className="font-label-md text-on-surface block">{t.ADD_MODAL_ICON_LABEL}</label>
+            <div className="flex gap-2 justify-between">
+              {GOAL_ICONS.map((item) => {
+                const Icon = GOAL_ICON_MAP[item.icon as keyof typeof GOAL_ICON_MAP];
+                const isSelected = selectedIcon === item.value;
+                return (
+                  <button
+                    key={item.value}
+                    type="button"
+                    onClick={() => setSelectedIcon(item.value)}
+                    aria-label={item.label}
+                    className={cn(
+                      "w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all focus:outline-none",
+                      isSelected
+                        ? "bg-primary-container text-on-primary-container border-primary ring-2 ring-primary/20"
+                        : "bg-surface-variant/50 text-on-surface-variant border-transparent hover:border-outline-variant"
+                    )}
+                  >
+                    <Icon className="w-5 h-5" />
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           {/* Category Name */}
           <div className="space-y-1">
             <label className="font-label-md text-on-surface">{t.ADD_MODAL_NAME_LABEL}</label>
@@ -71,7 +113,22 @@ export function AddCategoryModal({ open, onOpenChange, onAdd }: AddCategoryModal
               placeholder={t.ADD_MODAL_NAME_PLACEHOLDER}
               className="w-full px-3 py-2.5 bg-white border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary font-body-sm text-on-surface transition-all"
               maxLength={50}
-              autoFocus
+            />
+          </div>
+
+          {/* Description */}
+          <div className="space-y-1">
+            <div className="flex justify-between items-center">
+              <label className="font-label-md text-on-surface">{t.ADD_MODAL_DESCRIPTION_LABEL}</label>
+              <span className="text-label-xs font-label-xs text-outline">Optional</span>
+            </div>
+            <input
+              type="text"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder={t.ADD_MODAL_DESCRIPTION_PLACEHOLDER}
+              className="w-full px-3 py-2.5 bg-white border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary font-body-sm text-on-surface transition-all"
+              maxLength={100}
             />
           </div>
 

@@ -12,15 +12,20 @@ const ALL_CATEGORIES = [...EXPENSE_CATEGORIES, ...INCOME_CATEGORIES];
  * Renders a single transaction row with icon, title, category, and amount.
  * Used inside TransactionList grouped by date.
  */
-export function TransactionRow({ transaction }: { transaction: Doc<"transactions"> }) {
+export function TransactionRow({ 
+  transaction, 
+  customIcon 
+}: { 
+  transaction: Doc<"transactions">;
+  customIcon?: string;
+}) {
   const isIncome = transaction.type === "income";
 
   // Look up the icon component for this category
+  // Priority: 1. Passed override, 2. Static meta, 3. Default (MoreHorizontal)
   const categoryMeta = ALL_CATEGORIES.find((c) => c.value === transaction.category);
-  const Icon =
-    categoryMeta && ICON_MAP[categoryMeta.icon as keyof typeof ICON_MAP]
-      ? ICON_MAP[categoryMeta.icon as keyof typeof ICON_MAP]
-      : MoreHorizontal;
+  const iconKey = customIcon ?? categoryMeta?.icon;
+  const Icon = ICON_MAP[iconKey as keyof typeof ICON_MAP] ?? MoreHorizontal;
 
   return (
     <div className="flex items-center justify-between px-6 py-4 hover:bg-surface-container-low transition-colors group border-b border-surface-container last:border-0">

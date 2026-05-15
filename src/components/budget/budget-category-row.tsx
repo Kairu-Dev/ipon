@@ -18,6 +18,8 @@ interface BudgetCategoryRowProps {
   spent: number;
   /** The editable monthly limit value — empty string means no limit set */
   limitValue: string;
+  /** Optional custom description */
+  description?: string;
   /** Called when the limit input changes */
   onLimitChange: (value: string) => void;
   /** Called when the delete button is clicked */
@@ -29,11 +31,12 @@ export function BudgetCategoryRow({
   icon,
   spent,
   limitValue,
+  description,
   onLimitChange,
   onDelete,
 }: BudgetCategoryRowProps) {
   const Icon = ICON_MAP[icon as keyof typeof ICON_MAP] || MoreHorizontal;
-  const subtitle = CATEGORY_SUBTITLES[category] ?? "Custom category";
+  const subtitle = description || CATEGORY_SUBTITLES[category] || "Custom category";
   const limit = parseFloat(limitValue);
   const hasLimit = !isNaN(limit) && limit > 0;
 

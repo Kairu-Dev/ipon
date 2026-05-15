@@ -39,7 +39,9 @@ export default function DashboardPage() {
         </div>
 
         {/* AI Insights — dynamic component replaces static mockup */}
-        <IponAIInsights />
+        <div className="lg:sticky lg:top-6 lg:self-start">
+          <IponAIInsights />
+        </div>
       </section>
 
       {/* Goal Contribution Sheet */}

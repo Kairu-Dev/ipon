@@ -74,7 +74,7 @@ export function buildInsightPrompt(data: PromptData): string {
     0
   ).getDate();
   const daysLeft = daysInMonth - today.getDate();
-  const weeksLeft = Math.max(daysLeft / 7, 1);
+  const weeksLeft = Math.max(daysLeft / 7, 1); // Minimum 1 week — avoids impractical daily-cut suggestions near month-end
 
   const overBudgetCategories = Object.entries(categoryTotals)
     .map(([cat, spent]) => {

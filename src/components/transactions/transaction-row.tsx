@@ -24,8 +24,8 @@ export function TransactionRow({
   // Look up the icon component for this category
   // Priority: 1. Passed override, 2. Static meta, 3. Default (MoreHorizontal)
   const categoryMeta = ALL_CATEGORIES.find((c) => c.value === transaction.category);
-  const iconKey = customIcon || categoryMeta?.icon;
-  const Icon = ICON_MAP[iconKey as keyof typeof ICON_MAP] || MoreHorizontal;
+  const iconKey = customIcon ?? categoryMeta?.icon;
+  const Icon = ICON_MAP[iconKey as keyof typeof ICON_MAP] ?? MoreHorizontal;
 
   return (
     <div className="flex items-center justify-between px-6 py-4 hover:bg-surface-container-low transition-colors group border-b border-surface-container last:border-0">

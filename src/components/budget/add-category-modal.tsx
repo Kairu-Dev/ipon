@@ -11,11 +11,13 @@ import { cn } from "@/lib/utils";
 interface AddCategoryModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** Array of existing categories to prevent duplicates */
+  existingCategories: string[];
   /** Called with the custom category name, limit, icon, and optional description when the user submits. */
   onAdd: (category: string, limit: number, icon?: string, description?: string) => void;
 }
 
-export function AddCategoryModal({ open, onOpenChange, onAdd }: AddCategoryModalProps) {
+export function AddCategoryModal({ open, onOpenChange, existingCategories, onAdd }: AddCategoryModalProps) {
   const [name, setName] = useState("");
   const [limit, setLimit] = useState("");
   const [description, setDescription] = useState("");
@@ -29,6 +31,11 @@ export function AddCategoryModal({ open, onOpenChange, onAdd }: AddCategoryModal
     const trimmedName = name.trim();
     if (!trimmedName) {
       setError(t.ERROR_CATEGORY_REQUIRED);
+      return;
+    }
+
+    if (existingCategories.some((c) => c.toLowerCase() === trimmedName.toLowerCase())) {
+      setError(t.ERROR_DUPLICATE_CATEGORY);
       return;
     }
 

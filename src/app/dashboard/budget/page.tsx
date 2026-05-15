@@ -209,6 +209,7 @@ export default function BudgetPage() {
       <AddCategoryModal
         open={isAddModalOpen}
         onOpenChange={setIsAddModalOpen}
+        existingCategories={rows.map((r) => r.category)}
         onAdd={handleAddCategory}
       />
     </div>

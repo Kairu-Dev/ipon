@@ -136,6 +136,12 @@ export const saveBudgets = mutation({
       }
     }
 
+    // Detect duplicate categories in the payload
+    const payloadCategories = new Set(args.budgets.map((b) => b.category));
+    if (payloadCategories.size !== args.budgets.length) {
+      throw new ConvexError("Duplicate categories found in the payload.");
+    }
+
     const existing = await ctx.db
       .query("budgets")
       .withIndex("by_user_and_month", (q) =>
@@ -143,7 +149,6 @@ export const saveBudgets = mutation({
       )
       .collect();
 
-    const payloadCategories = new Set(args.budgets.map((b) => b.category));
 
     // Upsert: update existing or insert new
     for (const budget of args.budgets) {

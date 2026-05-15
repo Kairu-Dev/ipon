@@ -43,6 +43,7 @@ export const BUDGET_STRINGS = {
   // Validation
   ERROR_BUDGET_ZERO: "Budget must be greater than ₱0",
   ERROR_CATEGORY_REQUIRED: "Category name is required",
+  ERROR_DUPLICATE_CATEGORY: "This category already exists",
 
   // Loading / empty
   LOADING: "Loading budgets…",

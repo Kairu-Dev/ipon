@@ -50,7 +50,7 @@ export function ChatMessage({ role, content }: ChatMessageProps) {
   let budgetBreakdown: Array<{ category: string; limit: number; spent: number; percentage: number }> | null = null;
 
   // 1. Extract Verdict
-  const verdictMatch = content.match(/\|\|\|VERDICT\|\|\|(.*?)\|\|\|END\|\|\|/s);
+  const verdictMatch = content.match(/\|\|\|VERDICT\|\|\|([\s\S]*?)\|\|\|END\|\|\|/);
   if (verdictMatch) {
     try {
       verdictData = JSON.parse(verdictMatch[1]);
@@ -59,7 +59,7 @@ export function ChatMessage({ role, content }: ChatMessageProps) {
   }
 
   // 2. Extract Budget Breakdown
-  const budgetMatch = content.match(/\|\|\|BUDGET_BREAKDOWN\|\|\|(.*?)\|\|\|END\|\|\|/s);
+  const budgetMatch = content.match(/\|\|\|BUDGET_BREAKDOWN\|\|\|([\s\S]*?)\|\|\|END\|\|\|/);
   if (budgetMatch) {
     try {
       budgetBreakdown = JSON.parse(budgetMatch[1]);

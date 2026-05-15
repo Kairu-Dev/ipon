@@ -12,6 +12,11 @@ import {
   Layout,
   Monitor,
   PiggyBank,
+  Plane,
+  Laptop,
+  Star,
+  Heart,
+  Gift,
 } from "lucide-react";
 
 export const ICON_MAP = {
@@ -25,4 +30,9 @@ export const ICON_MAP = {
   layout: Layout,
   monitor: Monitor,
   "piggy-bank": PiggyBank,
+  plane: Plane,
+  laptop: Laptop,
+  star: Star,
+  heart: Heart,
+  gift: Gift,
 } as const;

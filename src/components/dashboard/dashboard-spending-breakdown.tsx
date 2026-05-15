@@ -65,7 +65,7 @@ export function DashboardSpendingBreakdown() {
           const width = getBudgetPercentage(spent, limit);
           
           const catDef = BUDGET_ELIGIBLE_CATEGORIES.find((c) => c.value === category);
-          const iconKey = catDef?.icon || "more-horizontal";
+          const iconKey = budget?.icon || catDef?.icon || "more-horizontal";
           const Icon = ICON_MAP[iconKey as keyof typeof ICON_MAP] || MoreHorizontal;
 
           return (

@@ -20,18 +20,18 @@ export async function askGemini(prompt: string): Promise<string | null> {
 
     try {
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent`,
         {
           method: "POST",
-          headers: { 
+          headers: {
             "Content-Type": "application/json",
             "x-goog-api-key": apiKey
           },
           signal: controller.signal,
           body: JSON.stringify({
             contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { 
-              temperature: 0.1, 
+            generationConfig: {
+              temperature: 0.1,
               maxOutputTokens: 200 // High token count needed to account for 2.5-flash internal reasoning phase
             },
           }),

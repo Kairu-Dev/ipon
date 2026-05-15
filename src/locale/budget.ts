@@ -30,8 +30,11 @@ export const BUDGET_STRINGS = {
 
   // Add category modal
   ADD_MODAL_TITLE: "Add Custom Category",
+  ADD_MODAL_ICON_LABEL: "Choose an Icon",
   ADD_MODAL_NAME_LABEL: "Category Name",
   ADD_MODAL_NAME_PLACEHOLDER: "e.g. Entertainment",
+  ADD_MODAL_DESCRIPTION_LABEL: "Category Description",
+  ADD_MODAL_DESCRIPTION_PLACEHOLDER: "e.g. Movies, concerts, and hobbies",
   ADD_MODAL_LIMIT_LABEL: "Monthly Limit",
   ADD_MODAL_LIMIT_PLACEHOLDER: "0",
   ADD_MODAL_BTN_ADD: "Add Category",
@@ -40,6 +43,7 @@ export const BUDGET_STRINGS = {
   // Validation
   ERROR_BUDGET_ZERO: "Budget must be greater than ₱0",
   ERROR_CATEGORY_REQUIRED: "Category name is required",
+  ERROR_DUPLICATE_CATEGORY: "This category already exists",
 
   // Loading / empty
   LOADING: "Loading budgets…",

@@ -51,4 +51,12 @@ export default defineSchema({
         manualRegenResetAt: v.string(),    // ISO date "YYYY-MM-DD" — resets daily
         transactionCount: v.number(),      // number of transactions used to generate
     }).index("by_user", ["userId"]),
+    chatMessages: defineTable({
+        userId: v.id("users"),
+        role: v.union(v.literal("user"), v.literal("assistant")),
+        content: v.string(),
+        createdAt: v.string(), // ISO datetime
+    })
+        .index("by_user", ["userId"])
+        .index("by_created_at", ["createdAt"]), // for cron cleanup
 });

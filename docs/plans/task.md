@@ -1,9 +1,10 @@
-# US-11 AI Spending Insights — Task Tracker
+# US-12 AI Chat Interface — Task Tracker
 
-| # | Task | Status |
-|---|------|--------|
-| 1 | Add `insights` table to schema | done |
-| 2 | Create queries & internal queries (`getInsight`, `getInsightData`) | done |
-| 3 | Create action & internal mutation (`generateInsight`, `saveInsight`) | done |
-| 4 | Build `IponAIInsights` React component with loading/error states | done |
-| 5 | Integrate component into `DashboardPage` and replace static markup | done |
+| # | Task | Status | Notes |
+|---|------|--------|-------|
+| 1 | Update Schema — chatMessages table | done | |
+| 2 | Internal Queries & Mutations for Chat | done | |
+| 3 | sendMessage & executeAction Actions | done | Created askGeminiChat wrapper |
+| 4 | Cron Job — clearOldMessages | done | Uses index range constraint |
+| 5 | Chat UI Components | in_progress | |
+| 6 | Chat Page Assembly | not_started | |

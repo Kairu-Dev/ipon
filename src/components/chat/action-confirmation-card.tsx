@@ -1,8 +1,5 @@
 "use client";
-// src/components/chat/action-confirmation-card.tsx
-// Confirmation card shown when the AI wants to perform a write action.
-// User must explicitly confirm or cancel before any mutation runs.
-
+import { useState } from "react";
 import { CHAT_STRINGS as t } from "@/locale/chat";
 
 
@@ -13,10 +10,12 @@ interface PendingAction {
 
 interface ActionConfirmationCardProps {
   action: PendingAction;
-  onConfirm: () => void;
+  onConfirm: (overrides?: Record<string, unknown>) => void;
   onCancel: () => void;
   isExecuting: boolean;
 }
+
+const SELECTABLE_ICONS = ["flight", "laptop_mac", "home", "favorite", "star", "redeem"];
 
 /** Safely format a number with toLocaleString, returning fallback on bad input. */
 function safeAmount(val: unknown): string {
@@ -36,6 +35,15 @@ const ACTION_LABELS: Record<string, {
       (p.title as string) || "Untitled",
       `${safeAmount(p.amount)} · ${p.category || "—"} · ${p.paymentMethod || "Cash"}`,
       `Date: ${p.date || "Today"}`,
+    ],
+  },
+  createGoal: {
+    title: "Create savings goal?",
+    icon: "flag",
+    getDetails: (p) => [
+      (p.name as string) || "Unnamed goal",
+      `Target: ${safeAmount(p.targetAmount)}`,
+      `Deadline: ${p.deadline || "None"}`,
     ],
   },
   contributeToGoal: {
@@ -65,6 +73,8 @@ export function ActionConfirmationCard({
   onCancel,
   isExecuting,
 }: ActionConfirmationCardProps) {
+  const [selectedIcon, setSelectedIcon] = useState<string>((action.params.icon as string) || "flight");
+
   const config = ACTION_LABELS[action.actionType] || {
     title: "Confirm action?",
     icon: "check_circle",
@@ -77,7 +87,7 @@ export function ActionConfirmationCard({
   return (
     <div className="flex gap-3 max-w-[85%] self-start">
       <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center shrink-0 mt-1">
-        <span className="material-symbols-outlined text-on-primary-container text-sm" style={{ fontVariationSettings: "'FILL' 1" }} aria-hidden="true">colors_spark</span>
+        <span className="material-symbols-outlined text-on-primary-container text-sm" style={{ fontVariationSettings: "'FILL' 1" }} aria-hidden="true">auto_awesome</span>
       </div>
       <div className="chat-bubble-ai">
         <p className="mb-2 text-on-surface">{title}</p>
@@ -90,6 +100,29 @@ export function ActionConfirmationCard({
             </li>
           ))}
         </ul>
+
+        {/* Icon Selector (only for Create Goal or Custom Budget) */}
+        {(action.actionType === "createGoal" || (action.actionType === "setBudgetLimit" && action.params.isNew === true)) && (
+          <div className="mb-4 bg-surface-container-low p-3 rounded-xl border border-surface-variant">
+            <p className="text-xs font-label-md text-on-surface-variant mb-2">Choose an Icon</p>
+            <div className="flex gap-2">
+              {SELECTABLE_ICONS.map((ic) => (
+                <button
+                  key={ic}
+                  onClick={() => setSelectedIcon(ic)}
+                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+                    selectedIcon === ic 
+                      ? "bg-primary text-on-primary" 
+                      : "bg-surface text-on-surface-variant hover:bg-surface-variant"
+                  }`}
+                  aria-label={`Select ${ic} icon`}
+                >
+                  <span className="material-symbols-outlined text-[20px] leading-none" aria-hidden="true">{ic}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Action block styled like the "Safe to Spend" block */}
         <div className="mt-3 p-3 bg-surface-container-highest rounded-lg border border-surface-variant flex items-center gap-3">
@@ -107,7 +140,13 @@ export function ActionConfirmationCard({
         {/* Confirm/Cancel buttons */}
         <div className="flex gap-3 mt-4">
           <button
-            onClick={onConfirm}
+            onClick={() => {
+              if (action.actionType === "createGoal" || (action.actionType === "setBudgetLimit" && action.params.isNew === true)) {
+                onConfirm({ icon: selectedIcon });
+              } else {
+                onConfirm();
+              }
+            }}
             disabled={isExecuting}
             className="flex items-center gap-2 bg-primary text-on-primary px-4 py-2 rounded-lg font-label-md text-sm hover:bg-primary-container hover:text-on-primary-container transition-colors disabled:opacity-50"
           >

@@ -2,6 +2,10 @@
 // src/components/chat/chat-message.tsx
 // Renders a single chat bubble — user messages right-aligned, AI messages left-aligned.
 import { GoalProgressCard } from "./goal-progress-card";
+import { useQuery } from "convex/react";
+import { api } from "../../../convex/_generated/api";
+
+const pad = (n: number) => String(n).padStart(2, "0");
 
 interface ChatMessageProps {
   role: "user" | "assistant";
@@ -9,25 +13,22 @@ interface ChatMessageProps {
 }
 
 export function ChatMessage({ role, content }: ChatMessageProps) {
-  // Only attempt goalProgress parsing for assistant messages
-  const goalProgressData = (() => {
-    if (role !== "assistant") return null;
-    try {
-      const parsed = JSON.parse(content);
-      if (parsed && parsed.type === "goalProgress") return parsed;
-    } catch { /* not JSON — expected for most messages */ }
-    return null;
-  })();
+  const currentMonth = `${new Date().getFullYear()}-${pad(new Date().getMonth() + 1)}`;
+  const totals = useQuery(api.transactions.getTotals, { month: currentMonth });
 
-  if (goalProgressData) {
-    return (
-      <div className="flex gap-3 max-w-[85%] self-start w-full">
-        <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center shrink-0 mt-1">
-          <span className="material-symbols-outlined text-on-primary-container text-sm" style={{ fontVariationSettings: "'FILL' 1" }} aria-hidden="true">colors_spark</span>
-        </div>
-        <GoalProgressCard goalId={goalProgressData.goalId} />
-      </div>
-    );
+  // Only attempt goalProgress parsing for assistant messages
+  const goalProgressMatch = content.match(/\|\|\|GOAL_PROGRESS\|\|\|([\s\S]*?)\|\|\|END\|\|\|/);
+  let goalProgressData: { goalId: string | null } | null = null;
+  let displayContent = content;
+
+  if (goalProgressMatch) {
+    try {
+      const parsed = JSON.parse(goalProgressMatch[1]);
+      if (parsed && (parsed.goalId === null || typeof parsed.goalId === "string")) {
+        goalProgressData = parsed;
+        displayContent = displayContent.replace(goalProgressMatch[0], "");
+      }
+    } catch (e) { console.warn("GoalProgress parse fail", e); }
   }
 
   const isUser = role === "user";
@@ -47,7 +48,6 @@ export function ChatMessage({ role, content }: ChatMessageProps) {
   }
 
   // Handle verdict extraction and stripping
-  let displayContent = content;
   let verdictData: { verdict: "safe" | "caution" | "risk"; verdict_reason: string } | null = null;
   let budgetBreakdown: Array<{ category: string; limit: number; spent: number; percentage: number }> | null = null;
 
@@ -79,19 +79,42 @@ export function ChatMessage({ role, content }: ChatMessageProps) {
     } catch (e) { console.warn("Budget parse fail", e); }
   }
 
+  // 3. Extract Affordability Check & compute verdict locally
+  const affordabilityMatch = content.match(/\|\|\|AFFORDABILITY_CHECK\|\|\|([\s\S]*?)\|\|\|END\|\|\|/);
+  if (affordabilityMatch) {
+    try {
+      const parsed = JSON.parse(affordabilityMatch[1]);
+      if (parsed && typeof parsed.cost === "number") {
+        displayContent = displayContent.replace(affordabilityMatch[0], "");
+        
+        if (totals !== undefined) {
+          if (totals.remainingBalance < parsed.cost) {
+            verdictData = { 
+              verdict: "risk", 
+              verdict_reason: `Insufficient balance (Cost: ₱${parsed.cost.toLocaleString()})` 
+            };
+          } else {
+            verdictData = { verdict: "safe", verdict_reason: "You have enough balance." };
+            if (budgetBreakdown && budgetBreakdown.length > 0 && budgetBreakdown[0].percentage > 100) {
+              verdictData = { 
+                verdict: "caution", 
+                verdict_reason: "This will put you over your category budget." 
+              };
+            }
+          }
+        }
+      }
+    } catch (e) { console.warn("Affordability parse fail", e); }
+  }
+
   displayContent = displayContent.trim();
 
-  // Strip markdown bold/italic before display
-  const cleanContent = displayContent
-    .replace(/\*\*(.*?)\*\*/g, "$1")  // **bold** → plain
+  // Strip italics and standardise list items, but preserve bold for splitting
+  const preProcessedContent = displayContent
     .replace(/\*(.*?)\*/g, "$1")       // *italic* → plain
     .replace(/^[\*\-] /gm, "• ");      // * list → • list
 
-  const verdictColors = {
-    safe: "bg-green-100 text-green-800 border-green-200",
-    caution: "bg-amber-100 text-amber-800 border-amber-200",
-    risk: "bg-red-100 text-red-800 border-red-200",
-  };
+  const cleanContentParts = preProcessedContent.split(/(\*\*.*?\*\*)/g);
 
   const verdictIcons = {
     safe: "check_circle",
@@ -102,10 +125,19 @@ export function ChatMessage({ role, content }: ChatMessageProps) {
   return (
     <div className="flex gap-3 max-w-[85%] self-start">
       <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center shrink-0 mt-1">
-        <span className="material-symbols-outlined text-on-primary-container text-sm" style={{ fontVariationSettings: "'FILL' 1" }} aria-hidden="true">colors_spark</span>
+        <span className="material-symbols-outlined text-on-primary-container text-sm" style={{ fontVariationSettings: "'FILL' 1" }} aria-hidden="true">auto_awesome</span>
       </div>
       <div className="chat-bubble-ai-text flex flex-col gap-4">
-        {cleanContent && <p className="whitespace-pre-wrap">{cleanContent}</p>}
+        {cleanContentParts.length > 0 && (
+          <p className="whitespace-pre-wrap">
+            {cleanContentParts.map((part, i) => {
+              if (part.startsWith("**") && part.endsWith("**")) {
+                return <strong key={i} className="font-bold">{part.slice(2, -2)}</strong>;
+              }
+              return part;
+            })}
+          </p>
+        )}
         
         {/* Visual Budget Breakdown */}
         {budgetBreakdown && budgetBreakdown.length > 0 && (
@@ -117,9 +149,9 @@ export function ChatMessage({ role, content }: ChatMessageProps) {
                   <span>₱{item.spent.toLocaleString()}</span>
                 </div>
                 {/* Progress Bar Container */}
-                <div className="w-full h-3 bg-surface-container rounded-full overflow-hidden">
+                <div className="w-full h-3 bg-surface-container rounded-full">
                   <div 
-                    className={`h-full rounded-full transition-all duration-500 ${item.percentage >= 100 ? "bg-error" : "bg-primary"}`}
+                    className={`h-full rounded-full transition-all duration-500 shadow-sm ${item.percentage >= 100 ? "bg-error" : "bg-primary"}`}
                     style={{ width: `${Math.min(item.percentage, 100)}%` }}
                   />
                 </div>
@@ -134,14 +166,31 @@ export function ChatMessage({ role, content }: ChatMessageProps) {
 
         {/* Verdict Badge */}
         {verdictData && (
-          <div className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-medium ${verdictColors[verdictData.verdict]}`}>
-            <span className="material-symbols-outlined text-base" aria-hidden="true">
-              {verdictIcons[verdictData.verdict]}
-            </span>
-            <div className="flex flex-col">
-              <span className="uppercase tracking-wider font-bold">{verdictData.verdict} VERDICT</span>
-              <span className="opacity-90">{verdictData.verdict_reason}</span>
+          <div className="mt-1 p-3 bg-surface-container-highest rounded-lg border border-surface-variant flex items-center gap-3">
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+              verdictData.verdict === "safe" ? "bg-green-100 text-green-700" :
+              verdictData.verdict === "caution" ? "bg-amber-100 text-amber-700" :
+              "bg-red-100 text-red-700"
+            }`}>
+              <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
+                {verdictIcons[verdictData.verdict]}
+              </span>
             </div>
+            <div className="flex-1">
+              <p className="font-label-md text-label-md text-on-surface">
+                {verdictData.verdict === "safe" ? "Safe to Spend" : 
+                 verdictData.verdict === "caution" ? "Caution" : "High Risk"}
+              </p>
+              <p className="font-body-sm text-body-sm text-on-surface-variant">
+                {verdictData.verdict_reason.includes("Impact on savings") ? verdictData.verdict_reason : `Impact on savings: ${verdictData.verdict_reason}`}
+              </p>
+            </div>
+          </div>
+        )}
+        {/* Visual Goal Progress Card */}
+        {goalProgressData && (
+          <div className="mt-1">
+            <GoalProgressCard goalId={goalProgressData.goalId} />
           </div>
         )}
       </div>

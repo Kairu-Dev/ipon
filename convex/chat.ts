@@ -18,11 +18,13 @@ export const getChatHistory = query({
     const userId = await getAuthUserId(ctx);
     if (!userId) return [];
 
-    return await ctx.db
+    // Fetch the latest 50 messages (desc) then reverse to chronological order
+    const messages = await ctx.db
       .query("chatMessages")
       .withIndex("by_user", (q) => q.eq("userId", userId))
-      .order("asc")
+      .order("desc")
       .take(50);
+    return messages.reverse();
   },
 });
 
@@ -180,15 +182,29 @@ const CHAT_TOOLS = [{
       },
     },
     {
+      name: "createGoal",
+      description: "Create a new savings goal for the user. Ask the user for the target amount and deadline if they are not provided.",
+      parameters: {
+        type: "object",
+        properties: {
+          name: { type: "string", description: "Name of the savings goal" },
+          targetAmount: { type: "number", description: "Target amount to save in Philippine Peso" },
+          deadline: { type: "string", description: "ISO date YYYY-MM-DD for when they want to achieve the goal" },
+          icon: { type: "string", description: "A Material symbol icon name that best matches the goal (e.g. laptop_mac, flight, directions_car, savings)" }
+        },
+        required: ["name", "targetAmount", "deadline", "icon"],
+      },
+    },
+    {
       name: "setBudgetLimit",
-      description: "Set or update a monthly spending limit for a budget category. Use this when the user asks to adjust, set, or change a budget limit — NEVER use addTransaction for budget changes.",
+      description: "Set or update a monthly spending limit for a budget category. ONLY use this when the user explicitly asks to SET, CREATE, or CHANGE a budget limit. DO NOT use this tool if the user is just asking to VIEW or SHOW their budgets.",
       parameters: {
         type: "object",
         properties: {
           category:    { type: "string", description: "Category name e.g. 'Food & Dining'" },
           limit:       { type: "number", description: "New monthly limit in Philippine Peso" },
           description: { type: "string", description: "Optional short description of the category" },
-          isNew:       { type: "boolean", description: "true if this is a new custom category, false if updating existing" },
+          isNew:       { type: "boolean", description: "true ONLY if this is a custom category NOT in the standard expense categories list. Standard categories are never custom, so this MUST be false for them." },
         },
         required: ["category", "limit", "isNew"],
       },
@@ -221,6 +237,7 @@ function buildChatSystemPrompt(contextData: {
 You have access to the user's real financial data provided below.
 
 === FINANCIAL CONTEXT ===
+Today's Date: ${new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
 Total Income this month: ₱${contextData.totals.totalIncome.toLocaleString()}
 Total Expenses this month: ₱${contextData.totals.totalExpenses.toLocaleString()}
 Remaining Balance: ₱${contextData.totals.remainingBalance.toLocaleString()}
@@ -246,11 +263,20 @@ ${contextData.goals.length > 0
 === TOOL USAGE RULES — READ CAREFULLY ===
 - addTransaction → ONLY for logging actual spending or income
 - setBudgetLimit → ONLY for setting or adjusting budget category limits
-- contributeToGoal → ONLY for adding money to a savings goal
+- createGoal → ONLY for creating a new savings goal (NOT for contributing to one)
+- contributeToGoal → ONLY for adding money to an EXISTING savings goal (must already exist in the goals list above)
 - getGoalProgress → ONLY when user asks to see goal progress visually
 - NEVER use addTransaction for budget adjustments — this is a critical rule
 - PROACTIVE LOGGING: If a user asks "can I afford X" and then says "log it" or "buy it", use addTransaction IMMEDIATELY with the details from the previous message.
 - DEFAULT VALUES: Use "Cash" as the default payment method if unknown. Use the most relevant category from the affordability check.
+
+=== GUARDRAILS ===
+- Maximum single transaction amount: 999,999
+- Maximum goal target amount: 9,999,999
+- Maximum budget limit: 999,999
+- If user requests an amount above these limits, tell them the limit and ask them to confirm
+- If user says "create a goal" or "set a savings goal", use createGoal — NOT contributeToGoal
+- If user says "add to my goal" or "contribute to goal", use contributeToGoal — NOT createGoal
 
 === CUSTOM CATEGORY RULES ===
 - You can create new budget categories using setBudgetLimit with isNew: true
@@ -272,23 +298,34 @@ ${contextData.goals.length > 0
 11. Do not force Filipino slang — GCash, Jollibee, commute are fine naturally
 12. Short sentences — this is a mobile app, not a report
 13. Dry wit is allowed — the situation can be lightly funny, never the user's punchline
-14. Do not render markdown asterisks — write in plain text only, no **bold** formatting
+14. You MAY use bullet points (•) and **bold** formatting for emphasis, but keep it minimal and clean.
 
 === AFFORDABILITY QUESTIONS ===
 When user asks "can I afford X?" or similar:
-- Give a clear verdict: "Yes, you can afford it" or "This would stretch your budget"
-- Show remaining balance after the purchase
-- NEVER use bullet points (•) for budget limits. Use the tag:
+- Calculate carefully: IF (remaining balance) minus (cost) is LESS THAN ZERO, you MUST say "You do not have enough balance for this."
+- ONLY IF (remaining balance) minus (cost) is GREATER THAN OR EQUAL TO ZERO, give a verdict based on budget limits.
+- Show remaining balance after the purchase.
+- You must structure your affordability response like this:
+  Looking at your current budget for this month:
+  • (Detail about the relevant category remaining balance)
+  • (Friendly note about their essentials or general savings)
+  **(Clear Verdict e.g. Yes, you can afford it! / This is a bit risky)** (Explanation of remaining balance)
+- NEVER use bullet points (•) for the budget limits table itself. Use the tag instead:
   |||BUDGET_BREAKDOWN|||[{"category":"Food & Dining","limit":5000,"spent":6750,"percentage":135}]|||END|||
-- Always include at the END of your response:
-  |||VERDICT|||{"verdict":"safe","verdict_reason":"Impact on savings: Minimal"}|||END|||
-  Valid verdict values: "safe" | "caution" | "risk"
+- Always include at the END of your response the cost of the item being asked about:
+  |||AFFORDABILITY_CHECK|||{"cost":200}|||END|||
 
 === BUDGET LIMIT QUERIES ===
 When user asks "what is my budget for X" or "what's my X limit":
 - State the category name, monthly limit, amount spent so far, and percentage used
 - NEVER use bullet points (•) for budget limits. Use the |||BUDGET_BREAKDOWN||| tag.
 - Do NOT use setBudgetLimit for queries — only for setting or changing limits
+When user asks to "show all my budget limits" or similar:
+- If no limits are set, explicitly list the standard categories (${VALID_EXPENSE_CATEGORIES.join(", ")}) and inform the user that no limits have been set for them yet.
+
+=== MULTIPLE ACTIONS ===
+- You can only execute ONE tool action per response.
+- If the user asks to update multiple budget limits or log multiple items at once, choose ONE to update, and tell the user that you can only do one at a time and ask which one they want to do next.
 
 === FORMAT RULES ===
 - Plain text only — no markdown asterisks, no bold, no headers
@@ -304,7 +341,11 @@ Valid payment methods: ${VALID_PAYMENT_METHODS.join(", ")}`;
 // Action — send a user message and get an AI response
 // ---------------------------------------------------------------------------
 export const sendMessage = action({
-  args: { userMessage: v.string(), month: v.string() },
+  args: { 
+    userMessage: v.string(), 
+    month: v.string(),
+    canceledActionContext: v.optional(v.string())
+  },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new ConvexError("Not authenticated");
@@ -333,11 +374,17 @@ export const sendMessage = action({
     // 3. Build system prompt
     const systemPrompt = buildChatSystemPrompt(contextData);
 
-    // 4. Call Gemini
+    // 4. Inject context if there was a canceled action the user is trying to edit
+    let finalUserMessage = trimmed;
+    if (args.canceledActionContext) {
+      finalUserMessage = `[SYSTEM NOTE: The user just canceled the following pending action to edit it: ${args.canceledActionContext}. Use this as context for their next request.]\n\nUser: ${trimmed}`;
+    }
+
+    // 5. Call Gemini
     const result = await askGeminiChat({
       systemInstruction: systemPrompt,
       history,
-      userMessage: trimmed,
+      userMessage: finalUserMessage,
       tools: CHAT_TOOLS,
     });
 
@@ -362,19 +409,18 @@ export const sendMessage = action({
         });
         return {
           type: "text" as const,
-          text: JSON.stringify({
-            type: "goalProgress",
-            goalId: functionArgs.goalId ?? null,
-          }),
+          text: `|||GOAL_PROGRESS|||${JSON.stringify({ goalId: functionArgs.goalId ?? null })}|||END|||`,
         };
       }
 
       // All other function calls → return pending action for confirmation
+      // Thread the user-selected month through so executeAction uses the right month
       return {
         type: "pendingAction" as const,
         pendingAction: {
           actionType: name,
           params: functionArgs,
+          month: args.month,
         },
       };
     }
@@ -406,10 +452,12 @@ export const sendMessage = action({
 export const executeAction = action({
   args: {
     userMessage: v.string(),
+    month: v.string(),
     actionType: v.union(
       v.literal("addTransaction"),
       v.literal("contributeToGoal"),
-      v.literal("setBudgetLimit")
+      v.literal("setBudgetLimit"),
+      v.literal("createGoal")
     ),
     params: v.object({
       // addTransaction params
@@ -427,6 +475,11 @@ export const executeAction = action({
       limit: v.optional(v.number()),
       description: v.optional(v.string()),
       isNew: v.optional(v.boolean()),
+      // createGoal params
+      name: v.optional(v.string()),
+      targetAmount: v.optional(v.number()),
+      deadline: v.optional(v.string()),
+      icon: v.optional(v.string()),
     }),
   },
   handler: async (ctx, args) => {
@@ -436,35 +489,45 @@ export const executeAction = action({
     let successMsg: string;
 
     if (args.actionType === "setBudgetLimit") {
-      const today = new Date();
-      const pad = (n: number) => String(n).padStart(2, "0");
-      const currentMonth = `${today.getFullYear()}-${pad(today.getMonth() + 1)}`;
+      // Validate AI-supplied params before trusting them
+      const category = args.params.category?.trim();
+      const limit = args.params.limit;
+      if (!category) {
+        throw new ConvexError("Budget category cannot be empty.");
+      }
+      if (typeof limit !== "number" || !isFinite(limit) || limit <= 0) {
+        throw new ConvexError("Budget limit must be a positive number.");
+      }
+
+      // Use the month threaded from the user's session, not new Date()
+      const month = args.month;
 
       // Check if budget record already exists for this category + month
       const existing = await ctx.runQuery(internal.chat.getBudgetRecord, {
         userId,
-        category: args.params.category!,
-        month: currentMonth,
+        category,
+        month,
       });
 
       if (existing) {
         await ctx.runMutation(internal.budgets.patchBudget, {
           id: existing._id,
-          monthlyLimit: args.params.limit!,
+          monthlyLimit: limit,
           description: args.params.description,
         });
       } else {
         await ctx.runMutation(internal.budgets.insertBudget, {
           userId,
-          category: args.params.category!,
-          monthlyLimit: args.params.limit!,
-          month: currentMonth,
+          category,
+          monthlyLimit: limit,
+          month,
           description: args.params.description,
         });
       }
 
-      const action = args.params.isNew ? "created" : "updated";
-      successMsg = `Done! Budget ${action} — ${args.params.category} limit set to ₱${args.params.limit!.toLocaleString()}/month.`;
+      // Derive action from DB lookup, not AI-supplied isNew
+      const action = existing ? "updated" : "created";
+      successMsg = `Done! Budget ${action} — ${category} limit set to ₱${limit.toLocaleString()}/month.`;
 
     } else if (args.actionType === "addTransaction") {
       // Validate required fields
@@ -490,6 +553,30 @@ export const executeAction = action({
       });
 
       successMsg = `Done! ₱${amount.toLocaleString()} logged for "${title}".`;
+    } else if (args.actionType === "createGoal") {
+      const { name, targetAmount, deadline, icon } = args.params;
+      if (!name || !targetAmount || !deadline || !icon) {
+        throw new ConvexError("Missing required goal creation fields. Ensure name, targetAmount, deadline, and icon are provided.");
+      }
+
+      if (typeof targetAmount !== "number" || targetAmount <= 0) {
+        throw new ConvexError("Target amount must be a positive number.");
+      }
+
+      // Automatically set the creation date to today in the local timezone (approximate)
+      const date = new Date().toISOString().split("T")[0];
+
+      const newGoalId = await ctx.runMutation(api.goals.createGoal, {
+        name: name as string,
+        icon: icon as string,
+        targetAmount: targetAmount as number,
+        initialDeposit: 0,
+        deadline: deadline as string,
+        date
+      });
+
+      const successText = `Done! Savings goal "${name}" created with a target of ₱${(targetAmount as number).toLocaleString()}.`;
+      successMsg = `${successText}\n\n|||GOAL_PROGRESS|||${JSON.stringify({ goalId: newGoalId })}|||END|||`;
     } else {
       // contributeToGoal
       const { goalId, goalName, amount, date } = args.params;
@@ -501,21 +588,21 @@ export const executeAction = action({
         throw new ConvexError("Contribution amount must be greater than 0");
       }
 
-      // Validate goalId format before passing to mutation — AI can hallucinate IDs.
-      // Convex IDs follow a specific format; reject obviously invalid ones early
-      // so the user gets a clear error instead of a cryptic Convex internal error.
-      const CONVEX_ID_PATTERN = /^[a-z0-9]{32}$/;
-      if (!CONVEX_ID_PATTERN.test(goalId)) {
-        throw new ConvexError(`Invalid goal ID: "${goalId}". The goal may have been deleted or the AI provided an incorrect reference.`);
+      // Let the mutation's v.id("goals") validator handle ID format checking.
+      // Wrap in try/catch to surface a clear user-facing error if the ID is invalid.
+      try {
+        await ctx.runMutation(api.goals.contributeToGoal, {
+          goalId: goalId as unknown as import('./_generated/dataModel').Id<'goals'>,
+          amount,
+          date,
+        });
+      } catch (err) {
+        const message = err instanceof ConvexError ? (err.data as string) : "Goal not found or invalid.";
+        throw new ConvexError(`Could not contribute to "${goalName}": ${message}`);
       }
 
-      await ctx.runMutation(api.goals.contributeToGoal, {
-        goalId: goalId as unknown as import('./_generated/dataModel').Id<'goals'>,
-        amount,
-        date,
-      });
-
-      successMsg = `Done! ₱${amount.toLocaleString()} contributed to "${goalName}".`;
+      const successText = `Done! ₱${amount.toLocaleString()} contributed to "${goalName}".`;
+      successMsg = `${successText}\n\n|||GOAL_PROGRESS|||${JSON.stringify({ goalId })}|||END|||`;
     }
 
     // Save user message and AI confirmation to history

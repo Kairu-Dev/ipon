@@ -19,8 +19,10 @@ export function SuggestionChips({
   const chips = [
     { text: "Can I afford a ₱3,000 purchase?", icon: "shopping_cart" },
     { text: `Summarize my ${currentMonthName} spending`, icon: "summarize" },
-    topSpendingCategory ? { text: `How to lower ${topSpendingCategory} spending?`, icon: "trending_down" } : null,
-  ].filter(Boolean) as { text: string; icon: string }[];
+    topSpendingCategory 
+      ? { text: `How to lower ${topSpendingCategory} spending?`, icon: "trending_down" } 
+      : { text: "Set a Food & Dining budget to ₱5000", icon: "tune" },
+  ];
 
   return (
     <div className="p-4 flex gap-2 overflow-x-auto whitespace-nowrap border-b border-slate-100 bg-surface-container-lowest z-10 shrink-0 scrollbar-hide">

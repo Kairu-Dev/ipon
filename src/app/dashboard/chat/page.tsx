@@ -26,6 +26,7 @@ interface PendingAction {
   actionType: string;
   params: Record<string, unknown>;
   userMessage: string;
+  month: string;
 }
 
 /** Error bubble shown when the AI fails. */
@@ -84,6 +85,7 @@ export default function ChatPage() {
   const handleSend = useCallback(
     async (message: string) => {
       setError(null);
+      const currentPendingAction = pendingAction;
       if (pendingAction) {
         setPendingAction(null);
         setLocalMessages((prev) => [
@@ -99,12 +101,20 @@ export default function ChatPage() {
       setIsLoading(true);
 
       try {
-        const result = await sendMessage({ userMessage: message, month: currentMonth });
+        const result = await sendMessage({ 
+          userMessage: message, 
+          month: currentMonth,
+          canceledActionContext: currentPendingAction ? JSON.stringify({
+            actionType: currentPendingAction.actionType,
+            params: currentPendingAction.params
+          }) : undefined
+        });
         if (result.type === "pendingAction") {
           setPendingAction({
             actionType: result.pendingAction.actionType,
             params: result.pendingAction.params as Record<string, unknown>,
             userMessage: message,
+            month: currentMonth,
           });
         } else if (result.type === "text") {
           setLocalMessages((prev) => [
@@ -125,15 +135,16 @@ export default function ChatPage() {
     [sendMessage, currentMonth, pendingAction]
   );
 
-  const handleConfirmAction = useCallback(async () => {
+  const handleConfirmAction = useCallback(async (overrides?: Record<string, unknown>) => {
     if (!pendingAction) return;
     setIsExecuting(true);
 
     try {
       const result = await executeActionMutation({
         userMessage: pendingAction.userMessage,
-        actionType: pendingAction.actionType as "addTransaction" | "contributeToGoal" | "setBudgetLimit",
-        params: pendingAction.params,
+        month: pendingAction.month,
+        actionType: pendingAction.actionType as "addTransaction" | "createGoal" | "contributeToGoal" | "setBudgetLimit",
+        params: { ...pendingAction.params, ...overrides },
       });
 
       setLocalMessages((prev) => [
@@ -180,8 +191,8 @@ export default function ChatPage() {
         <div className="flex-1 overflow-y-auto p-6 space-y-6 flex flex-col h-full">
           {allMessages.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full text-center">
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4 mx-auto">
-                <span className="material-symbols-outlined text-primary text-3xl" aria-hidden="true">chat</span>
+              <div className="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center mb-4">
+                <span className="material-symbols-outlined text-primary text-2xl" aria-hidden="true">auto_awesome</span>
               </div>
               <p className="font-body-sm text-on-surface-variant max-w-sm mx-auto">{t.EMPTY_STATE}</p>
             </div>
@@ -205,7 +216,7 @@ export default function ChatPage() {
           {isLoading && (
             <div className="flex gap-3 max-w-[85%] self-start">
               <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center shrink-0 mt-1">
-                <span className="material-symbols-outlined text-on-primary-container text-sm" style={{ fontVariationSettings: "'FILL' 1" }} aria-hidden="true">colors_spark</span>
+                <span className="material-symbols-outlined text-on-primary-container text-sm" style={{ fontVariationSettings: "'FILL' 1" }} aria-hidden="true">auto_awesome</span>
               </div>
               <div className="chat-bubble-ai-text">
                 <span className="animate-pulse">{t.LOADING}</span>

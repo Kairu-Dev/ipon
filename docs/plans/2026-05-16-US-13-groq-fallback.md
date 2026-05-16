@@ -1,40 +1,25 @@
-// convex/lib/geminiChat.ts
-// Chat-specific Gemini wrapper with support for system instructions,
-// conversation history, and function calling (tools).
-// Falls back to Groq (llama-3.3-70b-versatile) when Gemini returns 429.
-// Separate from askGemini which is tuned for single-prompt insight generation.
+# Groq Fallback Implementation Plan
 
-interface ChatMessage {
-  role: "user" | "model";
-  parts: { text: string }[];
-}
+> **For Antigravity:** REQUIRED WORKFLOW: Use `.agent/workflows/execute-plan.md` to execute this plan in single-flow mode.
 
-interface FunctionCall {
-  name: string;
-  args: Record<string, unknown>;
-}
+**Goal:** Implement a fallback mechanism to Groq when Gemini API rate limits (status 429) are encountered.
 
-interface GeminiChatOptions {
-  systemInstruction: string;
-  history: ChatMessage[];
-  userMessage: string;
-  tools: unknown[];
-}
+**Architecture:** We will modify `convex/lib/geminiChat.ts` to catch 429 responses from Gemini. When caught, we will format the context, chat history, and tools into the standard OpenAI API format, and send a request to Groq's `/v1/chat/completions` endpoint using the `llama-3.3-70b-versatile` model. We will then normalize the Groq response back to the existing `GeminiChatResult` format so the rest of the application remains unchanged.
 
-interface GeminiChatResult {
-  text: string | null;
-  functionCall: FunctionCall | null;
-}
+**Tech Stack:** Convex, Node `fetch`, Groq API (OpenAI compatible).
 
-/**
- * Sends a chat message to the Gemini API with system instructions,
- * conversation history, and optional tool declarations.
- *
- * Returns either a text response or a function call request.
- * Timeout is 15 seconds (longer than insight calls — chat may need more reasoning).
- *
- * On HTTP 429 (rate limit), automatically falls back to Groq.
- */
+---
+
+### Task 1: Update Gemini Wrapper with Groq Fallback
+
+**Files:**
+- Modify: `convex/lib/geminiChat.ts`
+
+**Step 1: Write the implementation**
+
+```typescript
+// Add to convex/lib/geminiChat.ts replacing the current askGeminiChat implementation or updating it
+
 export async function askGeminiChat(
   options: GeminiChatOptions
 ): Promise<GeminiChatResult> {
@@ -63,13 +48,12 @@ export async function askGeminiChat(
       },
     };
 
-    // Only include tools if there are function declarations
     if (options.tools.length > 0) {
       body.tools = options.tools;
     }
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent`,
+      \`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent\`,
       {
         method: "POST",
         headers: {
@@ -81,7 +65,6 @@ export async function askGeminiChat(
       }
     );
 
-    // Gemini rate limited — fall back to Groq
     if (response.status === 429) {
       console.warn("Gemini rate limited (429). Falling back to Groq.");
       return await askGroqFallback(options);
@@ -105,7 +88,6 @@ export async function askGeminiChat(
       return { text: null, functionCall: null };
     }
 
-    // Check for function call first
     const functionCallPart = parts.find(
       (p: Record<string, unknown>) => p.functionCall
     );
@@ -119,7 +101,6 @@ export async function askGeminiChat(
       };
     }
 
-    // Otherwise, extract text
     const textPart = parts.find((p: Record<string, unknown>) => p.text);
     return {
       text: textPart?.text || null,
@@ -137,35 +118,12 @@ export async function askGeminiChat(
   }
 }
 
-// ---------------------------------------------------------------------------
-// Groq fallback — used when Gemini returns 429 (rate limited)
-// Uses llama-3.3-70b-versatile via OpenAI-compatible API.
-// ---------------------------------------------------------------------------
+// Add the new fallback function below it
 
-/** Shape of a single Gemini functionDeclaration (for type narrowing). */
-interface GeminiFunctionDeclaration {
-  name: string;
-  description: string;
-  parameters: Record<string, unknown>;
-}
-
-/** Wrapper object that holds the array of function declarations. */
-interface GeminiToolWrapper {
-  functionDeclarations?: GeminiFunctionDeclaration[];
-}
-
-/** OpenAI-format tool definition expected by Groq. */
-interface GroqTool {
-  type: "function";
-  function: GeminiFunctionDeclaration;
-}
-
-async function askGroqFallback(
-  options: GeminiChatOptions
-): Promise<GeminiChatResult> {
+async function askGroqFallback(options: GeminiChatOptions): Promise<GeminiChatResult> {
   const groqKey = process.env.GROQ_API_KEY;
   if (!groqKey) {
-    console.warn("GROQ_API_KEY not set. Cannot fall back from Gemini.");
+    console.warn("GROQ_API_KEY missing. Cannot fallback.");
     return { text: null, functionCall: null };
   }
 
@@ -173,8 +131,8 @@ async function askGroqFallback(
   const timeoutId = setTimeout(() => controller.abort(), 15000);
 
   try {
-    // Convert Gemini message format → OpenAI message format
-    const messages: { role: string; content: string }[] = [
+    // Convert to OpenAI format
+    const messages = [
       { role: "system", content: options.systemInstruction },
       ...options.history.map((m) => ({
         role: m.role === "model" ? "assistant" : "user",
@@ -183,21 +141,18 @@ async function askGroqFallback(
       { role: "user", content: options.userMessage },
     ];
 
-    // Convert Gemini tool declarations → OpenAI tool format
-    let groqTools: GroqTool[] | undefined;
+    let groqTools = undefined;
     if (options.tools && options.tools.length > 0) {
-      const toolWrapper = options.tools[0] as GeminiToolWrapper;
+      const toolWrapper = options.tools[0] as any;
       if (toolWrapper.functionDeclarations) {
-        groqTools = toolWrapper.functionDeclarations.map(
-          (fn: GeminiFunctionDeclaration) => ({
-            type: "function" as const,
-            function: fn,
-          })
-        );
+        groqTools = toolWrapper.functionDeclarations.map((fn: any) => ({
+          type: "function",
+          function: fn,
+        }));
       }
     }
 
-    const body: Record<string, unknown> = {
+    const body: any = {
       model: "llama-3.3-70b-versatile",
       messages,
       temperature: 0.7,
@@ -209,18 +164,15 @@ async function askGroqFallback(
       body.tool_choice = "auto";
     }
 
-    const response = await fetch(
-      "https://api.groq.com/openai/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${groqKey}`,
-          "Content-Type": "application/json",
-        },
-        signal: controller.signal,
-        body: JSON.stringify(body),
-      }
-    );
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": \`Bearer \${groqKey}\`,
+        "Content-Type": "application/json",
+      },
+      signal: controller.signal,
+      body: JSON.stringify(body),
+    });
 
     if (!response.ok) {
       const errorText = await response.text().catch(() => "unknown");
@@ -230,23 +182,18 @@ async function askGroqFallback(
 
     const data = await response.json();
     const message = data.choices?.[0]?.message;
+
     if (!message) return { text: null, functionCall: null };
 
-    // Check for tool calls (OpenAI format)
     if (message.tool_calls && message.tool_calls.length > 0) {
       const call = message.tool_calls[0].function;
-      try {
-        return {
-          text: null,
-          functionCall: {
-            name: call.name,
-            args: JSON.parse(call.arguments),
-          },
-        };
-      } catch (parseErr) {
-        console.warn("Groq tool_call arguments parse error:", parseErr);
-        return { text: null, functionCall: null };
-      }
+      return {
+        text: null,
+        functionCall: {
+          name: call.name,
+          args: JSON.parse(call.arguments),
+        },
+      };
     }
 
     return {
@@ -254,13 +201,17 @@ async function askGroqFallback(
       functionCall: null,
     };
   } catch (err) {
-    if ((err as Error).name === "AbortError") {
-      console.warn("Groq fallback request timed out after 15000ms");
-    } else {
-      console.warn("Error calling Groq fallback:", err);
-    }
+    console.warn("Error calling Groq fallback:", err);
     return { text: null, functionCall: null };
   } finally {
     clearTimeout(timeoutId);
   }
 }
+```
+
+**Step 2: Commit**
+
+```bash
+git add convex/lib/geminiChat.ts
+git commit -m "feat: add Groq fallback for Gemini rate limits"
+```

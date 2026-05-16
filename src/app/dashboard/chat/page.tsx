@@ -132,7 +132,7 @@ export default function ChatPage() {
     try {
       const result = await executeActionMutation({
         userMessage: pendingAction.userMessage,
-        actionType: pendingAction.actionType as "addTransaction" | "contributeToGoal",
+        actionType: pendingAction.actionType as "addTransaction" | "contributeToGoal" | "setBudgetLimit",
         params: pendingAction.params,
       });
 
@@ -143,7 +143,7 @@ export default function ChatPage() {
       setPendingAction(null);
     } catch (err) {
       console.error("Action execution error:", err);
-      setError({ message: "Failed to execute action. Please try again.", retryMessage: pendingAction.userMessage });
+      setError({ message: t.ERROR_ACTION_EXECUTION, retryMessage: pendingAction.userMessage });
       setPendingAction(null);
     } finally {
       setIsExecuting(false);

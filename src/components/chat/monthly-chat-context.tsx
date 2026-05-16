@@ -80,9 +80,9 @@ export function MonthlyChatContext({ currentMonth }: MonthlyChatContextProps) {
                   <span className="font-body-sm text-body-sm font-medium text-on-surface">{formatCurrency(topCategory[1] as number)}</span>
                 </div>
                 <div className="w-full bg-surface-container rounded-full h-2 overflow-hidden">
-                  <div className="bg-tertiary-container h-2 rounded-full" style={{ width: `${progressPercent || 100}%` }}></div>
+                  <div className="bg-tertiary-container h-2 rounded-full" style={{ width: `${Math.max(0, Math.min(100, progressPercent ?? 100))}%` }}></div>
                 </div>
-                {progressPercent > 0 && (
+                {typeof progressPercent === "number" && progressPercent > 0 && (
                   <p className="font-label-xs text-label-xs text-on-surface-variant mt-2 text-right">
                     {progressPercent}% of {topCategory[0].toLowerCase()} budget
                   </p>

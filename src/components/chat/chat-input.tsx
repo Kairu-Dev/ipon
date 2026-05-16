@@ -30,7 +30,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
   return (
     <div className="absolute bottom-0 left-0 right-0 p-4 bg-surface-container-lowest border-t border-slate-100">
       <div className="max-w-3xl mx-auto relative flex items-center">
-        <button className="absolute left-3 text-on-surface-variant hover:text-primary transition-colors p-2" type="button" aria-label="Add conversation">
+        <button className="absolute left-3 text-on-surface-variant transition-colors p-2 opacity-40 cursor-not-allowed" type="button" aria-label="Add conversation" disabled>
           <span className="material-symbols-outlined" aria-hidden="true">add_circle</span>
         </button>
         <input 

@@ -222,7 +222,7 @@ export const patchBudget = internalMutation({
   handler: async (ctx, args) => {
     await ctx.db.patch(args.id, {
       monthlyLimit: args.monthlyLimit,
-      ...(args.description ? { description: args.description } : {}),
+      ...(args.description !== undefined ? { description: args.description } : {}),
     });
   },
 });

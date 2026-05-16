@@ -22,7 +22,7 @@ export const getChatHistory = query({
       .query("chatMessages")
       .withIndex("by_user", (q) => q.eq("userId", userId))
       .order("asc")
-      .collect();
+      .take(50);
   },
 });
 
@@ -93,13 +93,6 @@ export const getContextForAI = internalQuery({
       .slice(0, 5)
       .map(([cat, amount]) => `${cat}: ₱${amount.toLocaleString()}`);
 
-    const spentPerCategory: Record<string, number> = {};
-    for (const tx of transactions) {
-      if (tx.type === "expense" && tx.category !== SAVINGS_CATEGORY) {
-        spentPerCategory[tx.category] = (spentPerCategory[tx.category] ?? 0) + tx.amount;
-      }
-    }
-
     return {
       totals: {
         totalIncome,
@@ -122,7 +115,7 @@ export const getContextForAI = internalQuery({
           saved: g.savedAmount,
           deadline: g.deadline,
         })),
-      spentPerCategory,
+      spentPerCategory: categoryTotals,
     };
   },
 });
@@ -496,7 +489,7 @@ export const executeAction = action({
         note: args.params.note,
       });
 
-      successMsg = `Done! ₱${amount.toLocaleString()} logged for "${title}". 🎉`;
+      successMsg = `Done! ₱${amount.toLocaleString()} logged for "${title}".`;
     } else {
       // contributeToGoal
       const { goalId, goalName, amount, date } = args.params;
@@ -508,15 +501,21 @@ export const executeAction = action({
         throw new ConvexError("Contribution amount must be greater than 0");
       }
 
-      // goalId comes as string from Gemini — we pass it through and let
-      // the mutation validate it against the goals table
+      // Validate goalId format before passing to mutation — AI can hallucinate IDs.
+      // Convex IDs follow a specific format; reject obviously invalid ones early
+      // so the user gets a clear error instead of a cryptic Convex internal error.
+      const CONVEX_ID_PATTERN = /^[a-z0-9]{32}$/;
+      if (!CONVEX_ID_PATTERN.test(goalId)) {
+        throw new ConvexError(`Invalid goal ID: "${goalId}". The goal may have been deleted or the AI provided an incorrect reference.`);
+      }
+
       await ctx.runMutation(api.goals.contributeToGoal, {
         goalId: goalId as unknown as import('./_generated/dataModel').Id<'goals'>,
         amount,
         date,
       });
 
-      successMsg = `Done! ₱${amount.toLocaleString()} contributed to "${goalName}". 🎉`;
+      successMsg = `Done! ₱${amount.toLocaleString()} contributed to "${goalName}".`;
     }
 
     // Save user message and AI confirmation to history

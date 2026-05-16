@@ -9,21 +9,23 @@ interface ChatMessageProps {
 }
 
 export function ChatMessage({ role, content }: ChatMessageProps) {
-  const isGoalProgress = (() => {
+  // Only attempt goalProgress parsing for assistant messages
+  const goalProgressData = (() => {
+    if (role !== "assistant") return null;
     try {
       const parsed = JSON.parse(content);
-      return parsed.type === "goalProgress";
-    } catch { return false; }
+      if (parsed && parsed.type === "goalProgress") return parsed;
+    } catch { /* not JSON — expected for most messages */ }
+    return null;
   })();
 
-  if (isGoalProgress) {
-    const { goalId } = JSON.parse(content);
+  if (goalProgressData) {
     return (
       <div className="flex gap-3 max-w-[85%] self-start w-full">
         <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center shrink-0 mt-1">
           <span className="material-symbols-outlined text-on-primary-container text-sm" style={{ fontVariationSettings: "'FILL' 1" }} aria-hidden="true">colors_spark</span>
         </div>
-        <GoalProgressCard goalId={goalId} />
+        <GoalProgressCard goalId={goalProgressData.goalId} />
       </div>
     );
   }
@@ -49,21 +51,31 @@ export function ChatMessage({ role, content }: ChatMessageProps) {
   let verdictData: { verdict: "safe" | "caution" | "risk"; verdict_reason: string } | null = null;
   let budgetBreakdown: Array<{ category: string; limit: number; spent: number; percentage: number }> | null = null;
 
-  // 1. Extract Verdict
+  // 1. Extract Verdict — with shape validation
   const verdictMatch = content.match(/\|\|\|VERDICT\|\|\|([\s\S]*?)\|\|\|END\|\|\|/);
   if (verdictMatch) {
     try {
-      verdictData = JSON.parse(verdictMatch[1]);
-      displayContent = displayContent.replace(verdictMatch[0], "");
+      const parsed = JSON.parse(verdictMatch[1]);
+      if (parsed && typeof parsed.verdict === "string" && typeof parsed.verdict_reason === "string"
+        && ["safe", "caution", "risk"].includes(parsed.verdict)) {
+        verdictData = parsed;
+        displayContent = displayContent.replace(verdictMatch[0], "");
+      }
     } catch (e) { console.warn("Verdict parse fail", e); }
   }
 
-  // 2. Extract Budget Breakdown
+  // 2. Extract Budget Breakdown — with shape validation
   const budgetMatch = content.match(/\|\|\|BUDGET_BREAKDOWN\|\|\|([\s\S]*?)\|\|\|END\|\|\|/);
   if (budgetMatch) {
     try {
-      budgetBreakdown = JSON.parse(budgetMatch[1]);
-      displayContent = displayContent.replace(budgetMatch[0], "");
+      const parsed = JSON.parse(budgetMatch[1]);
+      if (Array.isArray(parsed) && parsed.every((item: Record<string, unknown>) =>
+        typeof item.category === "string" && typeof item.limit === "number"
+        && typeof item.spent === "number" && typeof item.percentage === "number"
+      )) {
+        budgetBreakdown = parsed;
+        displayContent = displayContent.replace(budgetMatch[0], "");
+      }
     } catch (e) { console.warn("Budget parse fail", e); }
   }
 

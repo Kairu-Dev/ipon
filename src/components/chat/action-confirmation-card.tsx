@@ -18,6 +18,12 @@ interface ActionConfirmationCardProps {
   isExecuting: boolean;
 }
 
+/** Safely format a number with toLocaleString, returning fallback on bad input. */
+function safeAmount(val: unknown): string {
+  const num = Number(val);
+  return isNaN(num) ? "—" : `₱${num.toLocaleString()}`;
+}
+
 const ACTION_LABELS: Record<string, {
   title: string | ((params: Record<string, unknown>) => string);
   icon: string;
@@ -27,27 +33,27 @@ const ACTION_LABELS: Record<string, {
     title: "Log this transaction?",
     icon: "receipt_long",
     getDetails: (p) => [
-      p.title as string,
-      `₱${(p.amount as number).toLocaleString()} · ${p.category} · ${p.paymentMethod}`,
-      `Date: ${p.date}`,
+      (p.title as string) || "Untitled",
+      `${safeAmount(p.amount)} · ${p.category || "—"} · ${p.paymentMethod || "Cash"}`,
+      `Date: ${p.date || "Today"}`,
     ],
   },
   contributeToGoal: {
     title: "Contribute to goal?",
     icon: "savings",
     getDetails: (p) => [
-      p.goalName as string,
-      `₱${(p.amount as number).toLocaleString()} contribution`,
+      (p.goalName as string) || "Unnamed goal",
+      `${safeAmount(p.amount)} contribution`,
     ],
   },
   setBudgetLimit: {
-    title: (params) => params.isNew
+    title: (params) => params.isNew === true
       ? "Create new budget category?"
       : "Update budget limit?",
     icon: "tune",
     getDetails: (p) => [
-      p.category as string,
-      `Monthly limit: ₱${(p.limit as number).toLocaleString()}`,
+      (p.category as string) || "—",
+      `Monthly limit: ${safeAmount(p.limit)}`,
       ...(p.description ? [`Description: ${p.description}`] : []),
     ],
   },

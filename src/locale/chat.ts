@@ -26,6 +26,7 @@ export const CHAT_STRINGS = {
   // Error
   ERROR_TITLE: "Something went wrong",
   ERROR_RETRY: "Retry",
+  ERROR_ACTION_EXECUTION: "Failed to execute action. Please try again.",
 
   // Suggestion chips
   CHIP_AFFORD: "Can I afford a ₱3,000 purchase?",

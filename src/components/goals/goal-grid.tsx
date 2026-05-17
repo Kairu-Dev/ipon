@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "convex/react";
-import { api } from "../../../convex/_generated/api";
+import { api } from "@convex/_generated/api";
 import { GoalCard } from "./goal-card";
 import { Target } from "lucide-react";
 import { GOALS_STRINGS } from "@/locale/goals";

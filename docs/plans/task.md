@@ -1,10 +1,7 @@
-# US-12 AI Chat Interface — Task Tracker
+# Task Tracker — Payment Selector & Mobile Fix
 
-| # | Task | Status | Notes |
-|---|------|--------|-------|
-| 1 | Update Schema — chatMessages table | done | |
-| 2 | Internal Queries & Mutations for Chat | done | |
-| 3 | sendMessage & executeAction Actions | done | Created askGeminiChat wrapper |
-| 4 | Cron Job — clearOldMessages | done | Uses index range constraint |
-| 5 | Chat UI Components | in_progress | |
-| 6 | Chat Page Assembly | not_started | |
+| # | Task | Status |
+|---|---|---|
+| 1 | Update System Prompt — Stop Asking Payment Method | done |
+| 2 | Add Payment Method Selector to Confirmation Card | done |
+| 3 | Fix Monthly Context Sheet for Small Screens | done |

@@ -5,7 +5,7 @@ import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useUIStore } from "@/store/ui-store";
 import { useMutation, useAction, useQuery } from "convex/react";
-import { api } from "../../../convex/_generated/api";
+import { api } from "@convex/_generated/api";
 import { transactionSchema, TransactionInput } from "@/lib/validation";
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES, PAYMENT_METHODS } from "@/constants/transactions";
 import { ICON_MAP } from "@/constants/icons";

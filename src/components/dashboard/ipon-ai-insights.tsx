@@ -7,7 +7,7 @@
 import { useRef, useEffect, useState } from "react";
 import Link from "next/link";
 import { useQuery, useAction } from "convex/react";
-import { api } from "../../../convex/_generated/api";
+import { api } from "@convex/_generated/api";
 import { dashboardLocale } from "@/locale/dashboard";
 
 // Parsed shape of the insight JSON stored in the content field

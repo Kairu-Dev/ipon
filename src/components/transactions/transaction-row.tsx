@@ -1,7 +1,7 @@
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from "@/constants/transactions";
 import { ICON_MAP } from "@/constants/icons";
 import { MoreHorizontal } from "lucide-react";
-import { Doc } from "../../../convex/_generated/dataModel";
+import { Doc } from "@convex/_generated/dataModel";
 
 import { formatCurrency } from "@/lib/formatters";
 

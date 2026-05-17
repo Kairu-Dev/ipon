@@ -1,6 +1,6 @@
 "use client";
 import { useQuery } from "convex/react";
-import { api } from "../../../convex/_generated/api";
+import { api } from "@convex/_generated/api";
 import { formatCurrency } from "@/lib/formatters";
 import Link from "next/link";
 import { ICON_MAP } from "@/constants/icons";
@@ -24,7 +24,7 @@ export function MonthlyChatContext({ currentMonth }: MonthlyChatContextProps) {
 
   if (totals === undefined || spentMap === undefined || transactionsQuery === undefined || budgets === undefined) {
     return (
-      <div className="right-panel">
+      <div className="space-y-8 animate-pulse">
         <div className="p-6 space-y-8 animate-pulse">
           <div className="h-8 bg-surface-container rounded w-1/2 mb-4"></div>
           <div className="grid grid-cols-2 gap-3 mb-6">
@@ -51,19 +51,19 @@ export function MonthlyChatContext({ currentMonth }: MonthlyChatContextProps) {
   const recentTransactions = transactionsQuery.page.slice(0, 4);
 
   return (
-    <div className="right-panel hidden lg:block">
-      <div className="p-6 space-y-8">
+    <div className="space-y-8">
+      <div className="p-4 sm:p-6 space-y-8">
         <div>
           <h2 className="font-h3 text-h3 text-on-surface mb-4">Monthly Context</h2>
           {/* Financial Summary Cards */}
           <div className="grid grid-cols-2 gap-3 mb-6">
             <div className="summary-card">
               <p className="font-label-xs text-label-xs text-on-surface-variant uppercase mb-1">Income</p>
-              <p className="font-currency text-currency text-primary">{formatCurrency(totals.totalIncome)}</p>
+              <p className="font-currency text-[16px] sm:text-currency text-primary">{formatCurrency(totals.totalIncome)}</p>
             </div>
             <div className="summary-card">
               <p className="font-label-xs text-label-xs text-on-surface-variant uppercase mb-1">Expenses</p>
-              <p className="font-currency text-currency text-on-surface">{formatCurrency(totals.totalExpenses)}</p>
+              <p className="font-currency text-[16px] sm:text-currency text-on-surface">{formatCurrency(totals.totalExpenses)}</p>
             </div>
           </div>
 
@@ -108,9 +108,9 @@ export function MonthlyChatContext({ currentMonth }: MonthlyChatContextProps) {
 
               return (
                 <div key={tx._id} className="transaction-item">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
                     <div 
-                      className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                      className={`w-10 h-10 rounded-full shrink-0 flex items-center justify-center ${
                         isIncome 
                           ? "bg-primary-fixed text-on-primary-fixed" 
                           : "bg-tertiary-fixed text-on-tertiary-fixed"
@@ -118,12 +118,12 @@ export function MonthlyChatContext({ currentMonth }: MonthlyChatContextProps) {
                     >
                       <Icon className="w-5 h-5" />
                     </div>
-                    <div>
-                      <p className="font-label-md text-label-md text-on-surface">{tx.title || tx.category}</p>
+                    <div className="min-w-0">
+                      <p className="font-label-md text-label-md text-on-surface truncate">{tx.title || tx.category}</p>
                       <p className="font-label-xs text-label-xs text-on-surface-variant">{tx.date}</p>
                     </div>
                   </div>
-                  <p className={`font-body-sm text-body-sm font-medium ${isIncome ? 'text-primary' : 'text-on-surface'}`}>
+                  <p className={`font-body-sm text-body-sm font-medium shrink-0 whitespace-nowrap text-right pl-2 ${isIncome ? 'text-primary' : 'text-on-surface'}`}>
                     {isIncome ? '+' : '-'}{formatCurrency(tx.amount)}
                   </p>
                 </div>

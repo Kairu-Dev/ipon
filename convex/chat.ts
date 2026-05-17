@@ -6,8 +6,8 @@ import { v, ConvexError } from "convex/values";
 import { internal, api } from "./_generated/api";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { SAVINGS_CATEGORY } from "./constants";
-import { askGeminiChat } from "./lib/geminiChat";
-import { EXPENSE_CATEGORIES, INCOME_CATEGORIES, PAYMENT_METHODS } from "../src/constants/transactions";
+import { askGeminiChat } from "./lib/gemini/chat";
+import { EXPENSE_CATEGORIES, INCOME_CATEGORIES, PAYMENT_METHODS } from "@/constants/transactions";
 
 // ---------------------------------------------------------------------------
 // Public query — used by the UI to render chat history
@@ -152,7 +152,7 @@ const CHAT_TOOLS = [{
   functionDeclarations: [
     {
       name: "addTransaction",
-      description: "Log an income or expense transaction for the user. Use this ONLY for logging actual spending or income — never for budget adjustments.",
+      description: "Log an income or expense transaction. CRITICAL: If the user did not explicitly state the amount, DO NOT use this tool. You must reply with a normal message asking for the exact amount.",
       parameters: {
         type: "object",
         properties: {
@@ -169,7 +169,7 @@ const CHAT_TOOLS = [{
     },
     {
       name: "contributeToGoal",
-      description: "Add money to one of the user's savings goals.",
+      description: "Add money to one of the user's savings goals. CRITICAL: If the user did not explicitly state the amount to contribute, DO NOT use this tool. Ask them for the amount.",
       parameters: {
         type: "object",
         properties: {
@@ -183,7 +183,7 @@ const CHAT_TOOLS = [{
     },
     {
       name: "createGoal",
-      description: "Create a new savings goal for the user. Ask the user for the target amount and deadline if they are not provided.",
+      description: "Create a new savings goal for the user. CRITICAL: If the user did not explicitly state the target amount or the deadline, DO NOT use this tool. Ask them for the missing details.",
       parameters: {
         type: "object",
         properties: {
@@ -197,7 +197,7 @@ const CHAT_TOOLS = [{
     },
     {
       name: "setBudgetLimit",
-      description: "Set or update a monthly spending limit for a budget category. ONLY use this when the user explicitly asks to SET, CREATE, or CHANGE a budget limit. DO NOT use this tool if the user is just asking to VIEW or SHOW their budgets.",
+      description: "Set or update a monthly spending limit for a budget category. ONLY use this when the user explicitly asks to SET, CREATE, or CHANGE a budget limit. CRITICAL: If the user did not specify the limit amount, DO NOT use this tool. Ask them for the exact amount.",
       parameters: {
         type: "object",
         properties: {
@@ -261,14 +261,16 @@ ${contextData.goals.length > 0
   : "No savings goals set."}
 
 === TOOL USAGE RULES — READ CAREFULLY ===
-- addTransaction → ONLY for logging actual spending or income
+- ALWAYS use the provided tools to perform actions. NEVER output text claiming an action was completed (e.g., "Done! Budget updated...") without actually calling the tool first. If you just output text, the database will NOT be updated.
+- addTransaction → ONLY for logging actual spending or income. If the user doesn't specify a payment method, default to "Cash". Do NOT ask.
 - setBudgetLimit → ONLY for setting or adjusting budget category limits
 - createGoal → ONLY for creating a new savings goal (NOT for contributing to one)
 - contributeToGoal → ONLY for adding money to an EXISTING savings goal (must already exist in the goals list above)
 - getGoalProgress → ONLY when user asks to see goal progress visually
 - NEVER use addTransaction for budget adjustments — this is a critical rule
 - PROACTIVE LOGGING: If a user asks "can I afford X" and then says "log it" or "buy it", use addTransaction IMMEDIATELY with the details from the previous message.
-- DEFAULT VALUES: Use "Cash" as the default payment method if unknown. Use the most relevant category from the affordability check.
+- PAYMENT METHOD: If the user specifies a payment method, use it. If they don't, default to "Cash". Do NOT ask — the user can change it on the confirmation card before confirming.
+- MISSING AMOUNT: If the user asks to log a transaction, create a goal, or set a budget but does NOT specify an amount, you MUST ask them for the exact amount. NEVER assume or hallucinate an amount.
 
 === GUARDRAILS ===
 - Maximum single transaction amount: 999,999
@@ -299,6 +301,16 @@ ${contextData.goals.length > 0
 12. Short sentences — this is a mobile app, not a report
 13. Dry wit is allowed — the situation can be lightly funny, never the user's punchline
 14. You MAY use bullet points (•) and **bold** formatting for emphasis, but keep it minimal and clean.
+15. NEVER begin a text response with "Done!". That prefix is reserved for the system's automated action confirmations. If you use it, you are hallucinating.
+16. If the user wants to perform an action (Create, Update, Log), you MUST return a tool call. You cannot fulfill the request with text alone.
+17. HONESTY: If the user asks you to do something you cannot do (like edit an existing transaction), explain that you don't have that capability yet and tell them how to do it manually in the UI.
+
+=== CAPABILITIES & CONSTRAINTS — DO NOT IGNORE ===
+- CREATE-ONLY: You can log NEW transactions, goals, and budget limits.
+- NO EDIT/DELETE: You CANNOT edit, update, or delete existing transactions, budgets, or goals after they have been confirmed.
+- NO RETROACTIVE CORRECTION: If you log something incorrectly (e.g. wrong payment method) and the user notices, you CANNOT "fix" it in the database. You must apologize and instruct the user to go to the Transactions page to edit it manually.
+- NO ACCESS TO TRANSACTION IDs: You cannot see or reference individual transaction IDs.
+- If a user asks to "change", "delete", or "fix" a previous entry, say: "I don't have the ability to edit or delete entries yet. Please go to the [Relevant Page] to make that change manually."
 
 === AFFORDABILITY QUESTIONS ===
 When user asks "can I afford X?" or similar:
@@ -366,10 +378,17 @@ export const sendMessage = action({
     });
 
     // Format history for Gemini (role: "user" | "model")
-    const history = recentMessages.map((m: { role: string; content: string }) => ({
-      role: m.role === "user" ? ("user" as const) : ("model" as const),
-      parts: [{ text: m.content }],
-    }));
+    // If a message starts with "Done!", we tag it so the AI knows it was an automated system confirmation.
+    const history = recentMessages.map((m: { role: string; content: string }) => {
+      let content = m.content;
+      if (m.role === "assistant" && content.startsWith("Done!")) {
+        content = `[SYSTEM CONFIRMATION: ${content}]`;
+      }
+      return {
+        role: m.role === "user" ? ("user" as const) : ("model" as const),
+        parts: [{ text: content }],
+      };
+    });
 
     // 3. Build system prompt
     const systemPrompt = buildChatSystemPrompt(contextData);

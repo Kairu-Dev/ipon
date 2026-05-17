@@ -5,9 +5,9 @@
 // Local state holds editable row values; persisted on "Save Changes".
 import { useState, useCallback } from "react";
 import { useQuery, useMutation } from "convex/react";
-import { api } from "../../../../convex/_generated/api";
+import { api } from "@convex/_generated/api";
 import { BUDGET_ELIGIBLE_CATEGORIES } from "@/constants/budget";
-import { calculateTotalBudget } from "@/lib/budget";
+import { calculateTotalBudget } from "@/lib/finance";
 import { BudgetSummaryCard, IncomeAllocatedCard, BudgetCategoryRow, AddCategoryModal } from "@/components/budget";
 import { BUDGET_STRINGS as t } from "@/locale/budget";
 

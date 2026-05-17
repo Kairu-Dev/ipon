@@ -6,7 +6,7 @@ import { ICON_MAP } from "@/constants/icons";
 import { CATEGORY_SUBTITLES, BUDGET_STATUS_STYLES } from "@/constants/budget";
 import { formatCurrency } from "@/lib/formatters";
 import { BUDGET_STRINGS as t } from "@/locale/budget";
-import { getBudgetStatus, getBudgetPercentage } from "@/lib/budget";
+import { getBudgetStatus, getBudgetPercentage } from "@/lib/finance";
 import { MoreHorizontal, Trash2 } from "lucide-react";
 
 interface BudgetCategoryRowProps {

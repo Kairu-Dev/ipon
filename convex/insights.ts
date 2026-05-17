@@ -8,8 +8,8 @@ import { internal } from "./_generated/api";
 import { v, ConvexError } from "convex/values";
 import { Id } from "./_generated/dataModel";
 import { getAuthUserId } from "@convex-dev/auth/server";
-import { askGemini } from "./lib/gemini";
-import { buildInsightPrompt } from "./lib/insightsPrompt";
+import { askGemini } from "./lib/gemini/client";
+import { buildInsightPrompt } from "./lib/gemini/prompts";
 
 // Return type for the generateInsight action
 export type InsightResult =

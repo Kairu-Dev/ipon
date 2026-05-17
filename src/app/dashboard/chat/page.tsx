@@ -1,7 +1,7 @@
 "use client";
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { useQuery, useAction } from "convex/react";
-import { api } from "../../../../convex/_generated/api";
+import { api } from "@convex/_generated/api";
 import {
   ChatMessage,
   ActionConfirmationCard,
@@ -9,6 +9,7 @@ import {
   SuggestionChips,
   MonthlyChatContext,
 } from "@/components/chat";
+import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
 import { CHAT_STRINGS as t } from "@/locale/chat";
 
 /** Pad a number to 2 digits — timezone-safe date formatting. */
@@ -180,6 +181,19 @@ export default function ChatPage() {
     <div id="chat-page">
       {/* Left: Chat Thread */}
       <div className="left-panel relative pb-24 h-[calc(100vh-6rem)] flex flex-col">
+        {/* Mobile Header (Chat Page Only) */}
+        <div className="lg:hidden flex justify-between items-center px-6 pt-2 pb-4">
+          <h1 className="font-h3 text-h3 text-on-surface">Ipon AI</h1>
+          <Sheet>
+            <SheetTrigger render={<button className="text-on-surface-variant hover:text-primary transition-colors p-2 hover:bg-primary/5 rounded-full" type="button" aria-label="View Monthly Context" />}>
+              <span className="material-symbols-outlined text-xl" aria-hidden="true">analytics</span>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-[85vw] sm:w-[400px] overflow-y-auto pt-10">
+              <MonthlyChatContext currentMonth={currentMonth} />
+            </SheetContent>
+          </Sheet>
+        </div>
+
         {/* Suggestion Chips */}
         <SuggestionChips
           currentMonthName={currentMonthName}
@@ -246,8 +260,10 @@ export default function ChatPage() {
         <ChatInput onSend={handleSend} disabled={isLoading || isExecuting} />
       </div>
 
-      {/* Right: Monthly Context Panel */}
-      <MonthlyChatContext currentMonth={currentMonth} />
+      {/* Right: Monthly Context Panel (Desktop) */}
+      <div className="right-panel hidden lg:block p-6">
+        <MonthlyChatContext currentMonth={currentMonth} />
+      </div>
     </div>
   );
 }

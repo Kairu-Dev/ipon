@@ -212,7 +212,9 @@ export default function ChatPage() {
             </div>
           )}
 
-          {allMessages.map((msg) => (
+          {allMessages
+            .filter((msg) => !msg.content.startsWith("[SYSTEM:"))
+            .map((msg) => (
             <ChatMessage key={msg.id} role={msg.role} content={msg.content} />
           ))}
 

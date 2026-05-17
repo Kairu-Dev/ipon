@@ -1,4 +1,4 @@
-import { SAVINGS_CATEGORY } from "../constants";
+import { SAVINGS_CATEGORY } from "../../constants";
 
 export interface PromptData {
   transactions: { type: string; amount: number; category: string }[];

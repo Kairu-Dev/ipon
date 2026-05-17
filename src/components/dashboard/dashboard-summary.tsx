@@ -1,9 +1,9 @@
 "use client";
 import { useQuery } from "convex/react";
-import { api } from "../../../convex/_generated/api";
+import { api } from "@convex/_generated/api";
 import { dashboardLocale } from "@/locale/dashboard";
 import { formatCurrency } from "@/lib/formatters";
-import { getMonthOverMonthDates, calculateSafeToSpend } from "@/lib/dashboard";
+import { getMonthOverMonthDates, calculateSafeToSpend } from "@/lib/finance";
 import { InfoTooltip } from "@/components/ui/info-tooltip";
 
 // Shows a trend indicator comparing current vs previous month.

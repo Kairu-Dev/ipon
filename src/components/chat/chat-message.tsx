@@ -3,7 +3,7 @@
 // Renders a single chat bubble — user messages right-aligned, AI messages left-aligned.
 import { GoalProgressCard } from "./goal-progress-card";
 import { useQuery } from "convex/react";
-import { api } from "../../../convex/_generated/api";
+import { api } from "@convex/_generated/api";
 
 const pad = (n: number) => String(n).padStart(2, "0");
 

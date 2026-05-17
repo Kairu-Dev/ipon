@@ -1,9 +1,9 @@
 "use client";
 
 import { useUIStore } from "@/store/ui-store";
-import { Doc } from "../../../convex/_generated/dataModel";
+import { Doc } from "@convex/_generated/dataModel";
 import { GOAL_ICON_MAP } from "@/constants/goals";
-import { calculateGoalProgress } from "@/lib/goals";
+import { calculateGoalProgress } from "@/lib/finance";
 import { formatCurrency, formatGoalDate } from "@/lib/formatters";
 import { Check, Calendar } from "lucide-react";
 import { GOALS_STRINGS } from "@/locale/goals";

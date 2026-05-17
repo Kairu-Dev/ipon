@@ -3,7 +3,7 @@
 // Auth state is NOT stored here — it comes from Convex Auth hooks.
 // See Standards/state-management.md for the full rules.
 import { create } from "zustand";
-import { Id } from "../../convex/_generated/dataModel";
+import { Id } from "@convex/_generated/dataModel";
 
 interface UIState {
   // Modal/panel visibility flags

@@ -3,9 +3,9 @@ import { paginationOptsValidator } from "convex/server";
 import { v, ConvexError } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { SAVINGS_CATEGORY } from "./constants";
-import { parseGeminiCategorySuggestion } from "../src/lib/gemini-parser";
-import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from "../src/constants/transactions";
-import { askGemini } from "./lib/gemini";
+import { parseGeminiCategorySuggestion } from "@/lib/gemini-parser";
+import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from "@/constants/transactions";
+import { askGemini } from "./lib/gemini/client";
 
 export const addTransaction = mutation({
   args: {

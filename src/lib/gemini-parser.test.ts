@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { parseGeminiCategorySuggestion } from "../lib/gemini-parser";
+import { parseGeminiCategorySuggestion } from "./gemini-parser";
 
 describe("Gemini Category Parser", () => {
   it("parses exact value matches", () => {

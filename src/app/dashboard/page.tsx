@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "convex/react";
-import { api } from "../../../convex/_generated/api";
+import { api } from "@convex/_generated/api";
 import { DashboardSummary, DashboardSpendingBreakdown, DashboardGoalsPreview, IponAIInsights } from "@/components/dashboard";
 import { ContributeGoalSheet } from "@/components/goals";
 import { dashboardLocale } from "@/locale/dashboard";

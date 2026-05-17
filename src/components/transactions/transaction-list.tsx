@@ -2,10 +2,10 @@
 
 import { useState, useMemo } from "react";
 import { usePaginatedQuery, useQuery } from "convex/react";
-import { api } from "../../../convex/_generated/api";
+import { api } from "@convex/_generated/api";
 import { EmptyTransactionState } from "./empty-transaction-state";
 import { TransactionRow } from "./transaction-row";
-import { groupByDate } from "@/lib/transactions";
+import { groupByDate } from "@/lib/finance";
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from "@/constants/transactions";
 
 /** All unique categories merged for the "All" type filter. */

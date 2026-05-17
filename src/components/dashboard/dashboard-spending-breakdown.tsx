@@ -3,9 +3,9 @@
 import Link from "next/link";
 
 import { useQuery } from "convex/react";
-import { api } from "../../../convex/_generated/api";
+import { api } from "@convex/_generated/api";
 import { BUDGET_STATUS_STYLES, BUDGET_ELIGIBLE_CATEGORIES } from "@/constants/budget";
-import { getBudgetStatus, getBudgetPercentage } from "@/lib/budget";
+import { getBudgetStatus, getBudgetPercentage } from "@/lib/finance";
 import { formatCurrency } from "@/lib/formatters";
 import { ICON_MAP } from "@/constants/icons";
 import { MoreHorizontal } from "lucide-react";

@@ -60,7 +60,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
                 Here are some things you can ask Ipon to do for you.
               </DialogDescription>
             </DialogHeader>
-            <div className="grid gap-4 py-4">
+            <div className="grid gap-4 py-4 max-h-[60vh] overflow-y-auto pr-2">
               {capabilities.map((item, i) => (
                 <div key={i} className="flex items-start gap-4 p-3 rounded-lg bg-surface-container-lowest border border-slate-100 shadow-sm">
                   <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">

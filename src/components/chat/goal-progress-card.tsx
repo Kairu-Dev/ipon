@@ -1,7 +1,7 @@
 "use client";
 import { useQuery } from "convex/react";
-import { api } from "../../../convex/_generated/api";
-import { calculateGoalProgress } from "@/lib/goals";
+import { api } from "@convex/_generated/api";
+import { calculateGoalProgress } from "@/lib/finance";
 import { GOAL_ICON_MAP } from "@/constants/goals";
 import { MoreHorizontal } from "lucide-react";
 

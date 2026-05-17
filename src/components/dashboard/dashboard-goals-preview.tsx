@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "convex/react";
-import { api } from "../../../convex/_generated/api";
+import { api } from "@convex/_generated/api";
 import Link from "next/link";
 import { GoalCard } from "@/components/goals";
 import { dashboardLocale } from "@/locale/dashboard";

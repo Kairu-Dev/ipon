@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { CHAT_STRINGS as t } from "@/locale/chat";
+import { PAYMENT_METHODS } from "@/constants/transactions";
 
 
 interface PendingAction {
@@ -33,7 +34,7 @@ const ACTION_LABELS: Record<string, {
     icon: "receipt_long",
     getDetails: (p) => [
       (p.title as string) || "Untitled",
-      `${safeAmount(p.amount)} · ${p.category || "—"} · ${p.paymentMethod || "Cash"}`,
+      `${safeAmount(p.amount)} · ${p.category || "—"}`,
       `Date: ${p.date || "Today"}`,
     ],
   },
@@ -74,6 +75,7 @@ export function ActionConfirmationCard({
   isExecuting,
 }: ActionConfirmationCardProps) {
   const [selectedIcon, setSelectedIcon] = useState<string>((action.params.icon as string) || "flight");
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>((action.params.paymentMethod as string) || "Cash");
 
   const config = ACTION_LABELS[action.actionType] || {
     title: "Confirm action?",
@@ -100,6 +102,29 @@ export function ActionConfirmationCard({
             </li>
           ))}
         </ul>
+
+        {/* Payment Method Selector (only for addTransaction) */}
+        {action.actionType === "addTransaction" && (
+          <div className="mb-4 bg-surface-container-low p-3 rounded-xl border border-surface-variant">
+            <p className="text-xs font-label-md text-on-surface-variant mb-2">Payment Method</p>
+            <div className="flex flex-wrap gap-2">
+              {PAYMENT_METHODS.map((method) => (
+                <button
+                  key={method}
+                  onClick={() => setSelectedPaymentMethod(method)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-label-md transition-colors ${
+                    selectedPaymentMethod === method
+                      ? "bg-primary text-on-primary"
+                      : "bg-surface text-on-surface-variant hover:bg-surface-variant"
+                  }`}
+                  aria-label={`Select ${method}`}
+                >
+                  {method}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Icon Selector (only for Create Goal or Custom Budget) */}
         {(action.actionType === "createGoal" || (action.actionType === "setBudgetLimit" && action.params.isNew === true)) && (
@@ -143,6 +168,8 @@ export function ActionConfirmationCard({
             onClick={() => {
               if (action.actionType === "createGoal" || (action.actionType === "setBudgetLimit" && action.params.isNew === true)) {
                 onConfirm({ icon: selectedIcon });
+              } else if (action.actionType === "addTransaction") {
+                onConfirm({ paymentMethod: selectedPaymentMethod });
               } else {
                 onConfirm();
               }

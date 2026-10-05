@@ -1,16 +1,14 @@
 // convex/schema.ts
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
-import { authTables } from "@convex-dev/auth/server";
-
 export default defineSchema({
-    ...authTables,
     users: defineTable({
+        clerkId: v.string(),
         name: v.optional(v.string()),
         email: v.optional(v.string()),
-        emailVerificationTime: v.optional(v.number()),
-        isAnonymous: v.optional(v.boolean()),
-    }).index("email", ["email"]),
+    })
+        .index("by_clerk_id", ["clerkId"])
+        .index("email", ["email"]),
     transactions: defineTable({
         userId: v.id("users"),
         type: v.union(v.literal("income"), v.literal("expense")),

@@ -1,59 +1,113 @@
 "use client";
 import { useConvexAuth } from "convex/react";
-import { useAuthActions } from "@convex-dev/auth/react";
+import { useClerk, useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useUIStore } from "@/store/ui-store";
 import { AddTransactionModal } from "@/components/transactions";
+import { useEnsureUser } from "@/hooks/use-ensure-user";
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useConvexAuth();
-  const { signOut } = useAuthActions();
+  const { isLoaded: isClerkLoaded = true, isSignedIn = false } = useAuth();
+  const { isAuthenticated, isLoading: isConvexLoading } = useConvexAuth();
+  const { isReady } = useEnsureUser();
+  const { signOut } = useClerk();
   const router = useRouter();
   const pathname = usePathname();
   const setAddTransactionModalOpen = useUIStore((s) => s.setAddTransactionModalOpen);
 
-  // Redirect to login if session expires mid-use.
-  // proxy.ts handles unauthenticated page loads on the server side.
+  // Still resolving auth state:
+  // - Clerk hasn't initialized yet
+  // - Convex is loading
+  // - User is signed in to Clerk, but Convex token is still exchanging or user record is syncing
+  const isResolving =
+    !isClerkLoaded ||
+    isConvexLoading ||
+    (isSignedIn && (!isAuthenticated || !isReady)) ||
+    (!isSignedIn && isConvexLoading);
+
+  // Redirect to login ONLY if Clerk has fully loaded and confirmed user is NOT signed in
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    if (isClerkLoaded && !isSignedIn && !isConvexLoading && !isAuthenticated) {
       router.replace("/login");
     }
-  }, [isAuthenticated, isLoading, router]);
+  }, [isClerkLoaded, isSignedIn, isConvexLoading, isAuthenticated, router]);
 
-  // Show a branded skeleton while auth state resolves.
-  // This fires exactly once per page load — no re-render concern.
-  if (isLoading) {
+  // Show a modern, non-blocking shell skeleton while auth state resolves
+  if (isResolving) {
     return (
       <div className="bg-background text-on-background font-body-base h-screen overflow-hidden flex">
-        {/* Skeleton sidebar */}
-        <div className="hidden md:flex w-64 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex-col p-4">
+        {/* Hairline Top Progress Pulse */}
+        <div className="fixed top-0 left-0 right-0 z-50 h-0.5 bg-primary/20 overflow-hidden">
+          <div className="h-full bg-primary w-2/5 animate-pulse" />
+        </div>
+
+        {/* Skeleton sidebar (matches actual layout) */}
+        <aside className="hidden md:flex w-64 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex-col p-4 shrink-0">
           <div className="mb-8 px-4 flex items-center gap-3">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-on-primary font-bold">I</div>
+            <div className="w-8 h-8 bg-primary/10 text-primary border border-primary/20 rounded-lg flex items-center justify-center">
+              <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'FILL' 1" }} aria-hidden="true">spa</span>
+            </div>
             <div>
               <div className="text-2xl font-bold tracking-tight text-green-600 dark:text-green-500 font-h2">Ipon</div>
               <div className="text-slate-500 text-xs font-label-xs">Financial Growth</div>
             </div>
           </div>
-          <div className="flex flex-col gap-3 mt-4">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-10 bg-slate-100 dark:bg-slate-800 rounded-lg animate-pulse" />
+          <div className="flex flex-col gap-2.5 mt-2">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="h-9 bg-slate-100 dark:bg-slate-800/60 rounded-lg animate-pulse" />
             ))}
           </div>
-        </div>
-        {/* Skeleton main content */}
-        <div className="flex-1 flex flex-col items-center justify-center gap-4">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-on-primary font-bold animate-pulse">I</div>
-          <p className="text-sm text-slate-400 animate-pulse">Loading your dashboard…</p>
+        </aside>
+
+        {/* Skeleton main canvas (previews layout without blocking) */}
+        <div className="flex-1 flex flex-col h-full overflow-hidden">
+          {/* TopBar outline */}
+          <div className="h-16 border-b border-slate-200 dark:border-slate-800 hidden md:flex items-center justify-between px-8 bg-white/50 dark:bg-slate-900/50">
+            <div className="h-8 w-64 bg-slate-100 dark:bg-slate-800/50 rounded-full animate-pulse" />
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800/50 animate-pulse" />
+              <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800/50 animate-pulse" />
+            </div>
+          </div>
+
+          {/* Canvas content skeleton */}
+          <main className="flex-1 p-6 md:p-8 space-y-8 overflow-y-auto max-w-[1280px] w-full mx-auto">
+            {/* Header placeholder */}
+            <div className="space-y-2">
+              <div className="h-8 w-44 bg-slate-200 dark:bg-slate-800 rounded-lg animate-pulse" />
+              <p className="sr-only">Loading your dashboard…</p>
+              <div className="h-4 w-64 bg-slate-100 dark:bg-slate-800/60 rounded animate-pulse" />
+            </div>
+
+            {/* 3 Metric Cards Skeleton */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-32 bg-slate-50 dark:bg-slate-800/30 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-6 space-y-4 animate-pulse">
+                  <div className="h-4 w-24 bg-slate-200 dark:bg-slate-700/60 rounded" />
+                  <div className="h-8 w-36 bg-slate-200 dark:bg-slate-700/60 rounded-lg" />
+                </div>
+              ))}
+            </div>
+
+            {/* Content Table / Chart Preview Skeleton */}
+            <div className="h-72 bg-slate-50 dark:bg-slate-800/30 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-6 animate-pulse" />
+          </main>
         </div>
       </div>
     );
   }
 
-  // Not authenticated — render nothing, useEffect will redirect
-  if (!isAuthenticated) return null;
+  // Not authenticated — keep background styled with subtle spinner while redirect executes
+  if (!isAuthenticated && !isSignedIn) {
+    return (
+      <div className="bg-background text-on-background font-body-base h-screen overflow-hidden flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="bg-background text-on-background font-body-base h-screen overflow-hidden">
@@ -80,7 +134,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       {/* SideNavBar */}
       <nav className="h-screen w-64 border-r fixed left-0 top-0 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm dark:shadow-none hidden md:flex flex-col p-4 z-50">
         <div className="mb-8 px-4 flex items-center gap-3">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-on-primary font-bold">I</div>
+          <div className="w-8 h-8 bg-primary/10 text-primary border border-primary/20 rounded-lg flex items-center justify-center">
+            <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'FILL' 1" }} aria-hidden="true">spa</span>
+          </div>
           <div>
             <div className="text-2xl font-bold tracking-tight text-green-600 dark:text-green-500 font-h2">Ipon</div>
             <div className="text-slate-500 text-xs font-label-xs">Financial Growth</div>
@@ -113,7 +169,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             <span className="material-symbols-outlined" aria-hidden="true">settings</span>
             Settings
           </Link>
-          <button onClick={() => void signOut()} className="text-slate-600 dark:text-slate-400 px-4 py-2 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-all active:scale-95 duration-150 ease-in-out w-full text-left">
+          <button onClick={() => void signOut({ redirectUrl: "/login" })} className="text-slate-600 dark:text-slate-400 px-4 py-2 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-all active:scale-95 duration-150 ease-in-out w-full text-left">
             <span className="material-symbols-outlined" aria-hidden="true">logout</span>
             Logout
           </button>

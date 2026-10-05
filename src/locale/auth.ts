@@ -43,9 +43,9 @@ export const AUTH_STRINGS = {
   
   // Dividers & OAuth
   DIVIDER_TEXT: "Or continue with",
-  BTN_OAUTH_GOOGLE: "Google — Coming soon",
-  BTN_OAUTH_APPLE: "Apple — Coming soon",
-  OAUTH_TOOLTIP: "Coming soon",
+  BTN_OAUTH_GOOGLE: "Google",
+  BTN_OAUTH_APPLE: "Apple",
+  OAUTH_TOOLTIP: "Sign in with provider",
 
   // Password Rules
   RULE_MIN_LENGTH: "At least 8 characters",

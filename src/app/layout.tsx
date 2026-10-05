@@ -1,6 +1,6 @@
+import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
-import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
 import { ConvexClientProvider } from "@/components/convex-client-provider";
 import { SessionWatcher } from "@/components/auth/session-watcher";
 import "./globals.css";
@@ -21,7 +21,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ConvexAuthNextjsServerProvider>
+    <ClerkProvider>
       <html lang="en" className={`${manrope.variable} h-full antialiased`}>
         <head>
           <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -36,6 +36,6 @@ export default function RootLayout({
           </ConvexClientProvider>
         </body>
       </html>
-    </ConvexAuthNextjsServerProvider>
+    </ClerkProvider>
   );
 }

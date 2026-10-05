@@ -1,6 +1,6 @@
 // src/components/dashboard/dashboard-shell.test.tsx
 // Unit tests for the DashboardShell component.
-// Mocks Convex Auth hooks and Next.js navigation.
+// Mocks Clerk and Convex Auth hooks and Next.js navigation.
 import { render, screen } from "@testing-library/react";
 import { DashboardShell } from "./dashboard-shell";
 import { describe, it, expect, vi, beforeEach } from "vitest";
@@ -14,10 +14,18 @@ vi.mock("convex/react", () => ({
   useAction: vi.fn(),
 }));
 
-// Mock useAuthActions (signOut)
+// Mock useEnsureUser
+const mockUseEnsureUser = vi.fn(() => ({ isReady: true, isLoading: false }));
+vi.mock("@/hooks/use-ensure-user", () => ({
+  useEnsureUser: () => mockUseEnsureUser(),
+}));
+
+// Mock useClerk (signOut) and useAuth
 const mockSignOut = vi.fn();
-vi.mock("@convex-dev/auth/react", () => ({
-  useAuthActions: () => ({ signOut: mockSignOut }),
+const mockUseAuth = vi.fn(() => ({ isLoaded: true, isSignedIn: true }));
+vi.mock("@clerk/nextjs", () => ({
+  useClerk: () => ({ signOut: mockSignOut }),
+  useAuth: () => mockUseAuth(),
 }));
 
 // Mock Next.js navigation
@@ -40,6 +48,7 @@ vi.mock("next/link", () => ({
 describe("DashboardShell", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockUseEnsureUser.mockReturnValue({ isReady: true, isLoading: false });
   });
 
   it("shows loading skeleton when auth is loading", () => {
@@ -50,17 +59,25 @@ describe("DashboardShell", () => {
     expect(screen.queryByText("Secret Content")).toBeNull();
   });
 
-  it("renders children when authenticated", () => {
+  it("shows loading skeleton when authenticated but ensureUser is not ready", () => {
     mockUseConvexAuth.mockReturnValue({ isAuthenticated: true, isLoading: false });
+    mockUseEnsureUser.mockReturnValue({ isReady: false, isLoading: true });
+    render(<DashboardShell>Secret Content</DashboardShell>);
+    expect(screen.getByText("Loading your dashboard…")).toBeDefined();
+    expect(screen.queryByText("Secret Content")).toBeNull();
+  });
+
+  it("renders children when authenticated and ready", () => {
+    mockUseConvexAuth.mockReturnValue({ isAuthenticated: true, isLoading: false });
+    mockUseEnsureUser.mockReturnValue({ isReady: true, isLoading: false });
     render(<DashboardShell>Dashboard Content</DashboardShell>);
     expect(screen.getByText("Dashboard Content")).toBeDefined();
   });
 
-  it("renders nothing and triggers redirect when not authenticated", () => {
+  it("triggers redirect and keeps styled container when not authenticated", () => {
+    mockUseAuth.mockReturnValue({ isLoaded: true, isSignedIn: false });
     mockUseConvexAuth.mockReturnValue({ isAuthenticated: false, isLoading: false });
-    const { container } = render(<DashboardShell>Secret Content</DashboardShell>);
-    // Should render nothing (redirect via useEffect)
-    expect(container.innerHTML).toBe("");
+    render(<DashboardShell>Secret Content</DashboardShell>);
     expect(screen.queryByText("Secret Content")).toBeNull();
     // Should trigger redirect to login
     expect(mockReplace).toHaveBeenCalledWith("/login");

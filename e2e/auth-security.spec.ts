@@ -36,17 +36,7 @@ test.describe("Route Protection (proxy.ts)", () => {
 });
 
 test.describe("Session Security", () => {
-  test("login form has hidden flow=signIn field", async ({ page }) => {
-    await page.goto("/login");
-    const hiddenInput = page.locator('input[name="flow"][type="hidden"]');
-    await expect(hiddenInput).toHaveValue("signIn");
-  });
-
-  test("sign-up form has hidden flow=signUp field", async ({ page }) => {
-    await page.goto("/sign-up");
-    const hiddenInput = page.locator('input[name="flow"][type="hidden"]');
-    await expect(hiddenInput).toHaveValue("signUp");
-  });
+  // Session Security is enforced by Clerk via session cookies and clerkMiddleware in proxy.ts
 
   test("login error message does not leak email existence", async ({ page }) => {
     await page.goto("/login");
@@ -115,23 +105,11 @@ test.describe("Input Sanitization", () => {
 });
 
 test.describe("OAuth Buttons Security", () => {
-  test("Google button is disabled and cannot be clicked", async ({ page }) => {
+  test("Google and Apple buttons are enabled for active SSO redirect", async ({ page }) => {
     await page.goto("/login");
     const googleButton = page.getByRole("button", { name: /google/i });
-    await expect(googleButton).toBeDisabled();
-
-    // Attempt to click — should not navigate or trigger any action
-    await googleButton.click({ force: true }).catch(() => {
-      // Expected — disabled buttons may throw
-    });
-
-    // Should still be on login page
-    await expect(page).toHaveURL(/\/login/);
-  });
-
-  test("Apple button is disabled and cannot be clicked", async ({ page }) => {
-    await page.goto("/login");
     const appleButton = page.getByRole("button", { name: /apple/i });
-    await expect(appleButton).toBeDisabled();
+    await expect(googleButton).toBeEnabled();
+    await expect(appleButton).toBeEnabled();
   });
 });

@@ -6,6 +6,10 @@ export default defineSchema({
         clerkId: v.string(),
         name: v.optional(v.string()),
         email: v.optional(v.string()),
+        currency: v.optional(v.string()),
+        defaultPaymentMethod: v.optional(v.string()),
+        paydayCycle: v.optional(v.string()),
+        aiSuggestions: v.optional(v.boolean()),
     })
         .index("by_clerk_id", ["clerkId"])
         .index("email", ["email"]),

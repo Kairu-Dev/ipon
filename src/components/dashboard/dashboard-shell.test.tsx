@@ -20,12 +20,21 @@ vi.mock("@/hooks/use-ensure-user", () => ({
   useEnsureUser: () => mockUseEnsureUser(),
 }));
 
-// Mock useClerk (signOut) and useAuth
+// Mock useClerk (signOut), useAuth, and useUser
 const mockSignOut = vi.fn();
 const mockUseAuth = vi.fn(() => ({ isLoaded: true, isSignedIn: true }));
+const mockUseUser = vi.fn(() => ({
+  isLoaded: true,
+  user: {
+    fullName: "Kyle Soliman",
+    primaryEmailAddress: { emailAddress: "kyle@example.com" },
+    imageUrl: "https://example.com/avatar.jpg",
+  },
+}));
 vi.mock("@clerk/nextjs", () => ({
   useClerk: () => ({ signOut: mockSignOut }),
   useAuth: () => mockUseAuth(),
+  useUser: () => mockUseUser(),
 }));
 
 // Mock Next.js navigation

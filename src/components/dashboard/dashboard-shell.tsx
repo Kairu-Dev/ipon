@@ -8,6 +8,8 @@ import { usePathname } from "next/navigation";
 import { useUIStore } from "@/store/ui-store";
 import { AddTransactionModal } from "@/components/transactions";
 import { useEnsureUser } from "@/hooks/use-ensure-user";
+import { UserProfileMenu } from "@/components/dashboard/user-profile-menu";
+import { NotificationCenter } from "@/components/dashboard/notification-center";
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const { isLoaded: isClerkLoaded = true, isSignedIn = false } = useAuth();
@@ -65,8 +67,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         {/* Skeleton main canvas (previews layout without blocking) */}
         <div className="flex-1 flex flex-col h-full overflow-hidden">
           {/* TopBar outline */}
-          <div className="h-16 border-b border-slate-200 dark:border-slate-800 hidden md:flex items-center justify-between px-8 bg-white/50 dark:bg-slate-900/50">
-            <div className="h-8 w-64 bg-slate-100 dark:bg-slate-800/50 rounded-full animate-pulse" />
+          <div className="h-16 border-b border-slate-200 dark:border-slate-800 hidden md:flex items-center justify-end px-8 bg-white/50 dark:bg-slate-900/50">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800/50 animate-pulse" />
               <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800/50 animate-pulse" />
@@ -112,22 +113,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="bg-background text-on-background font-body-base h-screen overflow-hidden">
       {/* TopAppBar */}
-      <header className="fixed top-0 right-0 w-[calc(100%-16rem)] h-16 border-b z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-slate-200 dark:border-slate-800 hidden md:flex justify-between items-center px-8">
-        <div className="hidden text-green-600 dark:text-green-500 font-manrope text-sm font-semibold">Ipon</div>
-        <div className="flex-1 flex justify-start">
-          <div className="relative w-64">
-            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" aria-hidden="true">search</span>
-            <input className="w-full pl-10 pr-4 py-2 bg-surface-container-low border border-slate-200 rounded-full text-body-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" placeholder="Search..." type="text" aria-label="Search"/>
-          </div>
-        </div>
+      <header className="fixed top-0 right-0 w-[calc(100%-16rem)] h-16 border-b z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-slate-200 dark:border-slate-800 hidden md:flex justify-end items-center px-8">
         <div className="flex items-center gap-4">
-          <button className="text-slate-500 hover:text-green-600 transition-colors p-2 rounded-full hover:bg-slate-100">
-            <span className="material-symbols-outlined" aria-hidden="true">notifications</span>
-          </button>
-          <div className="w-8 h-8 rounded-full overflow-hidden border border-slate-200">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img alt="User profile" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDwte5fih0oaheTK_OB0sx3yBM879Nd8qfOBZwRMV_y0--lpi3jB9jq1GqunUMI4bZPxW7C6DDoBteDf3xRplCC1WxWkZkXuSgeg4DEdHWsBmjUho1A-KmXgl9dXkXR3xmBJrmIqPfolp36IEEM6irBKAReQ60HBUeaGVvl_l6rJTAhlyKf9gQ-4VkSZ7MZSBb5diHb_i4qg2j3NluAVXSLjRmDkt_PlfrM4aQH1uV5fUApiAMq69KylBwssAAdF6H58xN32PpQqat7"/>
-          </div>
+          <NotificationCenter />
+          <UserProfileMenu />
         </div>
       </header>
 

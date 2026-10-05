@@ -4,7 +4,7 @@
 import { query, mutation, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 import { ConvexError } from "convex/values";
-import { getAuthUserId } from "@convex-dev/auth/server";
+import { getCurrentUserId, requireUserId } from "./lib/auth";
 
 /**
  * Returns all budget records for the given month.
@@ -19,7 +19,7 @@ export const getBudgets = query({
       throw new ConvexError("Invalid month format. Expected YYYY-MM.");
     }
 
-    const userId = await getAuthUserId(ctx);
+    const userId = await getCurrentUserId(ctx);
     if (!userId) return [];
 
     // Query current month using the compound index
@@ -73,7 +73,7 @@ export const getSpentPerCategory = query({
       throw new ConvexError("Invalid month format. Expected YYYY-MM.");
     }
 
-    const userId = await getAuthUserId(ctx);
+    const userId = await getCurrentUserId(ctx);
     if (!userId) return {};
 
     // Use the compound index for efficient month-scoped retrieval
@@ -124,8 +124,7 @@ export const saveBudgets = mutation({
       throw new ConvexError("Invalid month format. Expected YYYY-MM.");
     }
 
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new ConvexError("Not authenticated");
+    const userId = await requireUserId(ctx);
 
     // Validate all limits > 0
     for (const b of args.budgets) {
@@ -186,7 +185,7 @@ export const saveBudgets = mutation({
 export const getCustomCategories = query({
   args: { month: v.string() },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
+    const userId = await getCurrentUserId(ctx);
     if (!userId) return [];
 
     const budgets = await ctx.db

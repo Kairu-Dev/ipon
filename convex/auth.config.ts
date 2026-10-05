@@ -1,10 +1,10 @@
-const authConfig = {
+import type { AuthConfig } from "convex/server";
+
+export default {
   providers: [
     {
-      domain: process.env.CONVEX_SITE_URL,
+      domain: process.env.CLERK_FRONTEND_API_URL!,
       applicationID: "convex",
     },
   ],
-};
-
-export default authConfig;
+} satisfies AuthConfig;

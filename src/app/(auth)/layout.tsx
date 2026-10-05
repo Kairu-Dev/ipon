@@ -49,7 +49,7 @@ export default function AuthLayout({
       </div>
 
       {/* Right Panel: Auth Forms (Dynamic Content) */}
-      <div className="w-full md:w-1/2 lg:w-7/12 flex items-center justify-center p-8 sm:p-12 bg-surface-container-lowest overflow-y-auto">
+      <div className="w-full md:w-1/2 lg:w-7/12 flex flex-col items-center justify-center p-8 sm:p-12 bg-surface-container-lowest overflow-y-auto">
         {children}
       </div>
     </div>

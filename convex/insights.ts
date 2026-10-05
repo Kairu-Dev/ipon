@@ -7,7 +7,7 @@ import { query, action, internalQuery, internalMutation } from "./_generated/ser
 import { internal } from "./_generated/api";
 import { v, ConvexError } from "convex/values";
 import { Id } from "./_generated/dataModel";
-import { getAuthUserId } from "@convex-dev/auth/server";
+import { getCurrentUserId, getUserIdFromAction } from "./lib/auth";
 import { askGemini } from "./lib/gemini/client";
 import { buildInsightPrompt } from "./lib/gemini/prompts";
 
@@ -50,7 +50,7 @@ const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 export const getInsight = query({
   args: {},
   handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
+    const userId = await getCurrentUserId(ctx);
     if (!userId) return null;
 
     // Fetch the most recent insight for this user
@@ -285,7 +285,7 @@ export const generateInsight = action({
     force: v.optional(v.boolean()),
   },
   handler: async (ctx, args): Promise<InsightResult> => {
-    const userId = await getAuthUserId(ctx);
+    const userId = await getUserIdFromAction(ctx);
     if (!userId) throw new ConvexError("Not authenticated");
 
     const force = args.force ?? false;

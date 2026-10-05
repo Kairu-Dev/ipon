@@ -56,14 +56,14 @@ test.describe("Login Flow", () => {
     await expect(page.getByText("Test account for this app")).toBeVisible();
   });
 
-  test("shows disabled OAuth buttons with Coming Soon", async ({ page }) => {
+  test("shows active OAuth buttons for Google and Apple", async ({ page }) => {
     const googleButton = page.getByRole("button", { name: /google/i });
     const appleButton = page.getByRole("button", { name: /apple/i });
 
     await expect(googleButton).toBeVisible();
     await expect(appleButton).toBeVisible();
-    await expect(googleButton).toBeDisabled();
-    await expect(appleButton).toBeDisabled();
+    await expect(googleButton).toBeEnabled();
+    await expect(appleButton).toBeEnabled();
   });
 
   test("password toggle works", async ({ page }) => {

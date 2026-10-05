@@ -4,7 +4,7 @@
 import { internalQuery, internalMutation, query, action } from "./_generated/server";
 import { v, ConvexError } from "convex/values";
 import { internal, api } from "./_generated/api";
-import { getAuthUserId } from "@convex-dev/auth/server";
+import { getCurrentUserId, getUserIdFromAction } from "./lib/auth";
 import { SAVINGS_CATEGORY } from "./constants";
 import { askGeminiChat } from "./lib/gemini/chat";
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES, PAYMENT_METHODS } from "@/constants/transactions";
@@ -15,7 +15,7 @@ import { EXPENSE_CATEGORIES, INCOME_CATEGORIES, PAYMENT_METHODS } from "@/consta
 export const getChatHistory = query({
   args: {},
   handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
+    const userId = await getCurrentUserId(ctx);
     if (!userId) return [];
 
     // Fetch the latest 50 messages (desc) then reverse to chronological order
@@ -360,7 +360,7 @@ export const sendMessage = action({
     canceledActionContext: v.optional(v.string())
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
+    const userId = await getUserIdFromAction(ctx);
     if (!userId) throw new ConvexError("Not authenticated");
 
     const trimmed = args.userMessage.trim();
@@ -506,7 +506,7 @@ export const executeAction = action({
     }),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
+    const userId = await getUserIdFromAction(ctx);
     if (!userId) throw new ConvexError("Not authenticated");
 
     let successMsg: string;

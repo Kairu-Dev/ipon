@@ -1,7 +1,7 @@
 import { mutation, action, query } from "./_generated/server";
 import { paginationOptsValidator } from "convex/server";
 import { v, ConvexError } from "convex/values";
-import { getAuthUserId } from "@convex-dev/auth/server";
+import { getCurrentUserId, requireUserId } from "./lib/auth";
 import { SAVINGS_CATEGORY } from "./constants";
 import { parseGeminiCategorySuggestion } from "@/lib/gemini-parser";
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from "@/constants/transactions";
@@ -18,8 +18,7 @@ export const addTransaction = mutation({
     note: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new ConvexError("Not authenticated");
+    const userId = await requireUserId(ctx);
 
     if (args.amount <= 0 || args.amount > 999999.99) {
       throw new ConvexError("Amount must be greater than 0 and up to 999,999.99");
@@ -80,7 +79,7 @@ export const getTotals = query({
       throw new ConvexError("Invalid month format. Expected YYYY-MM.");
     }
 
-    const userId = await getAuthUserId(ctx);
+    const userId = await getCurrentUserId(ctx);
     if (!userId) return { totalIncome: 0, totalExpenses: 0, remainingBalance: 0 };
 
     const currentMonthTx = await ctx.db
@@ -117,8 +116,7 @@ export const getTransactions = query({
     paginationOpts: paginationOptsValidator,
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new ConvexError("Not authenticated");
+    const userId = await requireUserId(ctx);
 
     // Use the compound index for efficient user-scoped date-ordered retrieval
     let q = ctx.db
@@ -146,7 +144,7 @@ export const getMonthOverMonthTrend = query({
     previousMonth: v.string(), // "YYYY-MM"
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
+    const userId = await getCurrentUserId(ctx);
     if (!userId) return null;
 
     const sumForMonth = async (month: string) => {

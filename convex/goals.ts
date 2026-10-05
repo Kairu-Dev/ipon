@@ -1,11 +1,11 @@
 import { mutation, query } from "./_generated/server";
 import { v, ConvexError } from "convex/values";
-import { getAuthUserId } from "@convex-dev/auth/server";
+import { getCurrentUserId, requireUserId } from "./lib/auth";
 
 export const getGoals = query({
   args: {},
   handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
+    const userId = await getCurrentUserId(ctx);
     if (!userId) return [];
     
     return await ctx.db
@@ -26,8 +26,7 @@ export const createGoal = mutation({
     date: v.string(),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new ConvexError("Not authenticated");
+    const userId = await requireUserId(ctx);
 
     const trimmedName = args.name.trim();
     if (trimmedName.length === 0) {
@@ -84,8 +83,7 @@ export const createGoal = mutation({
 export const getGoal = query({
   args: { id: v.id("goals") },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new ConvexError("Not authenticated");
+    const userId = await requireUserId(ctx);
     
     const goal = await ctx.db.get(args.id);
     if (!goal || goal.userId !== userId) return null;
@@ -101,8 +99,7 @@ export const contributeToGoal = mutation({
     date: v.string(), // ISO date string "YYYY-MM-DD"
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new ConvexError("Not authenticated");
+    const userId = await requireUserId(ctx);
 
     const isoDateRegex = /^\d{4}-\d{2}-\d{2}$/;
     if (!isoDateRegex.test(args.date)) {

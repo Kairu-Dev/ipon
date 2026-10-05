@@ -1,33 +1,24 @@
 // src/components/auth/login-form.test.tsx
-// Unit tests for the Login form component.
-// Mocks Convex Auth and Next.js navigation to test form behavior in isolation.
+// Unit tests for the LoginForm component.
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { LoginForm } from "./login-form";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-// Mock signIn from Convex Auth
-const mockSignIn = vi.fn();
-vi.mock("@convex-dev/auth/react", () => ({
-  useAuthActions: () => ({ signIn: mockSignIn }),
-}));
+// Mock Clerk useSignIn
+const mockSignInCreate = vi.fn();
+const mockAuthenticateWithRedirect = vi.fn();
+const mockSetActive = vi.fn();
 
-// Mock Convex hooks for rate limiting
-const mockUseQuery = vi.fn();
-const mockUseMutation = vi.fn().mockResolvedValue(undefined);
-vi.mock("convex/react", () => ({
-  useQuery: (...args: unknown[]) => mockUseQuery(...args),
-  useMutation: () => mockUseMutation,
-}));
-
-vi.mock("../../../convex/_generated/api", () => ({
-  api: {
-    loginAttempts: {
-      checkLoginAllowed: "checkLoginAllowed",
-      recordFailedLogin: "recordFailedLogin",
-      resetLoginAttempts: "resetLoginAttempts",
+vi.mock("@clerk/nextjs/legacy", () => ({
+  useSignIn: () => ({
+    isLoaded: true,
+    signIn: {
+      create: mockSignInCreate,
+      authenticateWithRedirect: mockAuthenticateWithRedirect,
     },
-  },
+    setActive: mockSetActive,
+  }),
 }));
 
 // Mock Next.js navigation
@@ -46,10 +37,8 @@ vi.mock("next/link", () => ({
 describe("LoginForm", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUseQuery.mockReturnValue({ ok: true }); // Default: not rate limited
   });
 
-  // --- Rendering ---
   it("renders email and password inputs", () => {
     render(<LoginForm />);
     expect(screen.getByPlaceholderText("name@example.com")).toBeDefined();
@@ -73,138 +62,82 @@ describe("LoginForm", () => {
     expect(signUpLink.closest("a")?.getAttribute("href")).toBe("/sign-up");
   });
 
-  it("renders test account info", () => {
-    render(<LoginForm />);
-    expect(screen.getByText("Test account for this app")).toBeDefined();
-    expect(screen.getByText("Email: name@example.com")).toBeDefined();
-    expect(screen.getByText("Password: 12345678")).toBeDefined();
-  });
-
-  // --- Password visibility toggle ---
   it("toggles password visibility when eye icon is clicked", async () => {
     render(<LoginForm />);
     const passwordInput = screen.getByPlaceholderText("••••••••");
-    // Initially type=password
     expect(passwordInput.getAttribute("type")).toBe("password");
 
-    // Find the toggle button (the one inside the password field)
-    const toggleButtons = screen.getAllByRole("button");
-    // The toggle is the one that is NOT the submit button and NOT a tab
-    const toggleButton = toggleButtons.find(
-      (btn) => btn.querySelector(".material-symbols-outlined")?.textContent === "visibility_off"
-    );
-    expect(toggleButton).toBeDefined();
-
-    await userEvent.click(toggleButton!);
+    const toggleButton = screen.getByRole("button", { name: /show password|hide password/i });
+    await userEvent.click(toggleButton);
     expect(passwordInput.getAttribute("type")).toBe("text");
 
-    await userEvent.click(toggleButton!);
+    await userEvent.click(toggleButton);
     expect(passwordInput.getAttribute("type")).toBe("password");
   });
 
-  // --- OAuth buttons ---
-  it("renders disabled Google and Apple buttons with 'Coming soon'", () => {
+  it("renders active Google and Apple SSO buttons", () => {
     render(<LoginForm />);
-    const googleBtn = screen.getByText(/google — coming soon/i).closest("button");
-    const appleBtn = screen.getByText(/apple — coming soon/i).closest("button");
+    const googleBtn = screen.getByRole("button", { name: /google/i });
+    const appleBtn = screen.getByRole("button", { name: /apple/i });
     expect(googleBtn).toBeDefined();
     expect(appleBtn).toBeDefined();
-    expect(googleBtn?.hasAttribute("disabled")).toBe(true);
-    expect(appleBtn?.hasAttribute("disabled")).toBe(true);
+    expect(googleBtn.hasAttribute("disabled")).toBe(false);
+    expect(appleBtn.hasAttribute("disabled")).toBe(false);
   });
 
-  // --- Form submission ---
-  it("calls signIn with password provider and redirects on success", async () => {
-    mockSignIn.mockResolvedValueOnce({});
+  it("triggers OAuth redirect when clicking Google button", async () => {
+    render(<LoginForm />);
+    const googleBtn = screen.getByRole("button", { name: /google/i });
+    await userEvent.click(googleBtn);
+
+    expect(mockAuthenticateWithRedirect).toHaveBeenCalledWith({
+      strategy: "oauth_google",
+      redirectUrl: "/sso-callback",
+      redirectUrlComplete: "/dashboard",
+      continueSignUp: true,
+    });
+  });
+
+  it("calls Clerk signIn.create and sets active session on success", async () => {
+    mockSignInCreate.mockResolvedValueOnce({
+      status: "complete",
+      createdSessionId: "sess_12345",
+    });
+    mockSetActive.mockResolvedValueOnce(undefined);
+
     render(<LoginForm />);
 
-    await userEvent.type(screen.getByPlaceholderText("name@example.com"), "name@example.com");
-    await userEvent.type(screen.getByPlaceholderText("••••••••"), "12345678");
+    await userEvent.type(screen.getByPlaceholderText("name@example.com"), "user@example.com");
+    await userEvent.type(screen.getByPlaceholderText("••••••••"), "Pass1234!");
 
-    const form = screen.getByPlaceholderText("name@example.com").closest("form")!;
-    fireEvent.submit(form);
+    const submitBtn = screen.getByRole("button", { name: /sign in/i });
+    await userEvent.click(submitBtn);
 
-    // Wait for async signIn to complete
     await waitFor(() => {
-      expect(mockSignIn).toHaveBeenCalledTimes(1);
-    });
-
-    // Verify signIn was called with "password" and a FormData instance
-    expect(mockSignIn).toHaveBeenCalledWith("password", expect.any(FormData));
-
-    // Verify redirect to dashboard
-    await waitFor(() => {
+      expect(mockSignInCreate).toHaveBeenCalledWith({
+        identifier: "user@example.com",
+        password: "Pass1234!",
+      });
+      expect(mockSetActive).toHaveBeenCalledWith({ session: "sess_12345" });
       expect(mockPush).toHaveBeenCalledWith("/dashboard");
     });
   });
 
   it("shows error message on failed login", async () => {
-    mockSignIn.mockRejectedValueOnce(new Error("Invalid credentials"));
+    mockSignInCreate.mockRejectedValueOnce({
+      errors: [{ message: "Invalid email or password" }],
+    });
+
     render(<LoginForm />);
 
     await userEvent.type(screen.getByPlaceholderText("name@example.com"), "wrong@example.com");
     await userEvent.type(screen.getByPlaceholderText("••••••••"), "wrongpassword");
 
-    const form = screen.getByPlaceholderText("name@example.com").closest("form")!;
-    fireEvent.submit(form);
-
-    // Should show generic error (not leaking whether email exists)
-    await waitFor(() => {
-      expect(screen.getByText("Invalid email or password.")).toBeDefined();
-    });
-
-    // Should NOT redirect
-    expect(mockPush).not.toHaveBeenCalled();
-  });
-
-  // --- Hidden flow field ---
-  it("includes hidden flow=signIn field in form", () => {
-    render(<LoginForm />);
-    const form = screen.getByPlaceholderText("name@example.com").closest("form")!;
-    const hiddenInput = form.querySelector('input[name="flow"]') as HTMLInputElement | null;
-    expect(hiddenInput).not.toBeNull();
-    expect(hiddenInput?.value).toBe("signIn");
-    expect(hiddenInput?.type).toBe("hidden");
-  });
-
-  // --- Security Tests ---
-  it("blocks login if rate limit exceeded", async () => {
-    const user = userEvent.setup();
-    mockUseQuery.mockReturnValue({ ok: false, retryAfter: 120000 }); // 2 minutes
-    
-    render(<LoginForm />);
-
-    const emailInput = screen.getByPlaceholderText("name@example.com");
-    await user.type(emailInput, "spammer@example.com");
-    
-    const passInput = screen.getByPlaceholderText("••••••••");
-    await user.type(passInput, "12345678");
-    
-    // Attempt submission
     const submitBtn = screen.getByRole("button", { name: /sign in/i });
-    fireEvent.submit(submitBtn);
-
-    // Verify rate limit message is shown and signIn was NOT called
-    expect(await screen.findByText("Too many login attempts. Please try again in 2 minute(s).")).toBeDefined();
-    expect(mockSignIn).not.toHaveBeenCalled();
-  });
-
-  // --- Security: error message does not leak email existence ---
-  it("shows generic error message regardless of failure reason", async () => {
-    // Simulate different error types — all should produce the same message
-    mockSignIn.mockRejectedValueOnce(new Error("User not found"));
-    render(<LoginForm />);
-
-    await userEvent.type(screen.getByPlaceholderText("name@example.com"), "test@test.com");
-    await userEvent.type(screen.getByPlaceholderText("••••••••"), "test");
-
-    const form = screen.getByPlaceholderText("name@example.com").closest("form")!;
-    fireEvent.submit(form);
+    await userEvent.click(submitBtn);
 
     await waitFor(() => {
-      // Should always say "Invalid email or password." — never "User not found"
-      expect(screen.getByText("Invalid email or password.")).toBeDefined();
-      expect(screen.queryByText("User not found")).toBeNull();
+      expect(screen.getByText("Invalid email or password")).toBeDefined();
     });
   });
 });

@@ -34,7 +34,7 @@ Ipon is built with a modern, serverless architecture focusing on real-time data 
 | **Frontend** | Next.js 16.2.4 (App Router) |
 | **Styling** | Tailwind CSS + shadcn/ui |
 | **Database & Backend** | [Convex](https://www.convex.dev/) (Real-time BaaS) |
-| **Authentication** | Convex Auth (Email/Password) |
+| **Authentication** | [Clerk](https://clerk.com/) (Google, Apple SSO & Email/Password) |
 | **State Management** | Zustand (UI State) |
 | **AI Integration** | Google Gemini API & Groq API |
 | **Hosting** | Vercel |
@@ -46,11 +46,54 @@ Ipon is built with a modern, serverless architecture focusing on real-time data 
 ## 🏗 Architecture & Design Decisions
 
 - **State Management Split:** 
-  - **Auth State:** Handled exclusively via Convex Auth hooks (`useConvexAuth`, `useCurrentUser`).
-  - **Server Data:** Managed through Convex queries and mutations.
+  - **Auth State:** Handled by Clerk (`@clerk/nextjs`) via `useAuth`, `useUser`, and synced to Convex through `ConvexProviderWithClerk`.
+  - **Server Data:** Managed reactively through Convex queries and mutations.
   - **UI State:** Handled by Zustand (e.g., filters, modals, UI toggles).
-- **Authentication:** Sessions are stored securely in cookies using `@convex-dev/auth/nextjs` with a robust two-layer route protection system (`proxy.ts` middleware and client-side `SessionWatcher`).
+- **Authentication:** Sessions and identity tokens (JWTs) are issued by Clerk with full support for Google and Apple SSO, multi-factor authentication, and bot detection (Turnstile/Cloudflare CAPTCHA). Protected routes are handled via Next.js middleware and Clerk route matchers.
 - **AI Agentic Flow:** The AI models (Gemini & Groq) are deeply integrated with Convex actions. The AI can execute tools to interact with your data, but is strictly guardrailed. It explicitly asks for missing required information (like transaction amounts or goal deadlines) before acting, ensuring data integrity without hallucination.
+
+---
+
+## ⚙️ User Settings & Application Preferences
+
+Ipon includes a centralized **Settings** hub (`/dashboard/settings`) that empowers users to customize their regional defaults, security credentials, and AI automation levels:
+
+```
+                    ┌─────────────────────────┐
+                    │     Dashboard Client    │
+                    │  (/dashboard/settings)  │
+                    └───────────┬─────────────┘
+                                │
+       ┌────────────────────────┼────────────────────────┐
+       ▼                        ▼                        ▼
+┌──────────────┐     ┌─────────────────────┐    ┌─────────────────┐
+│  Account &   │     │      Financial      │    │    AI Advisor   │
+│   Security   │     │     Preferences     │    │   Preferences   │
+└──────┬───────┘     └──────────┬──────────┘    └────────┬────────┘
+       │                        │                        │
+       ▼                        ▼                        ▼
+┌──────────────┐     ┌──────────────────────────────────────────┐
+│ Clerk Auth   │     │         Convex Real-Time Backend         │
+│ (MFA & SSO)  │     │   (Reactive Subscriptions & Mutations)   │
+└──────────────┘     └──────────────────────────────────────────┘
+```
+
+### 1. Account & Security
+- **Authentication Management:** Integrated Clerk account center allowing users to manage credentials, passkeys, multi-factor authentication (MFA), active devices, and linked OAuth providers (Google and Apple).
+- **Zero-Trust Boundary:** Identity and authentication data are managed securely through Clerk, keeping sensitive credentials completely decoupled from application-level financial records.
+
+### 2. Financial Preferences
+- **Primary Currency:** Set the app-wide currency (e.g., `PHP ₱`, `USD $`, `EUR €`). Formats all transaction lists, savings goals, and cash flow cards across the dashboard.
+- **Default Payment Method:** Pre-select your most frequently used wallet or payment method (e.g., `GCash`, `Maya`, `Cash`, `Bank Transfer`, `Credit Card`) to streamline expense logging.
+- **Payday Cycle:** Align cash-flow projections and budget tracking with your compensation schedule (e.g., Bimonthly `1st & 15th`, Monthly, or Weekly).
+
+### 3. AI Advisor Settings
+- **Autonomous Financial Insights:** Toggle automated AI spending evaluations on or off. When enabled, background AI tasks analyze monthly transaction distributions to surface proactive budgeting suggestions and highlight discretionary spending patterns.
+
+### 4. Real-Time Synchronization & Persistence
+- **Reactive State Sync:** Preferences are bound directly to Convex real-time subscriptions, instantly reflecting changes across all open browser windows and mobile views without manual reloads.
+- **Identity-Bound Isolation:** All preference updates are verified server-side against the caller's authenticated session, guaranteeing strict tenant data isolation.
+- **Cloud Persistence:** Settings persist indefinitely across devices, logins, and browser sessions directly within the cloud database.
 
 ---
 

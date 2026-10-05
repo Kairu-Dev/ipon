@@ -68,3 +68,50 @@ export const getIdByClerkId = internalQuery({
     return user ? user._id : null;
   },
 });
+
+/**
+ * Updates financial preferences for the authenticated user.
+ */
+export const updatePreferences = mutation({
+  args: {
+    currency: v.optional(v.string()),
+    defaultPaymentMethod: v.optional(v.string()),
+    paydayCycle: v.optional(v.string()),
+    aiSuggestions: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new ConvexError("Not authenticated");
+    }
+
+    const clerkId = identity.subject;
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", clerkId))
+      .unique();
+
+    if (!user) {
+      throw new ConvexError("User not found");
+    }
+
+    const updates: {
+      currency?: string;
+      defaultPaymentMethod?: string;
+      paydayCycle?: string;
+      aiSuggestions?: boolean;
+    } = {};
+
+    if (args.currency !== undefined) updates.currency = args.currency;
+    if (args.defaultPaymentMethod !== undefined) updates.defaultPaymentMethod = args.defaultPaymentMethod;
+    if (args.paydayCycle !== undefined) updates.paydayCycle = args.paydayCycle;
+    if (args.aiSuggestions !== undefined) updates.aiSuggestions = args.aiSuggestions;
+
+    if (Object.keys(updates).length > 0) {
+      await ctx.db.patch(user._id, updates);
+    }
+
+    return user._id;
+  },
+});
+
